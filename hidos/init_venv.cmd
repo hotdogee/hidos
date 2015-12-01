@@ -1,6 +1,6 @@
 cd hidos
 virtualenv env
-call ./hidos/env/Scripts/activate
-pip install -r requirements.txt
 cd ..
+call .\hidos\env\Scripts\activate
+pip install -r hidos\requirements.txt
 call deactivate
