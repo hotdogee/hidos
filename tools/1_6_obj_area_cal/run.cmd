@@ -1,0 +1,2 @@
+set R_Script="C:\Program Files\R\R-3.2.2\bin\RScript.exe"
+%R_Script% 1_6_obj_area_cal_cmd.R C:\Han\Work\Meribank\django-r\django_r\tools\1_6_obj_area_cal\IMG_0159.JPG C:\Han\Work\Meribank\django-r\django_r\tools\1_6_obj_area_cal\IMG_0159_out.JPG C:\Han\Work\Meribank\django-r\django_r\tools\1_6_obj_area_cal\IMG_0159_out.json
