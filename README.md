@@ -2,6 +2,7 @@
 HiDOS bioinformatics platform
 ## CellQ
 Setting up the development environment on Windows
+
 1. Install Git
    * Download: http://git-scm.com/downloads
 1. Install Python 2.7.x 64-bit (Does not work with Python 3.x)
