@@ -25,19 +25,19 @@ Setting up the development environment on Windows
    * Start the RabbitMQ service after installation
      * http://technet.microsoft.com/en-us/library/cc736564(v=ws.10).aspx
 1. Clone the repo, initialize Python virtualenv(`init_venv.cmd`), and setup the database schema(`run_migrate.cmd`)
-   ```
+```
 git clone https://github.com/hotdogee/hidos.git
 cd hidos\hidos
 init_venv.cmd
 run_migrate.cmd
 ```
-1. Run development web server
-   ```
+6. Run development web server
+  ```
 run_server.cmd
 ```
-1. Run job worker
-   ```
+7. Run job worker
+  ```
 run_celery.cmd
 ```
-1. Test the app
+8. Test the app
   * Check if the page `http://127.0.0.1:8000/` loads
