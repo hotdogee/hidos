@@ -5,7 +5,7 @@ Setting up the development environment on Windows
 
 1. Install Git
    * Download: http://git-scm.com/downloads
-1. Install Python 2.7.x 64-bit (Does not work with Python 3.x)
+2. Install Python 2.7.x 64-bit (Does not work with Python 3.x)
    * Download: https://www.python.org/downloads/
    * The default installation location is `C:\Python27`, if you do not use the default, modify all following steps accordingly.
      * Choose to install "pip" and "Add python.exe to Path" during the Python Setup
@@ -17,14 +17,14 @@ Setting up the development environment on Windows
    * Install `virtualenv`
      * `pip install virtualenv`
        * Learn more: http://docs.python-guide.org/en/latest/dev/virtualenvs/
-1. Install Erlang/OTP 64-bit
+3. Install Erlang/OTP 64-bit
    * This is required for RabbitMQ server
    * Download: http://www.erlang.org/download.html
-1. Install RabbitMQ server
+4. Install RabbitMQ server
    * Download: http://www.rabbitmq.com/download.html
    * Start the RabbitMQ service after installation
      * http://technet.microsoft.com/en-us/library/cc736564(v=ws.10).aspx
-1. Clone the repo, initialize Python virtualenv(`init_venv.cmd`), and setup the database schema(`run_migrate.cmd`)
+5. Clone the repo, initialize Python virtualenv(`init_venv.cmd`), and setup the database schema(`run_migrate.cmd`)
 ```
 git clone https://github.com/hotdogee/hidos.git
 cd hidos\hidos
