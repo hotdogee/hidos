@@ -14,13 +14,13 @@
         <p>Drag the image to pan, use the mousewheel to zoom</p>
         <div class="row">
             <div class="col-md-6">
-                <h3>Input Image <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span></h3>
+                <h3>Input Image <a id="input-download" download><span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span></a></h3>
                 <div class="parent">
                     <img class="panzoom" id="input-img">
                 </div>
             </div>
             <div class="col-md-6">
-                <h3>Result Image <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span></h3>
+                <h3>Result Image <a id="result-download" download><span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span></a></h3>
                 <div class="parent">
                     <img class="panzoom" id="result-img">
                 </div>
@@ -97,7 +97,9 @@
                             // display image
                             // /media/image_analysis/task/7ef4f4782fc840738f67a43edafc9683/7ef4f4782fc840738f67a43edafc9683_in.jpg
                             $('#input-img').attr('src', '/media/image_analysis/task/' + task_id + '/' + task_id + '_in.jpg');
+                            $('#input-download').attr('href', '/media/image_analysis/task/' + task_id + '/' + task_id + '_in.jpg');
                             $('#result-img').attr('src', '/media/image_analysis/task/' + task_id + '/' + task_id + '_out.jpg');
+                            $('#result-download').attr('href', '/media/image_analysis/task/' + task_id + '/' + task_id + '_out.jpg');
 
                             // get image size
                             $("<img/>") // Make in memory copy of image to avoid css issues
