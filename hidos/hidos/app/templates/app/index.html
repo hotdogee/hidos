@@ -1,7 +1,10 @@
 {% extends "app/layout.html" %}
 {% load staticfiles %}
 {% block content %}
-    <h1>Cell Ratio Analysis</h1>
+    <h1>CellQ <small>v0.3</small></h1>
+    <ul>
+        <li>Cell Ratio Analysis</li>
+    </ul>
     <form id="add-photos" action="{% url 'home' %}" class="dropzone">
         {% csrf_token %}
     </form>
