@@ -1,4 +1,4 @@
-#setwd('C:\\Han\\Work\\Meribank\\django-r\\django_r\\tools\\1_6_obj_area_cal')
+#setwd('C:\\Han\\Work\\Meridigen\\hidos\\tools\\1_6_obj_area_cal')
 library("stats")
 library("graphics")
 library("grDevices")
@@ -48,7 +48,7 @@ nuct5 = erode(nuct4, kern)
 nuclabel3 = bwlabel(nuct5)
 
 nuclabel3_gray<-channel(nuclabel3,"gray")
-img_processed = paintObjects(nuclabel3_gray, imgc, col='#ff00ff')
+img_processed = paintObjects(nuclabel3_gray, imgc, col=c('#FF0000', '#FF0000'), opac=c(1, 0.4), thick=TRUE, closed=TRUE)
 
 
 file_name_output = args[2]
