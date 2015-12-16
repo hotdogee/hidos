@@ -63,6 +63,9 @@
     <Content Include="app\static\app\images\loading.gif" />
     <Content Include="app\static\app\scripts\dropzone.js" />
     <Content Include="app\static\app\scripts\jquery.panzoom.js" />
+    <Content Include="app\static\app\scripts\underscore-min.js" />
+    <Content Include="app\static\app\scripts\underscore-min.map" />
+    <Content Include="app\static\app\scripts\underscore.js" />
     <Content Include="app\templates\app\result.html" />
     <Content Include="requirements.txt" />
     <Content Include="db.sqlite3" />

@@ -72,6 +72,7 @@
 {% endblock %}
 {% block scripts %}
     <script src="{% static 'app/scripts/jquery.panzoom.js' %}"></script>
+    <script src="{% static 'app/scripts/underscore-min.js' %}"></script>
     <script>
         $(function () {
             $('#result').hide();
@@ -113,7 +114,7 @@
                                     $('div.parent').width(frame_w);
                                     $('div.parent').height(frame_w / img_w * img_h);
                                     //console.log(img_w, img_h, frame_w, frame_w / img_w * img_h, $('#input-img').attr("src"))
-                                    console.log(frame_w / img_w)
+                                    console.log(frame_w / img_w);
                                     var $section = $('#result');
                                     var $panzoom = $section.find('.panzoom').panzoom({
                                         $set: $section.find('.panzoom'),
@@ -133,6 +134,23 @@
                                             focal: e
                                         });
                                     });
+                                    var lazyLayout = _.throttle(function () {
+                                        // get image size
+                                        $("<img/>") // Make in memory copy of image to avoid css issues
+                                            .attr("src", $('#input-img').attr("src"))
+                                            .load(function () {
+                                                var img_w = this.width;   // Note: $(this).width() will not
+                                                var img_h = this.height; // work for in memory images.
+
+                                                // window resize
+                                                var frame_w = ($(window).width() - 100) / 2;
+                                                $('div.parent').width(frame_w);
+                                                $('div.parent').height(frame_w / img_w * img_h);
+                                                //console.log(img_w, img_h, frame_w, frame_w / img_w * img_h, $('#input-img').attr("src"))
+                                                console.log(frame_w / img_w);
+                                            });
+                                    }, 200, { leading: false });
+                                    $(window).resize(lazyLayout);
                                 });
                             $('#result').fadeIn(1000);
                             $('#cover').fadeOut(1000);
