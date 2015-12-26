@@ -16,8 +16,9 @@ image_file_path = args[1]
 
 image_file = file.path(image_file_path)
 imgc = readImage(image_file)
+imgcs = resize(imgc, 1024)
 
-imgc_gray <- channel(imgc, 'gray')
+imgc_gray <- channel(imgcs, 'gray')
 
 img_gray_data = imageData(imgc_gray)
 
@@ -43,13 +44,24 @@ nuct4 = fillHull(nuct3)
 
 kern = makeBrush(11, shape='disc')
 nuct5 = erode(nuct4, kern)
+nuclabel3 = bwlabel(nuct5)
 #display(nuct5)
 
-nuclabel3 = bwlabel(nuct5)
+h7 <- distmap(nuct5)
+h8 <- watershed(h7, tolerance=0.5)
+ftrs = computeFeatures.shape(h8)
+id <- which(ftrs[, 's.area']>(mean(ftrs[, 's.area'])-sd(ftrs[, 's.area'])))
+h8[is.na(match(h8, id))] <- 0
+h9 = resize(h8, dim(imgc)[1],  dim(imgc)[2])
+#display(normalize(h8))
 
-nuclabel3_gray<-channel(nuclabel3,"gray")
-img_processed = paintObjects(nuclabel3_gray, imgc, col=c('#FF0000', '#FF0000'), opac=c(1, 0.4), thick=TRUE, closed=TRUE)
+count_min = length(id)
+count_max = floor(sum(ftrs[, 's.area']) / median(ftrs[, 's.area']))
 
+#nuclabel3_gray<-channel(nuclabel3,"gray")
+img_processed = paintObjects(h9, imgc, col=c('#FF0000', '#FF0000'), opac=c(1, 0.4), thick=TRUE, closed=TRUE)
+#img_processed = paintObjects(nuclabel3_gray, imgc, col='#ff00ff')
+#display(img_processed)
 
 file_name_output = args[2]
 
@@ -57,4 +69,4 @@ writeImage(img_processed,file_name_output, quality=100)
 
 ratio = length(nuclabel3[nuclabel3>0])/length(nuclabel3)
 
-write(toJSON(list(ratio = ratio)),file = args[3])
+write(toJSON(list(ratio = ratio, count_min=count_min, count_max=count_max)),file = args[3])
