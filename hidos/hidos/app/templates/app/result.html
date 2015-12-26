@@ -10,7 +10,11 @@
         </div>
     </div>
     <section id="result">
-        <h1 id="ratio"></h1>
+        <h1>CellQ <small>v0.4</small></h1>
+        <ul>
+            <li><h3>Cell Ratio Analysis: <span id="ratio"></span></h3></li>
+            <li><h3>Cell Count Estimation: <span id="count"></span></h3></li>
+        </ul>
         <p>Drag the image to pan, use the mousewheel to zoom</p>
         <div class="row">
             <div class="col-md-6">
@@ -93,7 +97,8 @@
                         else {
                             // get result json data
                             $.getJSON(path_prefix + '_out.json', function (result) {
-                                $('#ratio').text('Cell Ratio: ' + Math.round(result['ratio'] * 10000) / 100 + '%');
+                                $('#ratio').text(Math.round(result['ratio'] * 10000) / 100 + '%');
+                                $('#count').text(result['count_min']);
                             });
                             // display image
                             // /media/image_analysis/task/7ef4f4782fc840738f67a43edafc9683/7ef4f4782fc840738f67a43edafc9683_in.jpg
