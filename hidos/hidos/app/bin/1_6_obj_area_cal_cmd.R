@@ -34,16 +34,17 @@ thres = img_mean + img_std
 imgc_p2[imgc_gray >= thres] = 1
 imgc_p2[imgc_gray < thres] = 0
 
-imgc_p3 = imgc_p1 + imgc_p2
+#imgc_p3 = imgc_p1+imgc_p2
+imgc_p3 = imgc_p2
 #display(imgc_p3)
 
-kern = makeBrush(7, shape='diamond')
+kern = makeBrush(15, shape='diamond')
 nuct3 = dilate(imgc_p3, kern)
 
-nuct4 = fillHull(nuct3)
+#nuct4 = fillHull(nuct3)
 
-kern = makeBrush(11, shape='disc')
-nuct5 = erode(nuct4, kern)
+kern = makeBrush(7, shape='disc')
+nuct5 = erode(nuct3, kern)
 nuclabel3 = bwlabel(nuct5)
 #display(nuct5)
 
