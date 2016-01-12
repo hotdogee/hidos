@@ -100,7 +100,7 @@ def retrieve(request, task_id='1'):
             'app/result.html',
             context_instance = RequestContext(request,
             {
-                'title': 'CellQ Result - %s'.format(record.user_filename),
+                'title': 'CellQ - {0}'.format(record.user_filename),
                 'year': datetime.now().year,
                 'version': record.version,
                 'user_filename': record.user_filename,
