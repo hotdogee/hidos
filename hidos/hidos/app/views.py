@@ -16,6 +16,8 @@ from .tasks import run_image_analysis_task
 import stat as Perm
 import json
 
+version = '0.5'
+
 def home(request):
     """Renders the home page."""
     assert isinstance(request, HttpRequest)
@@ -27,6 +29,7 @@ def home(request):
             {
                 'title':'Home',
                 'year':datetime.now().year,
+                'version': version,
             })
         )
     elif request.method == 'POST':
@@ -80,8 +83,9 @@ def retrieve(request, task_id='1'):
         'app/result.html',
         context_instance = RequestContext(request,
         {
-            'title':'Cell Ratio',
-            'year':datetime.now().year,
+            'title': 'Cell Ratio',
+            'year': datetime.now().year,
+            'version': version,
         })
     )
 
