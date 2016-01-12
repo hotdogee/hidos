@@ -119,6 +119,19 @@ def retrieve(request, task_id='1'):
                 'message': message,
             })
         )
+    except Exception as e:
+        message = 'Result not found ({0})'.format(e.message)
+        return render(
+            request,
+            'app/error.html',
+            context_instance = RequestContext(request,
+            {
+                'title': 'CellQ Error',
+                'year': datetime.now().year,
+                'version': version,
+                'message': message,
+            })
+        )
 
 def status(request, task_id):
     if request.method == 'GET':
