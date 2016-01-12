@@ -40,6 +40,7 @@ def home(request):
         uploaded_file = request.FILES['file']
         # calculate file hash
         m = hashlib.md5()
+        m.update(version)
         for chunk in uploaded_file.chunks():
             m.update(chunk)
         task_id = m.hexdigest()
