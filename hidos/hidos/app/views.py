@@ -102,7 +102,7 @@ def retrieve(request, task_id='1'):
             {
                 'title': 'CellQ Result',
                 'year': datetime.now().year,
-                'version': version,
+                'version': record.version,
             })
         )
     except ObjectDoesNotExist:
