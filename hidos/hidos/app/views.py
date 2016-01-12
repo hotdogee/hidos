@@ -100,9 +100,10 @@ def retrieve(request, task_id='1'):
             'app/result.html',
             context_instance = RequestContext(request,
             {
-                'title': 'CellQ Result',
+                'title': 'CellQ Result - %s'.format(record.user_filename),
                 'year': datetime.now().year,
                 'version': record.version,
+                'user_filename': record.user_filename,
             })
         )
     except ObjectDoesNotExist:
