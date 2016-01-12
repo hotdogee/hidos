@@ -78,6 +78,8 @@ def home(request):
             # insert entry into database
             record = ImageAnalysis()
             record.task_id = task_id
+            record.version = version
+            record.user_filename = uploaded_file.name
             if request.user.is_authenticated():
                 record.user = request.user
             record.save()
