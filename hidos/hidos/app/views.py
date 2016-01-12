@@ -16,6 +16,7 @@ from .tasks import run_image_analysis_task
 import stat as Perm
 import json
 import hashlib
+from django.core.exceptions import ObjectDoesNotExist
 
 version = '0.5'
 
@@ -92,16 +93,31 @@ def home(request):
 
 def retrieve(request, task_id='1'):
     #return HttpResponse("retrieve = %s." % (task_id))
-    return render(
-        request,
-        'app/result.html',
-        context_instance = RequestContext(request,
-        {
-            'title': 'Cell Ratio',
-            'year': datetime.now().year,
-            'version': version,
-        })
-    )
+    try:
+        record = ImageAnalysis.objects.get(task_id=task_id)
+        return render(
+            request,
+            'app/result.html',
+            context_instance = RequestContext(request,
+            {
+                'title': 'CellQ Result',
+                'year': datetime.now().year,
+                'version': version,
+            })
+        )
+    except ObjectDoesNotExist:
+        message = 'Result not found'
+        return render(
+            request,
+            'app/error.html',
+            context_instance = RequestContext(request,
+            {
+                'title': 'CellQ Error',
+                'year': datetime.now().year,
+                'version': version,
+                'message': message,
+            })
+        )
 
 def status(request, task_id):
     if request.method == 'GET':
