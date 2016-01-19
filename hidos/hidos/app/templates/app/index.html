@@ -6,13 +6,56 @@
         <li>Cell Ratio Analysis</li>
         <li>Cell Count Estimation</li>
     </ul>
+
     <form id="add-photos" action="{% url 'home' %}" class="dropzone">
         {% csrf_token %}
     </form>
+
+    <div>
+        <h1>Results</h1>
+        {% if user.is_authenticated %}
+
+        <table id="result-list" class="display" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Area</th>
+                    <th>Count</th>
+                    <th>Created</th>
+                </tr>
+            </thead>
+            <tfoot>
+                <tr>
+                    <th>Name</th>
+                    <th>Area</th>
+                    <th>Count</th>
+                    <th>Date</th>
+                </tr>
+            </tfoot>
+            <tbody>
+                <tr>
+                    <td>123.jpg</td>
+                    <td>24.10%</td>
+                    <td>451</td>
+                    <td>2016/01/20 01:33AM</td>
+                </tr>
+            </tbody>
+        </table>
+
+        {% else %}
+
+        <div>Log in to save your results</div>
+
+        {% endif %}
+    </div>
+
 {% endblock %}
 {% block head-styles %}
     <link rel="stylesheet" type="text/css" href="{% static 'app/content/basic.css' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'app/content/dropzone.css' %}" />
+    <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.10/css/dataTables.bootstrap.css"/>
+    <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/scroller/1.4.0/css/scroller.bootstrap.css"/>
+
     <style type="text/css">
         #icon {
             display: inline-block;
@@ -26,6 +69,9 @@
 {% endblock %}
 {% block scripts %}
     <script src="{% static 'app/scripts/dropzone.js' %}"></script>
+    <script type="text/javascript" src="//cdn.datatables.net/1.10.10/js/jquery.dataTables.js"></script>
+    <script type="text/javascript" src="//cdn.datatables.net/1.10.10/js/dataTables.bootstrap.js"></script>
+    <script type="text/javascript" src="//cdn.datatables.net/scroller/1.4.0/js/dataTables.scroller.js"></script>
     <script>
     Dropzone.options.addPhotos = {
         maxFilesize: 100, // MB
@@ -39,5 +85,8 @@
             });
         }
     };
+    $(document).ready(function () {
+        $('#result-list').DataTable();
+    });
     </script>
 {% endblock %}
