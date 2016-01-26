@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 
 class Folder(models.Model):
-    pk = models.CharField(max_length=32, primary_key=True)
+    folder_id = models.CharField(max_length=32, primary_key=True)
     name = models.CharField(max_length=255) # display name
     owner = models.ForeignKey(User, models.CASCADE)
     parent_folder = models.ForeignKey('self', models.CASCADE, related_name='child_folders')
