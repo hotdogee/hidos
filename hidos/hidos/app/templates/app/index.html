@@ -10,7 +10,7 @@
     <form id="add-photos" action="{% url 'home' %}" class="dropzone">
         {% csrf_token %}
     </form>
-
+    <hr />
     <div>
         <h1>Results</h1>
         {% if user.is_authenticated %}
@@ -24,14 +24,6 @@
                     <th>Created</th>
                 </tr>
             </thead>
-            <tfoot>
-                <tr>
-                    <th>Name</th>
-                    <th>Area</th>
-                    <th>Count</th>
-                    <th>Date</th>
-                </tr>
-            </tfoot>
             <tbody>
                 <tr>
                     <td>123.jpg</td>
