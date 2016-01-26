@@ -45,9 +45,13 @@
 {% block head-styles %}
     <link rel="stylesheet" type="text/css" href="{% static 'app/content/basic.css' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'app/content/dropzone.css' %}" />
+    <!--
     <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.10/css/dataTables.bootstrap.css"/>
     <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/scroller/1.4.0/css/scroller.bootstrap.css"/>
-
+    -->
+    <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.10/css/jquery.dataTables.min.css"/>
+    <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/scroller/1.4.0/css/scroller.dataTables.min.css"/>
+ 
     <style type="text/css">
         #icon {
             display: inline-block;
@@ -57,13 +61,18 @@
         .dropzone .dz-message {
             font-size: large;
         }
+        div.DTS div.dataTables_scrollBody {
+            background: white;
+        }
     </style>
 {% endblock %}
 {% block scripts %}
     <script src="{% static 'app/scripts/dropzone.js' %}"></script>
-    <script type="text/javascript" src="//cdn.datatables.net/1.10.10/js/jquery.dataTables.js"></script>
+    <!--
     <script type="text/javascript" src="//cdn.datatables.net/1.10.10/js/dataTables.bootstrap.js"></script>
-    <script type="text/javascript" src="//cdn.datatables.net/scroller/1.4.0/js/dataTables.scroller.js"></script>
+    -->
+    <script type="text/javascript" src="//cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="//cdn.datatables.net/scroller/1.4.0/js/dataTables.scroller.min.js"></script>
     <script>
     Dropzone.options.addPhotos = {
         maxFilesize: 100, // MB
@@ -78,7 +87,18 @@
         }
     };
     $(document).ready(function () {
-        $('#result-list').DataTable();
+        $('#result-list').DataTable({
+            ajax: '/task',
+            deferRender: true,
+            scroller: true,
+            scrollY: 500,
+            columns: [
+                { data: "name" },
+                { data: "result.ratio", defaultContent: "<i>Running</i>" },
+                { data: "result.count_min", defaultContent: "<i>Running</i>" },
+                { data: "created" }
+            ]
+        });
     });
     </script>
 {% endblock %}

@@ -62,6 +62,9 @@ def run_image_analysis_task(task_id, args_list, path_prefix):
         result_status = 'OUT_JSON_EMPTY'
     else:
         result_status = 'SUCCESS'
+        with open(output_json_path, 'r') as f:
+            record.result = json.dumps(json.load(f))
+        
     record.result_status = result_status
     record.result_date = datetime.utcnow().replace(tzinfo=utc)
     record.save()

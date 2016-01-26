@@ -17,6 +17,7 @@ import stat as Perm
 import json
 import hashlib
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils import timezone
 
 version = '0.5'
 
@@ -25,11 +26,12 @@ def task(request):
     if not request.user.is_authenticated():
         return JsonResponse({})
     else:
+        current_tz = timezone.get_current_timezone()
         return JsonResponse({
             'data': [{
                 'name': t.user_filename, 
-                'result': json.loads(t.result), 
-                'created': t.user_filename
+                'result': json.loads(t.result or '{}'), 
+                'created': current_tz.normalize(t.enqueue_date.astimezone(current_tz)).isoformat(),
                 } for t in ImageAnalysis.objects.filter(user=request.user)]
             })
 

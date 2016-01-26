@@ -15,10 +15,8 @@ from app import views as app_views
 
 urlpatterns = [
     url(r'^$', app_views.home, name='home'),
-    url(r'^(?P<task_id>[0-9a-zA-Z]+)$', app_views.retrieve, name='retrieve'),
-    url(r'^(?P<task_id>[0-9a-zA-Z]+)/status$', app_views.status, name='status'),
     url(r'^task$', app_views.task, name='task'),
-    url(r'^login$',
+    url(r'^login/$',
         auth_views.login,
         {
             'template_name': 'app/login.html',
@@ -36,6 +34,8 @@ urlpatterns = [
             'next_page': '/',
         },
         name='logout'),
+    url(r'^(?P<task_id>[0-9a-zA-Z]+)$', app_views.retrieve, name='retrieve'),
+    url(r'^(?P<task_id>[0-9a-zA-Z]+)/status$', app_views.status, name='status'),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
