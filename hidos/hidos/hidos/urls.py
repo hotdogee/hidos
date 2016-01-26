@@ -5,19 +5,21 @@ Definition of urls for hidos.
 from datetime import datetime
 from django.conf.urls import patterns, url
 from app.forms import BootstrapAuthenticationForm
+from django.contrib.auth import views as auth_views
+from app import views as app_views
 
 # Uncomment the next lines to enable the admin:
 # from django.conf.urls import include
 # from django.contrib import admin
 # admin.autodiscover()
 
-urlpatterns = patterns('',
-    # Examples:
-    url(r'^$', 'app.views.home', name='home'),
-    url(r'^(?P<task_id>[0-9a-zA-Z]+)$', 'app.views.retrieve', name='retrieve'),
-    url(r'^(?P<task_id>[0-9a-zA-Z]+)/status$', 'app.views.status', name='status'),
-    url(r'^login/$',
-        'django.contrib.auth.views.login',
+urlpatterns = [
+    url(r'^$', app_views.home, name='home'),
+    url(r'^(?P<task_id>[0-9a-zA-Z]+)$', app_views.retrieve, name='retrieve'),
+    url(r'^(?P<task_id>[0-9a-zA-Z]+)/status$', app_views.status, name='status'),
+    url(r'^task$', app_views.task, name='task'),
+    url(r'^login$',
+        auth_views.login,
         {
             'template_name': 'app/login.html',
             'authentication_form': BootstrapAuthenticationForm,
@@ -29,7 +31,7 @@ urlpatterns = patterns('',
         },
         name='login'),
     url(r'^logout$',
-        'django.contrib.auth.views.logout',
+        auth_views.logout,
         {
             'next_page': '/',
         },
@@ -40,15 +42,10 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     # url(r'^admin/', include(admin.site.urls)),
-)
+]
 
+# Serving files uploaded by a user during development
 from django.conf import settings
+from django.conf.urls.static import static
 if settings.DEBUG:
-    urlpatterns += patterns('',
-        url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {
-            'document_root': settings.MEDIA_ROOT,
-        }),
-        url(r'^static/(?P<path>.*)$', 'django.views.static.serve', {
-            'document_root': settings.STATIC_ROOT,
-        }),
-    )
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
