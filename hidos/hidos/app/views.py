@@ -5,7 +5,7 @@ Definition of views.
 from django.shortcuts import render
 from django.shortcuts import redirect
 from django.http import HttpRequest
-from django.template import RequestContext
+from django.http import JsonResponse
 from datetime import datetime
 from .models import ImageAnalysis
 from django.http.response import HttpResponse
@@ -20,6 +20,19 @@ from django.core.exceptions import ObjectDoesNotExist
 
 version = '0.5'
 
+def task(request):
+    """returns task list for logged in user"""
+    if not request.user.is_authenticated():
+        return JsonResponse({})
+    else:
+        return JsonResponse({
+            'data': [{
+                'name': t.user_filename, 
+                'result': json.loads(t.result), 
+                'created': t.user_filename
+                } for t in ImageAnalysis.objects.filter(user=request.user)]
+            })
+
 def home(request):
     """Renders the home page."""
     assert isinstance(request, HttpRequest)
@@ -27,12 +40,11 @@ def home(request):
         return render(
             request,
             'app/index.html',
-            context_instance = RequestContext(request,
             {
                 'title':'Home',
                 'year':datetime.now().year,
                 'version': version,
-            })
+            }
         )
     elif request.method == 'POST':
         # error detection
@@ -98,39 +110,36 @@ def retrieve(request, task_id='1'):
         return render(
             request,
             'app/result.html',
-            context_instance = RequestContext(request,
             {
                 'title': 'CellQ - {0}'.format(record.user_filename),
                 'year': datetime.now().year,
                 'version': record.version,
                 'user_filename': record.user_filename,
-            })
+            }
         )
     except ObjectDoesNotExist:
         message = 'Result not found'
         return render(
             request,
             'app/error.html',
-            context_instance = RequestContext(request,
             {
                 'title': 'CellQ Error',
                 'year': datetime.now().year,
                 'version': version,
                 'message': message,
-            })
+            }
         )
     except Exception as e:
         message = 'Result not found ({0})'.format(e.message)
         return render(
             request,
             'app/error.html',
-            context_instance = RequestContext(request,
             {
                 'title': 'CellQ Error',
                 'year': datetime.now().year,
                 'version': version,
                 'message': message,
-            })
+            }
         )
 
 def status(request, task_id):
