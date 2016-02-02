@@ -1,11 +1,11 @@
 ﻿/* http://tobiasahlin.com/spinkit/ */
 
 .sk-fading-circle {
-    margin: 0px 5px -3px;
-    width: 15px;
-    height: 15px;
-    position: relative;
-    display: inline-block;
+  margin: 0px 5px -3px;
+  width: 15px;
+  height: 15px;
+  position: relative;
+  display: inline-block;
 }
 
 .sk-fading-circle .sk-circle {
