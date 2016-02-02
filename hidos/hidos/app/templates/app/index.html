@@ -112,9 +112,9 @@
                 scrollY: 500,
                 columns: [
                     { name: "file-name", data: "name" },
-                    { name: "area", data: "result.ratio", defaultContent: running_template },
-                    { name: "count", data: "result.count_min", defaultContent: running_template },
-                    { name: "created", data: "created" }
+                    { name: "area", type: "num", data: "result.ratio", defaultContent: running_template },
+                    { name: "count", type: "num", data: "result.count_min", defaultContent: running_template },
+                    { name: "created", type: "date", data: "created" }
                 ]
             });
         });
