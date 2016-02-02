@@ -18,7 +18,7 @@
         <table id="result-list" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
-                    <th>Name</th>
+                    <th>File Name</th>
                     <th>Area</th>
                     <th>Count</th>
                     <th>Created</th>
@@ -111,10 +111,10 @@
                 scroller: true,
                 scrollY: 500,
                 columns: [
-                    { data: "name" },
-                    { data: "result.ratio", defaultContent: running_template },
-                    { data: "result.count_min", defaultContent: running_template },
-                    { data: "created" }
+                    { name: "file-name", data: "name" },
+                    { name: "area", data: "result.ratio", defaultContent: running_template },
+                    { name: "count", data: "result.count_min", defaultContent: running_template },
+                    { name: "created", data: "created" }
                 ]
             });
         });
