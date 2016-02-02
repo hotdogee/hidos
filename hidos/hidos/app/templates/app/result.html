@@ -87,13 +87,13 @@
       // check status
       var poll = function () {
         $.ajax({
-          url: path_prefix + '_status.json',
+          url: '/api/v1/tasks/status?id=' + task_id,
           dataType: 'json',
           type: 'GET',
           success: function (data, status) {
             console.log(data);
 
-            if (data.status != "done")
+            if (data.data[0].result_status.toLowerCase() != "success")
               setTimeout(poll, 3000);
             else {
               // get result json data

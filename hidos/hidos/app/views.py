@@ -22,7 +22,7 @@ from django.core.urlresolvers import reverse
 
 version = '0.6-alpha'
 
-def task(request):
+def tasks(request):
     """returns task list for logged in user"""
     if not request.user.is_authenticated():
         return JsonResponse({})
@@ -35,10 +35,28 @@ def task(request):
                 'url': reverse('retrieve', kwargs={'task_id': t.task_id}),
                 'result_img': settings.MEDIA_URL + 'image_analysis/task/' + t.task_id + '/' + t.task_id + '_out.jpg',
                 'input_img': settings.MEDIA_URL + 'image_analysis/task/' + t.task_id + '/' + t.task_id + '_in.jpg',
-                'result': json.loads(t.result or '{}'), 
+                'result': json.loads(t.result or '{}'),
+                'result_status': t.result_status,
                 'created': current_tz.normalize(t.enqueue_date.astimezone(current_tz)).isoformat(),
                 } for t in ImageAnalysis.objects.filter(user=request.user)]
             })
+
+def status(request):
+    task_ids = []
+    if request.method == 'GET':
+        task_ids = request.GET.getlist('id')
+    elif request.method == 'POST':
+        task_ids = request.POST.getlist('id')
+    else:
+        return JsonResponse({})
+    if not task_ids:
+        return JsonResponse({})
+    return JsonResponse({
+        'data': [{
+            'id': t.task_id,
+            'result_status': t.result_status,
+            } for t in ImageAnalysis.objects.filter(task_id__in=task_ids)]
+        })
 
 def home(request):
     """Renders the home page."""
@@ -72,15 +90,10 @@ def home(request):
             input_image_path = path_prefix + '_in.jpg'
             output_image_path = path_prefix + '_out.jpg'
             output_json_path = path_prefix + '_out.json'
-            status_json_path = path_prefix + '_status.json'
 
             if not path.exists(path.dirname(input_image_path)):
                 makedirs(path.dirname(input_image_path))
             chmod(path.dirname(input_image_path), Perm.S_IRWXU | Perm.S_IRWXG | Perm.S_IRWXO) # ensure the standalone dequeuing process can open files in the directory
-
-            # generate status.json for frontend status checking
-            with open(status_json_path, 'wb') as f:
-                json.dump({'status': 'pending'}, f)
         
             # write query to file
             if 'file' in request.FILES:
@@ -100,6 +113,7 @@ def home(request):
             record.task_id = task_id
             record.version = version
             record.user_filename = uploaded_file.name
+            record.result_status = 'queued'
             if request.user.is_authenticated():
                 record.user = request.user
             record.save()
@@ -148,11 +162,3 @@ def retrieve(request, task_id='1'):
                 'message': message,
             }
         )
-
-def status(request, task_id):
-    if request.method == 'GET':
-        status_file_path = path.join(settings.MEDIA_ROOT, 'image_analysis', 'task', task_id, 'status.json')
-        status = {'status': 'unknown'}
-        return HttpResponse(json.dumps(status))
-    else:
-        return HttpResponse('Invalid Post')

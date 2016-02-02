@@ -34,15 +34,8 @@ def run_image_analysis_task(task_id, args_list, path_prefix):
     # update dequeue time
     record = ImageAnalysis.objects.get(task_id__exact=task_id)
     record.dequeue_date = datetime.utcnow().replace(tzinfo=utc)
+    record.result_status = 'running'
     record.save()
-
-    # update status from 'pending' to 'running' for frontend
-    status_json_path = path_prefix + '_status.json'
-    with open(status_json_path, 'r') as f:
-        statusdata = json.load(f)
-        statusdata['status'] = 'running'
-    with open(status_json_path, 'wb') as f:
-        json.dump(statusdata, f)
 
     # run
     for args in args_list:
@@ -52,6 +45,7 @@ def run_image_analysis_task(task_id, args_list, path_prefix):
     result_status = ''
     output_image_path = path_prefix + '_out.jpg'
     output_json_path = path_prefix + '_out.json'
+    record.result_status = 'failed'
     if not path.isfile(output_image_path):
         result_status = 'NO_OUT_JPG'
     elif stat(output_image_path)[6] == 0:
@@ -61,17 +55,12 @@ def run_image_analysis_task(task_id, args_list, path_prefix):
     elif stat(output_json_path)[6] == 0:
         result_status = 'OUT_JSON_EMPTY'
     else:
-        result_status = 'SUCCESS'
+        record.result_status = 'success'
         with open(output_json_path, 'r') as f:
             record.result = json.dumps(json.load(f))
         
-    record.result_status = result_status
     record.result_date = datetime.utcnow().replace(tzinfo=utc)
     record.save()
-
-    # generate status.json for frontend status checking
-    with open(status_json_path, 'wb') as f:
-        json.dump({'status': 'done'}, f)
 
     return task_id # passed to 'result' argument of task_success_handler
 

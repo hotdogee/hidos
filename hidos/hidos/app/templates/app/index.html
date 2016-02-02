@@ -115,7 +115,7 @@
       var cellq_name_compiled = _.template($('#cellq-name-template').html());
       var date_now = (new Date()).toLocaleDateString();
       var result_table = $('#result-list').DataTable({
-        ajax: '/task',
+        ajax: '/api/v1/tasks',
         deferRender: true,
         scroller: true,
         scrollY: 500,
