@@ -33,6 +33,8 @@ def task(request):
                 'id': t.task_id,
                 'name': t.user_filename,
                 'url': reverse('retrieve', kwargs={'task_id': t.task_id}),
+                'result_img': settings.MEDIA_URL + 'image_analysis/task/' + t.task_id + '/' + t.task_id + '_out.jpg',
+                'input_img': settings.MEDIA_URL + 'image_analysis/task/' + t.task_id + '/' + t.task_id + '_in.jpg',
                 'result': json.loads(t.result or '{}'), 
                 'created': current_tz.normalize(t.enqueue_date.astimezone(current_tz)).isoformat(),
                 } for t in ImageAnalysis.objects.filter(user=request.user)]
