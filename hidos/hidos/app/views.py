@@ -122,7 +122,7 @@ def home(request):
 
         # debug
         #run_image_analysis_task.delay(task_id, args_list, path_prefix).get()
-        return redirect('retrieve', task_id)
+        return HttpResponse(task_id)
 
 def retrieve(request, task_id='1'):
     #return HttpResponse("retrieve = %s." % (task_id))

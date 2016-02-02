@@ -90,6 +90,7 @@
           url: '/api/v1/tasks/status?id=' + task_id,
           dataType: 'json',
           type: 'GET',
+          traditional: true,
           success: function (data, status) {
             console.log(data);
 

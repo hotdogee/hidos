@@ -114,7 +114,8 @@
       var view_btn_compiled = _.template($('#viewer-btn-template').html());
       var cellq_name_compiled = _.template($('#cellq-name-template').html());
       var date_now = (new Date()).toLocaleDateString();
-      var result_table = $('#result-list').DataTable({
+      var result_table;
+      result_table = $('#result-list').DataTable({
         ajax: '/api/v1/tasks',
         deferRender: true,
         scroller: true,
@@ -172,10 +173,42 @@
           $('.viewer-btn', row).tooltip();
         }
       });
-
+      var unfinished = ['queued', 'running'];
+      var unfinished_task_ids;
+      var polling = false;
+      $('#result-list').on('xhr.dt', function (e, settings, json, xhr) {
+        // json data loaded
+        // get a list of queued and running tasks
+        unfinished_task_ids = _.pluck(_.filter(json.data, (t) => _.contains(unfinished, t.result_status)), 'id');
+        console.log(unfinished_task_ids);
+        if (unfinished_task_ids.length > 0 && polling == false) {
+          polling = true;
+          var finished = ['success', 'failed'];
+          var poll = function () {
+            $.ajax({
+              url: '/api/v1/tasks/status',
+              dataType: 'json',
+              type: 'GET',
+              data: { 'id': unfinished_task_ids },
+              traditional: true,
+              success: function (data, status) {
+                console.log(_.some(finished, (c) => _.contains(_.pluck(data.data, 'result_status'), c)));
+                if (_.some(finished, (c) => _.contains(_.pluck(data.data, 'result_status'), c))) {
+                  polling = false;
+                  result_table.ajax.reload();
+                }  else
+                  setTimeout(poll, 3000);
+              }
+            });
+          };
+          poll();
+        } else {
+          polling = false;
+        }
+      });
       Dropzone.options.addPhotos = {
         maxFilesize: 256, // MB
-        uploadMultiple: true,
+        uploadMultiple: false,
         parallelUploads: 2,
         maxFiles: null,
         thumbnailWidth: null,
