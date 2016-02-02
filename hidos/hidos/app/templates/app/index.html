@@ -1,10 +1,10 @@
 {% extends "app/layout.html" %}
 {% load staticfiles %}
 {% block content %}
-  <h1>cellq <small>v{{ version }}</small></h1>
+  <h1>CellQ <small>v{{ version }}</small></h1>
   <ul>
-    <li>cell ratio analysis</li>
-    <li>cell count estimation</li>
+    <li>Cell Ratio Analysis</li>
+    <li>Cell Count Estimation</li>
   </ul>
 
   <form id="add-photos" action="{% url 'home' %}" class="dropzone">
@@ -12,16 +12,16 @@
   </form>
   <hr />
   <div>
-    <h1>results</h1>
+    <h1>Results</h1>
     {% if user.is_authenticated %}
 
     <table id="result-list" class="display" cellspacing="0" width="100%">
       <thead>
         <tr>
-          <th>file name</th>
-          <th>area</th>
-          <th>count</th>
-          <th>created</th>
+          <th>File Name</th>
+          <th>Area</th>
+          <th>Count</th>
+          <th>Created</th>
         </tr>
       </thead>
       <tbody>
@@ -29,14 +29,14 @@
           <td>123.jpg</td>
           <td>24.10%</td>
           <td>451</td>
-          <td>2016/01/20 01:33am</td>
+          <td>2016/01/20 01:33AM</td>
         </tr>
       </tbody>
     </table>
 
     {% else %}
 
-    <div>log in to save your results</div>
+    <div>Log in to save your results</div>
 
     {% endif %}
   </div>
@@ -46,11 +46,11 @@
   <link rel="stylesheet" type="text/css" href="{% static 'app/content/basic.css' %}" />
   <link rel="stylesheet" type="text/css" href="{% static 'app/content/dropzone.css' %}" />
   <!--
-  <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.10/css/datatables.bootstrap.css"/>
+  <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.10/css/dataTables.bootstrap.css"/>
   <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/scroller/1.4.0/css/scroller.bootstrap.css"/>
   -->
-  <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.10/css/jquery.datatables.min.css"/>
-  <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/scroller/1.4.0/css/scroller.datatables.min.css"/>
+  <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.10/css/jquery.dataTables.min.css"/>
+  <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/scroller/1.4.0/css/scroller.dataTables.min.css"/>
   <link rel="stylesheet" type="text/css" href="{% static 'app/content/spinkit.css' %}" />
  
   <style type="text/css">
@@ -62,7 +62,7 @@
     .dropzone .dz-message {
       font-size: large;
     }
-    div.dts div.datatables_scrollbody {
+    div.DTS div.dataTables_scrollBody {
       background: white;
     }
   </style>
@@ -70,10 +70,10 @@
 {% block scripts %}
   <script src="{% static 'app/scripts/dropzone.js' %}"></script>
   <!--
-  <script type="text/javascript" src="//cdn.datatables.net/1.10.10/js/datatables.bootstrap.js"></script>
+  <script type="text/javascript" src="//cdn.datatables.net/1.10.10/js/dataTables.bootstrap.js"></script>
   -->
-  <script type="text/javascript" src="//cdn.datatables.net/1.10.10/js/jquery.datatables.min.js"></script>
-  <script type="text/javascript" src="//cdn.datatables.net/scroller/1.4.0/js/datatables.scroller.min.js"></script>
+  <script type="text/javascript" src="//cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
+  <script type="text/javascript" src="//cdn.datatables.net/scroller/1.4.0/js/dataTables.scroller.min.js"></script>
   <script type="text/template" id="loading-template">
     <div class="sk-fading-circle">
       <div class="sk-circle1 sk-circle"></div>
@@ -91,29 +91,29 @@
     </div>
   </script>
   <script>
-    dropzone.options.addphotos = {
-      maxfilesize: 100, // mb
-      uploadmultiple: false,
-      maxfiles: 1,
-      dictdefaultmessage: 'drop image here to upload',
+    Dropzone.options.addPhotos = {
+      maxFilesize: 100, // MB
+      uploadMultiple: false,
+      maxFiles: 1,
+      dictDefaultMessage: 'Drop image here to upload',
       init: function () {
         this.on("success", function (file, response) {
           //console.log(file, response);
-          window.location = file.xhr.responseurl;
+          window.location = file.xhr.responseURL;
         });
       }
     };
     $(document).ready(function () {
-      var running_template = "<i>running " + $("#loading-template").html() + "</i>";
-      $('#result-list').datatable({
+      var running_template = "<i>Running " + $("#loading-template").html() + "</i>";
+      $('#result-list').DataTable({
         ajax: '/task',
-        deferrender: true,
+        deferRender: true,
         scroller: true,
-        scrolly: 500,
+        scrollY: 500,
         columns: [
           { name: "file-name", data: "name" },
-          { name: "area", type: "num", data: "result.ratio", defaultcontent: running_template },
-          { name: "count", type: "num", data: "result.count_min", defaultcontent: running_template },
+          { name: "area", type: "num", data: "result.ratio", defaultContent: running_template },
+          { name: "count", type: "num", data: "result.count_min", defaultContent: running_template },
           { name: "created", type: "date", data: "created" }
         ]
       });
