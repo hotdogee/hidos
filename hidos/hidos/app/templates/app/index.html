@@ -51,6 +51,7 @@
     -->
     <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.10/css/jquery.dataTables.min.css"/>
     <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/scroller/1.4.0/css/scroller.dataTables.min.css"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'app/content/spinkit.css' %}" />
  
     <style type="text/css">
         #icon {
@@ -73,32 +74,49 @@
     -->
     <script type="text/javascript" src="//cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
     <script type="text/javascript" src="//cdn.datatables.net/scroller/1.4.0/js/dataTables.scroller.min.js"></script>
+    <script type="text/template" id="loading-template">
+        <div class="sk-fading-circle">
+            <div class="sk-circle1 sk-circle"></div>
+            <div class="sk-circle2 sk-circle"></div>
+            <div class="sk-circle3 sk-circle"></div>
+            <div class="sk-circle4 sk-circle"></div>
+            <div class="sk-circle5 sk-circle"></div>
+            <div class="sk-circle6 sk-circle"></div>
+            <div class="sk-circle7 sk-circle"></div>
+            <div class="sk-circle8 sk-circle"></div>
+            <div class="sk-circle9 sk-circle"></div>
+            <div class="sk-circle10 sk-circle"></div>
+            <div class="sk-circle11 sk-circle"></div>
+            <div class="sk-circle12 sk-circle"></div>
+        </div>
+    </script>
     <script>
-    Dropzone.options.addPhotos = {
-        maxFilesize: 100, // MB
-        uploadMultiple: false,
-        maxFiles: 1,
-        dictDefaultMessage: 'Drop image here to upload',
-        init: function () {
-            this.on("success", function (file, response) {
-                //console.log(file, response);
-                window.location = file.xhr.responseURL;
+        Dropzone.options.addPhotos = {
+            maxFilesize: 100, // MB
+            uploadMultiple: false,
+            maxFiles: 1,
+            dictDefaultMessage: 'Drop image here to upload',
+            init: function () {
+                this.on("success", function (file, response) {
+                    //console.log(file, response);
+                    window.location = file.xhr.responseURL;
+                });
+            }
+        };
+        $(document).ready(function () {
+            var running_template = "<i>Running " + $("#loading-template").html() + "</i>";
+            $('#result-list').DataTable({
+                ajax: '/task',
+                deferRender: true,
+                scroller: true,
+                scrollY: 500,
+                columns: [
+                    { data: "name" },
+                    { data: "result.ratio", defaultContent: running_template },
+                    { data: "result.count_min", defaultContent: running_template },
+                    { data: "created" }
+                ]
             });
-        }
-    };
-    $(document).ready(function () {
-        $('#result-list').DataTable({
-            ajax: '/task',
-            deferRender: true,
-            scroller: true,
-            scrollY: 500,
-            columns: [
-                { data: "name" },
-                { data: "result.ratio", defaultContent: "<i>Running</i>" },
-                { data: "result.count_min", defaultContent: "<i>Running</i>" },
-                { data: "created" }
-            ]
         });
-    });
     </script>
 {% endblock %}

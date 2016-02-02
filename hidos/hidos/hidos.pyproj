@@ -65,11 +65,13 @@
     <Content Include="app\bin\1_6_obj_area_cal_cmd.R" />
     <Content Include="app\static\app\content\basic.css" />
     <Content Include="app\static\app\content\dropzone.css" />
+    <Content Include="app\static\app\content\spinkit.css" />
     <Content Include="app\static\app\images\cell_ratio_logo.jpg" />
     <Content Include="app\static\app\images\error.png" />
     <Content Include="app\static\app\images\loading.gif" />
     <Content Include="app\static\app\scripts\dropzone.js" />
     <Content Include="app\static\app\scripts\jquery.panzoom.js" />
+    <Content Include="app\static\app\scripts\spin.min.js" />
     <Content Include="app\static\app\scripts\underscore-min.js" />
     <Content Include="app\static\app\scripts\underscore-min.map" />
     <Content Include="app\static\app\scripts\underscore.js" />
