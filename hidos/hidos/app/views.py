@@ -18,6 +18,7 @@ import json
 import hashlib
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
+from django.core.urlresolvers import reverse
 
 version = '0.5'
 
@@ -29,7 +30,9 @@ def task(request):
         current_tz = timezone.get_current_timezone()
         return JsonResponse({
             'data': [{
-                'name': t.user_filename, 
+                'id': t.task_id,
+                'name': t.user_filename,
+                'url': reverse('retrieve', kwargs={'task_id': t.task_id}),
                 'result': json.loads(t.result or '{}'), 
                 'created': current_tz.normalize(t.enqueue_date.astimezone(current_tz)).isoformat(),
                 } for t in ImageAnalysis.objects.filter(user=request.user)]
