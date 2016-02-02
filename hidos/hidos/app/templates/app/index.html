@@ -60,6 +60,11 @@
     div.DTS div.dataTables_scrollBody {
       background: white;
     }
+    .cellq-icon {
+      display: inline-block;
+      width: 22px;
+      height: 22px;
+    }
   </style>
 {% endblock %}
 {% block scripts %}
@@ -92,6 +97,9 @@
       <span class="glyphicon glyphicon-new-window"></span> Result
     </a>
   </script>
+  <script type="text/template" id="cellq-name-template">
+    <img class="cellq-icon" src="{% static 'app/images/cellq_icon.png' %}"> <%= name %>
+  </script>
   <script>
     Dropzone.options.addPhotos = {
       maxFilesize: 100, // MB
@@ -108,6 +116,7 @@
     $(document).ready(function () {
       var running_template = '<i>Running ' + $('#loading-template').html() + '</i>';
       var view_btn_compiled = _.template($('#viewer-btn-template').html());
+      var cellq_name_compiled = _.template($('#cellq-name-template').html());
       var date_now = (new Date()).toLocaleDateString();
       $('#result-list').DataTable({
         ajax: '/task',
@@ -125,7 +134,15 @@
                 return data;
             }
           },
-          { name: 'file-name', data: 'name' },
+          {
+            name: 'file-name', data: 'name',
+            render: function (data, type, full, meta) {
+              if (type === 'display')
+                return cellq_name_compiled({name: data});
+              else
+                return data;
+            }
+          },
           {
             name: 'area', type: 'num', data: 'result.ratio', defaultContent: running_template,
             render: function (data, type, full, meta) {
