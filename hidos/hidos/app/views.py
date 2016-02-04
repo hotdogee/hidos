@@ -79,6 +79,8 @@ def home(request):
         # calculate file hash
         m = hashlib.md5()
         m.update(version)
+        if request.user.is_authenticated():
+            m.update(request.user.username)
         for chunk in uploaded_file.chunks():
             m.update(chunk)
         task_id = m.hexdigest()
