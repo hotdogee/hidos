@@ -20,7 +20,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 from django.core.urlresolvers import reverse
 
-version = '0.6'
+version = '0.6.1'
 
 def tasks(request):
     """returns task list for logged in user"""
