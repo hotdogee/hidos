@@ -183,10 +183,10 @@
         $('#result-list').on('xhr.dt', function (e, settings, json, xhr) {
           // json data loaded
           // get a list of queued and running tasks
-          console.log(e, settings, json, xhr);
+          //console.log(e, settings, json, xhr);
           if (!json) return; // consecutive ajax.reload() may result in 'abort' status
           unfinished_task_ids = _.pluck(_.filter(json.data, (t) => _.contains(unfinished, t.result_status)), 'id');
-          console.log(unfinished_task_ids);
+          //console.log(unfinished_task_ids);
           if (unfinished_task_ids.length > 0 && polling == false) {
             polling = true;
             var finished = ['success', 'failed'];
@@ -198,7 +198,7 @@
                 data: { 'id': unfinished_task_ids },
                 traditional: true,
                 success: function (data, status) {
-                  console.log(_.some(finished, (c) => _.contains(_.pluck(data.data, 'result_status'), c)));
+                  //console.log(_.some(finished, (c) => _.contains(_.pluck(data.data, 'result_status'), c)));
                   if (_.some(finished, (c) => _.contains(_.pluck(data.data, 'result_status'), c))) {
                     polling = false;
                     result_table.ajax.reload();
