@@ -3,7 +3,7 @@ Definition of urls for hidos.
 """
 
 from datetime import datetime
-from django.conf.urls import patterns, url
+from django.conf.urls import include, url
 from app.forms import BootstrapAuthenticationForm
 from django.contrib.auth import views as auth_views
 from app import views as app_views
@@ -35,6 +35,7 @@ urlpatterns = [
             'next_page': '/',
         },
         name='logout'),
+    url(r'^accounts/', include('allauth.urls')),
     url(r'^(?P<task_id>[0-9a-zA-Z]+)$', app_views.retrieve, name='retrieve'),
 
     # Uncomment the admin/doc line below to enable admin documentation:
