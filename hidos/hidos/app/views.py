@@ -164,3 +164,6 @@ def retrieve(request, task_id='1'):
                 'message': message,
             }
         )
+
+def icsi(request):
+    return render(request, 'icsi/result.html')
