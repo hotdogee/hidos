@@ -204,6 +204,8 @@ from sys import platform
 R_SCRIPT = r"/usr/bin/Rscript"
 if platform == 'win32':
     R_SCRIPT = r"C:\Program Files\R\R-3.2.2\bin\RScript.exe"
+if platform == 'darwin':  # for mac
+    R_SCRIPT = r"/usr/local/bin/R"
 
 USE_CACHE = False
 
