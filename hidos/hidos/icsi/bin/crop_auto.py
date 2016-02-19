@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt 
 from skimage.feature import greycomatrix, greycoprops
 from skimage.io import imread, imsave
 import numpy as np
@@ -29,7 +28,7 @@ def findExtreme(array):
 def findSquare(x1,x2,y1,y2):
     center = [(x2-x1)/2+x1, (y2-y1)/2+y1]
     x_length = x2-x1
-    y_length = y2-y1
+    y_length = y1-y1
     width = 0
     if x_length > y_length:
         width = x_length
@@ -124,7 +123,7 @@ for props in regions:
         x1,x2,y1,y2 = findSquare(x1_old,x2_old,y1_old,y2_old)
             
         img_crop = img[x1:x2,y1:y2]/256
-        img_crop_path = OUTPUT_IMAGE_PATH + str(INPUT_IMAGE_PATH.split('.')[0])+'_Crop' + str(img_time)+'.jpg'
+        img_crop_path = OUTPUT_IMAGE_PATH +'_Crop' + str(img_time)+'.jpg'
         imsave(img_crop_path, img_crop)
         
 if img_time == 0:

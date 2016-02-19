@@ -88,9 +88,9 @@ def home(request):
         if not ImageAnalysis.objects.filter(task_id=task_id).exists():
             # setup file paths
             #task_id = uuid4().hex # TODO: Create from hash of input to check for duplicate inputs
-            path_prefix = path.join(settings.MEDIA_ROOT, 'image_analysis', 'task', task_id, task_id)
+            path_prefix = path.join(settings.MEDIA_ROOT, 'icsi', 'task', task_id, task_id)
             input_image_path = path_prefix + '_in.jpg'
-            output_image_path = path_prefix + '_out.jpg'
+            output_image_path = path_prefix
             output_json_path = path_prefix + '_out.json'
 
             if not path.exists(path.dirname(input_image_path)):
@@ -107,8 +107,8 @@ def home(request):
             # build command
             # set R_Script="C:\Program Files\R\R-3.2.2\bin\RScript.exe"
             # %R_Script% 1_6_obj_area_cal_cmd.R IMG_0159.JPG IMG_0159_out.JPG IMG_0159_out.csv
-            script_path = path.join(settings.PROJECT_ROOT, 'app', 'bin', '1_6_obj_area_cal_cmd.R')
-            args_list = [[settings.R_SCRIPT, script_path, input_image_path, output_image_path, output_json_path]]
+            script_path = path.join(settings.PROJECT_ROOT, 'icsi', 'bin', 'crop_auto.py')
+            args_list = [[settings.PYTHON_SCRIPT, script_path,'--input', input_image_path,'--output',output_image_path]]
         
             # insert entry into database
             record = ImageAnalysis()
@@ -165,5 +165,3 @@ def retrieve(request, task_id='1'):
             }
         )
 
-def icsi(request):
-    return render(request, 'icsi/result.html')
