@@ -1,6 +1,25 @@
 from django.shortcuts import render
+from django.shortcuts import redirect
+from django.http import HttpRequest
+from django.http import JsonResponse
+from datetime import datetime
 from app.models import ImageAnalysis
+from django.http.response import HttpResponse
+from django.conf import settings
+from uuid import uuid4
+from app.tasks import run_image_analysis_task
+import stat as Perm
+import json
+import hashlib
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils import timezone
+from django.core.urlresolvers import reverse
+
+
+from app.views import version 
+
+version = version
+
 # Create your views here.
 
 
@@ -10,7 +29,7 @@ def retrieve(request, task_id='1'):
         record = ImageAnalysis.objects.get(task_id=task_id)
         return render(
             request,
-            'app/result.html',
+            'cellcount/result.html',
             {
                 'title': 'CellQ - {0}'.format(record.user_filename),
                 'year': datetime.now().year,
@@ -50,7 +69,7 @@ def upload(request):
     if request.method == 'GET':
         return render(
             request,
-            'app/index.html',
+            'cellcount/index.html',
             {
                 'title':'Home',
                 'year':datetime.now().year,

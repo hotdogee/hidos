@@ -17,7 +17,7 @@ from django.contrib import admin
 urlpatterns = [
     url(r'^$', app_views.home, name='home'),
     url(r'^cellcount/$',cellcount_views.upload, name = 'cellcount'),
-    url(r'^icsi/$', icsi_views.home, name='icsi'),
+    url(r'^icsi/$', icsi_views.upload, name='icsi'),
     url(r'^api/v1/tasks$', app_views.tasks, name='tasks'),
     url(r'^api/v1/tasks/status$', app_views.status, name='status'),
     url(r'^login/$',
