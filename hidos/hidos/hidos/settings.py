@@ -207,6 +207,11 @@ if platform == 'win32':
 if platform == 'darwin':  # for mac
     R_SCRIPT = r"/usr/local/bin/R"
 
+
+# Python path
+PYTHON_SCRIPT = '/Users/Weian/GitHub/hidos/venv/bin/python'  # this is development on weian's mac
+
+
 USE_CACHE = False
 
 # Celery Settings
