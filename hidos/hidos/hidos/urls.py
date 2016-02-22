@@ -7,14 +7,15 @@ from django.conf.urls import include, url
 from app.forms import BootstrapAuthenticationForm
 from django.contrib.auth import views as auth_views
 from app import views as app_views
-
+from icsi import views as icsi_views
 # Uncomment the next lines to enable the admin:
 # from django.conf.urls import include
-# from django.contrib import admin
+from django.contrib import admin
 # admin.autodiscover()
 
 urlpatterns = [
     url(r'^$', app_views.home, name='home'),
+    url(r'^icsi/$', icsi_views.home, name='icsi'),
     url(r'^api/v1/tasks$', app_views.tasks, name='tasks'),
     url(r'^api/v1/tasks/status$', app_views.status, name='status'),
     url(r'^login/$',
@@ -39,10 +40,10 @@ urlpatterns = [
     url(r'^(?P<task_id>[0-9a-zA-Z]+)$', app_views.retrieve, name='retrieve'),
 
     # Uncomment the admin/doc line below to enable admin documentation:
-    # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
+    url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
     # Uncomment the next line to enable the admin:
-    # url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/', include(admin.site.urls)),
 ]
 
 # Serving files uploaded by a user during development
