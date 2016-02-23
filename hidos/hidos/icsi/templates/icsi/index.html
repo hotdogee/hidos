@@ -120,7 +120,7 @@
         var date_now = (new Date()).toLocaleDateString();
         var result_table;
         result_table = $('#result-list').DataTable({
-          ajax: '/api/v1/icsi/tasks',
+          ajax: '/api/v1/tasks',
           deferRender: true,
           scroller: true,
           scrollY: 500,
@@ -195,7 +195,7 @@
             var finished = ['success', 'failed'];
             var poll = function () {
               $.ajax({
-                url: '/api/v1/isci/tasks/status',
+                url: '/api/v1/tasks/status',
                 dataType: 'json',
                 type: 'GET',
                 data: { 'id': unfinished_task_ids },

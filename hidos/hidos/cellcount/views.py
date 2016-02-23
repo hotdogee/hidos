@@ -3,7 +3,7 @@ from django.shortcuts import redirect
 from django.http import HttpRequest
 from django.http import JsonResponse
 from datetime import datetime
-from .models import ImageAnalysis
+from .models import CellcountImageAnalysis
 from django.http.response import HttpResponse
 from django.conf import settings
 from uuid import uuid4
@@ -15,8 +15,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 from django.core.urlresolvers import reverse
 from os import path, makedirs, chmod
-
-
 from django.conf import settings
 version = settings.VERSION
 
@@ -39,7 +37,7 @@ def tasks(request):
                 'result': json.loads(t.result or '{}'),
                 'result_status': t.result_status,
                 'created': current_tz.normalize(t.enqueue_date.astimezone(current_tz)).isoformat(),
-                } for t in ImageAnalysis.objects.filter(user=request.user)]
+                } for t in CellcountImageAnalysis.objects.filter(user=request.user)]
             })
 
 def status(request):
@@ -56,7 +54,7 @@ def status(request):
         'data': [{
             'id': t.task_id,
             'result_status': t.result_status,
-            } for t in ImageAnalysis.objects.filter(task_id__in=task_ids)]
+            } for t in CellcountImageAnalysis.objects.filter(task_id__in=task_ids)]
         })
 
 
@@ -92,7 +90,7 @@ def upload(request):
             m.update(chunk)
         task_id = m.hexdigest()
         # check database for duplicate
-        if not ImageAnalysis.objects.filter(task_id=task_id).exists():
+        if not CellcountImageAnalysis.objects.filter(task_id=task_id).exists():
             # setup file paths
             #task_id = uuid4().hex # TODO: Create from hash of input to check for duplicate inputs
             path_prefix = path.join(settings.MEDIA_ROOT, 'cellcount', 'task', task_id, task_id)
@@ -118,7 +116,7 @@ def upload(request):
             args_list = [[settings.R_SCRIPT, script_path, input_image_path,output_image_path, output_json_path]]
         
             # insert entry into database
-            record = ImageAnalysis()
+            record = CellcountImageAnalysis()
             record.task_id = task_id
             record.version = version
             record.user_filename = uploaded_file.name
@@ -137,7 +135,7 @@ def upload(request):
 def retrieve(request, task_id='1'):
     #return HttpResponse("retrieve = %s." % (task_id))
     try:
-        record = ImageAnalysis.objects.get(task_id=task_id)
+        record = CellcountImageAnalysis.objects.get(task_id=task_id)
         return render(
             request,
             'cellcount/result.html',

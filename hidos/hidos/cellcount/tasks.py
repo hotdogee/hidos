@@ -4,7 +4,7 @@ from celery.task.schedules import crontab
 from celery.decorators import periodic_task
 from subprocess import Popen, PIPE
 from datetime import datetime, timedelta
-from .models import ImageAnalysis
+from .models import CellcountImageAnalysis
 from os import path, stat
 from pytz import utc
 from itertools import groupby
@@ -32,7 +32,7 @@ def run_image_analysis_task(task_id, args_list, path_prefix):
     logger.info("image_analysis task_id: %s" % (task_id,))
 
     # update dequeue time
-    record = ImageAnalysis.objects.get(task_id__exact=task_id)
+    record = CellcountImageAnalysis.objects.get(task_id__exact=task_id)
     record.dequeue_date = datetime.utcnow().replace(tzinfo=utc)
     record.result_status = 'running'
     record.save()
