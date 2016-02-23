@@ -206,11 +206,16 @@ R_SCRIPT = r"/usr/bin/Rscript"
 if platform == 'win32':
     R_SCRIPT = r"C:\Program Files\R\R-3.2.2\bin\RScript.exe"
 if platform == 'darwin':  # for mac
-    R_SCRIPT = r"/usr/local/bin/R"
+    R_SCRIPT = r"/usr/local/bin/Rscript"
 
 
 # Python path
 PYTHON_SCRIPT = '/Users/Weian/GitHub/hidos/venv/bin/python'  # this is development on weian's mac
+
+
+# Version
+VERSION = '0.6.1'
+
 
 
 USE_CACHE = False

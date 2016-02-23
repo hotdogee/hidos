@@ -83,11 +83,12 @@
       $('#result').hide();
       // get task-id from url
       var task_id = window.location.pathname.match(/\/([0-9a-zA-Z]+)\/?$/)[1];
-      var path_prefix = '/media/image_analysis/task/' + task_id + '/' + task_id;
+      var url = window.location.href
+      var path_prefix = '/media/cellcount/task/' + task_id + '/' + task_id;
       // check status
       var poll = function () {
         $.ajax({
-          url: '/api/v1/tasks/status?id=' + task_id,
+          url: 'api/v1/tasks/status?id=' + task_id,
           dataType: 'json',
           type: 'GET',
           traditional: true,
@@ -103,11 +104,11 @@
                 $('#count').text(result['count_min']);
               });
               // display image
-              // /media/image_analysis/task/7ef4f4782fc840738f67a43edafc9683/7ef4f4782fc840738f67a43edafc9683_in.jpg
-              $('#input-img').attr('src', '/media/image_analysis/task/' + task_id + '/' + task_id + '_in.jpg');
-              $('#input-download').attr('href', '/media/image_analysis/task/' + task_id + '/' + task_id + '_in.jpg');
-              $('#result-img').attr('src', '/media/image_analysis/task/' + task_id + '/' + task_id + '_out.jpg');
-              $('#result-download').attr('href', '/media/image_analysis/task/' + task_id + '/' + task_id + '_out.jpg');
+              // /media/cellcount/task/7ef4f4782fc840738f67a43edafc9683/7ef4f4782fc840738f67a43edafc9683_in.jpg
+              $('#input-img').attr('src', '/media/cellcount/task/' + task_id + '/' + task_id + '_in.jpg');
+              $('#input-download').attr('href', '/media/cellcount/task/' + task_id + '/' + task_id + '_in.jpg');
+              $('#result-img').attr('src', '/media/cellcount/task/' + task_id + '/' + task_id + '_out.jpg');
+              $('#result-download').attr('href', '/media/cellcount/task/' + task_id + '/' + task_id + '_out.jpg');
 
               // get image size
               $("<img/>") // Make in memory copy of image to avoid css issues

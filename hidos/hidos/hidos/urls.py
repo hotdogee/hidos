@@ -7,8 +7,6 @@ from django.conf.urls import include, url
 from app.forms import BootstrapAuthenticationForm
 from django.contrib.auth import views as auth_views
 from app import views as app_views
-from icsi import views as icsi_views
-from cellcount import views as cellcount_views
 # Uncomment the next lines to enable the admin:
 # from django.conf.urls import include
 from django.contrib import admin
@@ -16,10 +14,8 @@ from django.contrib import admin
 
 urlpatterns = [
     url(r'^$', app_views.home, name='home'),
-    url(r'^cellcount/$',cellcount_views.upload, name = 'cellcount'),
-    url(r'^icsi/$', icsi_views.upload, name='icsi'),
-    url(r'^api/v1/tasks$', app_views.tasks, name='tasks'),
-    url(r'^api/v1/tasks/status$', app_views.status, name='status'),
+    url(r'^cellcount/', include('cellcount.urls')),
+    url(r'^icsi/', include('icsi.urls')),
     url(r'^login/$',
         auth_views.login,
         {
@@ -39,8 +35,7 @@ urlpatterns = [
         },
         name='logout'),
     url(r'^accounts/', include('allauth.urls')),
-   # url(r'^(?P<task_id>[0-9a-zA-Z]+)$', app_views.retrieve, name='retrieve'),
-
+    
     # Uncomment the admin/doc line below to enable admin documentation:
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 

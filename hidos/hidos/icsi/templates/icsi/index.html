@@ -1,28 +1,31 @@
 {% extends "app/layout.html" %}
 {% load staticfiles %}
 {% block content %}
-  <h1>CellQ <small>v{{ version }}</small></h1>
+  <h1>ICSI <small>v{{ version }}</small></h1>
   <ul>
-    <li>Cell Ratio Analysis</li>
-    <li>Cell Count Estimation</li>
+    <li>Automatic ovum crop out</li>
+    <li>Grade estimation</li>
   </ul>
 
-  <form id="add-photos" action="{% url 'home' %}" class="dropzone">
+  <form id="add-photos" action="{% url 'icsi' %}" class="dropzone">
     {% csrf_token %}
   </form>
   <hr />
   <div>
     <h1>Results</h1>
     {% if user.is_authenticated %}
-
     <table id="result-list" class="display" cellspacing="0" width="100%">
       <thead>
         <tr>
           <th>Viewer</th>
           <th>File Name</th>
-          <th>Area</th>
-          <th>Count</th>
-          <th>Created</th>
+          <th>Ovum ID</th>
+          <th>A</th> 
+          <th>B</th>
+          <th>C</th>
+          <th>D</th>
+          <th>E</th>
+          <th>Created Date</th>
         </tr>
       </thead>
       <tbody>
@@ -117,7 +120,7 @@
         var date_now = (new Date()).toLocaleDateString();
         var result_table;
         result_table = $('#result-list').DataTable({
-          ajax: '/api/v1/tasks',
+          ajax: '/api/v1/icsi/tasks',
           deferRender: true,
           scroller: true,
           scrollY: 500,
@@ -192,7 +195,7 @@
             var finished = ['success', 'failed'];
             var poll = function () {
               $.ajax({
-                url: '/api/v1/tasks/status',
+                url: '/api/v1/isci/tasks/status',
                 dataType: 'json',
                 type: 'GET',
                 data: { 'id': unfinished_task_ids },

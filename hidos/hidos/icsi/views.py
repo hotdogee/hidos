@@ -3,33 +3,71 @@ from django.shortcuts import redirect
 from django.http import HttpRequest
 from django.http import JsonResponse
 from datetime import datetime
-from app.models import ImageAnalysis
+from .models import ICSIImageAnalysis
 from django.http.response import HttpResponse
 from django.conf import settings
 from uuid import uuid4
-from app.tasks import run_image_analysis_task
+from .tasks import run_image_analysis_task
 import stat as Perm
 import json
 import hashlib
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 from django.core.urlresolvers import reverse
+from os import chmod, mkdir, path
 
 
-from app.views import version 
 
-version = version
+from django.conf import settings 
+
+version = settings.VERSION
 
 # Create your views here.
+
+def tasks(request):
+    """returns task list for logged in user"""
+    if not request.user.is_authenticated():
+        return JsonResponse({})
+    else:
+        current_tz = timezone.get_current_timezone()
+        return JsonResponse({
+            'data': [{
+                'id': t.task_id,
+                'name': t.user_filename,
+                'url': reverse('retrieve', kwargs={'task_id': t.task_id}),
+                'result_img': settings.MEDIA_URL + 'cellcount/task/' + t.task_id + '/' + t.task_id + '_out.jpg',
+                # 'input_img': settings.MEDIA_URL + 'cellcount/task/' + t.task_id + '/' + t.task_id + '_in.jpg',
+                'result': json.loads(t.result or '{}'),
+                'result_status': t.result_status,
+                'created': current_tz.normalize(t.enqueue_date.astimezone(current_tz)).isoformat(),
+                } for t in ICSIImageAnalysis.objects.filter(user=request.user)]
+            })
+
+def status(request):
+    task_ids = []
+    if request.method == 'GET':
+        task_ids = request.GET.getlist('id')
+    elif request.method == 'POST':
+        task_ids = request.POST.getlist('id')
+    else:
+        return JsonResponse({})
+    if not task_ids:
+        return JsonResponse({})
+    return JsonResponse({
+        'data': [{
+            'id': t.task_id,
+            'result_status': t.result_status,
+            } for t in ICSIImageAnalysis.objects.filter(task_id__in=task_ids)]
+        })
 
 
 def retrieve(request, task_id='1'):
     #return HttpResponse("retrieve = %s." % (task_id))
     try:
-        record = ImageAnalysis.objects.get(task_id=task_id)
+        record = ICSIImageAnalysis.objects.get(task_id=task_id)
         return render(
             request,
-            'cellcount/result.html',
+            'icsi/result.html',
             {
                 'title': 'CellQ - {0}'.format(record.user_filename),
                 'year': datetime.now().year,
@@ -57,7 +95,7 @@ def retrieve(request, task_id='1'):
             {
                 'title': 'CellQ Error',
                 'year': datetime.now().year,
-                'version': version,
+                'version': vpathersion,
                 'message': message,
             }
         )
@@ -69,7 +107,7 @@ def upload(request):
     if request.method == 'GET':
         return render(
             request,
-            'cellcount/index.html',
+            'icsi/index.html',
             {
                 'title':'Home',
                 'year':datetime.now().year,
@@ -90,16 +128,16 @@ def upload(request):
             m.update(chunk)
         task_id = m.hexdigest()
         # check database for duplicate
-        if not ImageAnalysis.objects.filter(task_id=task_id).exists():
+        if not ICSIImageAnalysis.objects.filter(task_id=task_id).exists():
             # setup file paths
             #task_id = uuid4().hex # TODO: Create from hash of input to check for duplicate inputs
             path_prefix = path.join(settings.MEDIA_ROOT, 'icsi', 'task', task_id, task_id)
             input_image_path = path_prefix + '_in.jpg'
             output_image_path = path_prefix
-            output_json_path = path_prefix + '_out.json'
+            # output_json_path = path_prefix + '_out.json'
 
             if not path.exists(path.dirname(input_image_path)):
-                makedirs(path.dirname(input_image_path))
+                mkdir(path.dirname(input_image_path))
             chmod(path.dirname(input_image_path), Perm.S_IRWXU | Perm.S_IRWXG | Perm.S_IRWXO) # ensure the standalone dequeuing process can open files in the directory
         
             # write query to file
@@ -116,7 +154,7 @@ def upload(request):
             args_list = [[settings.PYTHON_SCRIPT, script_path,'--input', input_image_path,'--output',output_image_path]]
         
             # insert entry into database
-            record = ImageAnalysis()
+            record = ICSIImageAnalysis()
             record.task_id = task_id
             record.version = version
             record.user_filename = uploaded_file.name

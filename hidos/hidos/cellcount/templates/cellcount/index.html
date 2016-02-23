@@ -7,7 +7,7 @@
     <li>Cell Count Estimation</li>
   </ul>
 
-  <form id="add-photos" action="{% url 'home' %}" class="dropzone">
+  <form id="add-photos" action="{% url 'cellcount' %}" class="dropzone">
     {% csrf_token %}
   </form>
   <hr />
@@ -81,6 +81,8 @@
   -->
   <script type="text/javascript" src="//cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
   <script type="text/javascript" src="//cdn.datatables.net/scroller/1.4.0/js/dataTables.scroller.min.js"></script>
+  
+  <!-- Circle bar -->
   <script type="text/template" id="loading-template">
     <div class="sk-fading-circle">
       <div class="sk-circle1 sk-circle"></div>
@@ -97,6 +99,8 @@
       <div class="sk-circle12 sk-circle"></div>
     </div>
   </script>
+
+  <!-- Image preview -->
   <script type="text/template" id="viewer-btn-template">
     <a class="btn btn-default btn-xs viewer-btn" data-toggle="tooltip" data-placement="right" 
        data-container="body" data-html="true" data-trigger="hover"
@@ -105,9 +109,14 @@
       <span class="glyphicon glyphicon-new-window"></span> Image
     </a>
   </script>
+
+  <!-- Cell image icon -->
   <script type="text/template" id="cellq-name-template">
     <img class="cellq-icon" src="{% static 'app/images/cellq_icon.png' %}"> <%= name %>
   </script>
+
+
+  <!-- fetch the result in database to datatable -->
   <script>
     $(document).ready(function () {
       if ($('#result-list').length) { // check if user is logged in
@@ -117,7 +126,7 @@
         var date_now = (new Date()).toLocaleDateString();
         var result_table;
         result_table = $('#result-list').DataTable({
-          ajax: '/api/v1/tasks',
+          ajax: 'api/v1/tasks',
           deferRender: true,
           scroller: true,
           scrollY: 500,
@@ -192,7 +201,7 @@
             var finished = ['success', 'failed'];
             var poll = function () {
               $.ajax({
-                url: '/api/v1/tasks/status',
+                url: 'api/v1/status',
                 dataType: 'json',
                 type: 'GET',
                 data: { 'id': unfinished_task_ids },
