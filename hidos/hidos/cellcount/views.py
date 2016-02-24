@@ -27,6 +27,7 @@ def tasks(request):
         return JsonResponse({})
     else:
         current_tz = timezone.get_current_timezone()
+
         return JsonResponse({
             'data': [{
                 'id': t.task_id,
@@ -39,6 +40,8 @@ def tasks(request):
                 'created': current_tz.normalize(t.enqueue_date.astimezone(current_tz)).isoformat(),
                 } for t in CellcountImageAnalysis.objects.filter(user=request.user)]
             })
+
+        
 
 def status(request):
     task_ids = []
@@ -113,7 +116,7 @@ def upload(request):
             # set R_Script="C:\Program Files\R\R-3.2.2\bin\RScript.exe"
             # %R_Script% 1_6_obj_area_cal_cmd.R IMG_0159.JPG IMG_0159_out.JPG IMG_0159_out.csv
             script_path = path.join(settings.PROJECT_ROOT, 'cellcount', 'bin', '1_6_obj_area_cal_cmd.R')
-            args_list = [[settings.R_SCRIPT, script_path, input_image_path,output_image_path, output_json_path]]
+            args_list = [[settings.R_SCRIPT, script_path, input_image_path, output_image_path, output_json_path]]
         
             # insert entry into database
             record = CellcountImageAnalysis()
@@ -134,6 +137,7 @@ def upload(request):
 
 def retrieve(request, task_id='1'):
     #return HttpResponse("retrieve = %s." % (task_id))
+    print('over here')
     try:
         record = CellcountImageAnalysis.objects.get(task_id=task_id)
         return render(
