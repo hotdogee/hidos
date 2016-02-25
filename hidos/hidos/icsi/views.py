@@ -28,12 +28,13 @@ def tasks(request):
         current_tz = timezone.get_current_timezone()
         
         ICSIImageAnalysis_get_by_user = ICSIImageAnalysis.objects.filter(user=request.user)
-        
         ovum_objects = []
         for analysis in ICSIImageAnalysis_get_by_user:
             for ovum in analysis.ovums.all():
                 ovum_objects.append(ovum)
+        print(len(ovum_objects))
 
+    
         tmp = JsonResponse({
             'data': [{
                 'id': t.ovum_id,
@@ -44,7 +45,7 @@ def tasks(request):
                 'input_img': settings.MEDIA_URL + 'icsi/task/' + t.parent_imageanalysis.task_id + '/' + t.parent_imageanalysis.task_id + '_in.jpg',
                 'grade': t.grade,
                 'result_status': t.status,
-                #'created': current_tz.normalize(t.enqueue_date.astimezone(current_tz)).isoformat(),
+                'created': current_tz.normalize(t.graded_time.astimezone(current_tz)).isoformat(),
                 } for t in ovum_objects]
             })
         print(request.user)

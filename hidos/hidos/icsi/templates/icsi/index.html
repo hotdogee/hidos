@@ -106,12 +106,24 @@
   <script type="text/template" id="cellq-name-template">
 <a href="<%= input_img %>"><img class="cellq-icon" src="{% static 'app/images/cellq_icon.png' %}"><%= name %></a>
   </script>
+
+    <script type="text/template" id="checked-template">
+    <div class="glyphicon glyphicon-check"></div>
+    </script>
+
+
+    <script type="text/template" id="unchecked-template">
+    <div class="glyphicon glyphicon-unchecked"></div>
+    </script>
+
   <script>
     $(document).ready(function () {
       if ($('#result-list').length) { // check if user is logged in
         var running_template = $('#loading-template').html() ;
         var view_btn_compiled = _.template($('#viewer-img-template').html());
         var cellq_name_compiled = _.template($('#cellq-name-template').html());
+        var checked_compiled = _.template($('#checked-template').html());
+        var unchecked_compiled = _.template($('#unchecked-template').html());
         var date_now = (new Date()).toLocaleDateString();
         var result_table;
         result_table = $('#result-list').DataTable({
@@ -145,23 +157,67 @@
               }
             },
             {
-              name: 'OvumID', type: 'num', data: 'id', defaultContent: running_template, width: '70px', 
+              name: 'OvumID', type: 'num', data: 'id', defaultContent: running_template, width: '70px',
             },
 
             {
-              name: 'A', type: 'text', data: 'grade', defaultContent: running_template, width: '20px', 
+              name: 'A', type: 'text', data: 'grade', defaultContent: running_template, width: '20px',
+                    render: function(data, type, row, meta){
+                    if(data === 'A'){
+                        return checked_compiled()
+                    
+                    }else{
+                        return unchecked_compiled()
+                    }
+                }
             },
             {
-              name: 'B', type: 'text', data: 'grade', defaultContent: running_template, width: '20px'
+              name: 'B', type: 'text', data: 'grade', defaultContent: running_template, width: '20px',
+                    render: function(data, type, row, meta){
+                    if(data === 'B'){
+                        return checked_compiled()
+                    
+                    }else{
+                        return unchecked_compiled()
+                    }
+                }
+
             },
             {
-              name: 'C', type: 'text', data: 'grade', defaultContent: running_template, width: '20px'
+              name: 'C', type: 'text', data: 'grade', defaultContent: running_template, width: '20px',
+                    render: function(data, type, row, meta){
+                    if(data === 'C'){
+                        return checked_compiled()
+                    
+                    }else{
+                        return unchecked_compiled()
+                    }
+                }
+
             },
             {
-              name: 'D', type: 'text', data: 'grade', defaultContent: running_template, width: '20px'
+              name: 'D', type: 'text', data: 'grade', defaultContent: running_template, width: '20px',
+                    render: function(data, type, row, meta){
+                    if(data === 'D'){
+                        return checked_compiled()
+                    
+                    }else{
+                        return unchecked_compiled()
+                    }
+                }
+
             },
             {
-              name: 'E', type: 'text', data: 'grade', defaultContent: running_template, width: '20px'
+              name: 'E', type: 'text', data: 'grade', defaultContent: running_template, width: '20px',
+                    render: function(data, type, row, meta){
+                    if(data === 'F'){
+                        return checked_compiled()
+                    
+                    }else{
+                        return unchecked_compiled()
+                    }
+                }
+
             },
             {
               name: 'created', type: 'date', data: 'created', width: '100px',
