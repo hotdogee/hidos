@@ -37,11 +37,11 @@ def tasks(request):
     
         tmp = JsonResponse({
             'data': [{
-                'id': t.ovum_id,
+                'count': t.ovum_number,
                 'name': t.parent_imageanalysis.user_filename,
                 #'url': reverse('icsi_retrieve', kwargs={'task_id': t.task_id}),
                 'url': 'test',
-                'result_img': settings.MEDIA_URL + 'icsi/task/' + t.parent_imageanalysis.task_id + '/' + t.parent_imageanalysis.task_id + '_Crop' + t.ovum_id + '.jpg',
+                'result_img': settings.MEDIA_URL + 'icsi/task/' + t.parent_imageanalysis.task_id + '/' + t.parent_imageanalysis.task_id + '_Crop' + str(t.ovum_number) + '.jpg',
                 'input_img': settings.MEDIA_URL + 'icsi/task/' + t.parent_imageanalysis.task_id + '/' + t.parent_imageanalysis.task_id + '_in.jpg',
                 'grade': t.grade,
                 'result_status': t.status,

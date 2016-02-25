@@ -67,7 +67,10 @@ def run_image_analysis_task(task_id, args_list, path_prefix):
         for crop in crop_img_path:
             logger.info("cropping")
             Ovum = OvumGrade()
-            Ovum.ovum_id = ovum_count; ovum_count += 1 
+            Ovum.ovum_id = task_id + '_' + str(ovum_count)
+            Ovum.ovum_number = ovum_count
+            ovum_count += 1
+
             Ovum.parent_imageanalysis = ICSIImageAnalysis(task_id = task_id)
             Ovum.status = 'success'
             Ovum.grade = 'A' # Modify here when ML result is ready. 

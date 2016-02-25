@@ -14,6 +14,23 @@
   <div>
     <h1>Results</h1>
     {% if user.is_authenticated %}
+    <table id="task-list" class="display" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th>Viewer</th>
+                <th>File Name</th>
+                <th>Status</th>
+            </tr>
+        </thread>
+        <tbody>
+        </tbody>
+    </table>
+
+
+
+
+
+
     <table id="result-list" class="display" cellspacing="0" width="100%">
       <thead>
         <tr>
@@ -157,7 +174,7 @@
               }
             },
             {
-              name: 'OvumID', type: 'num', data: 'id', defaultContent: running_template, width: '70px',
+              name: 'OvumID', type: 'num', data: 'count', width: '70px',
             },
 
             {

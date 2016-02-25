@@ -21,12 +21,14 @@ class ICSIImageAnalysis(ImageAnalysis):
 
 class OvumGrade(models.Model):
     ovum_id = models.CharField(max_length=32, primary_key=True)
+    ovum_number = models.IntegerField(null=True)
     parent_imageanalysis = models.ForeignKey('ICSIImageAnalysis',related_name = 'ovums', null = True)
     status = models.CharField(max_length=32, default='undefined')
     grade = models.CharField(max_length=32, default='A')
     graded_time = models.DateTimeField(null=True)
-    user = models.ForeignKey(User, null=True)
+    
 
 
 
-# TODO: Permissions class for sharing
+# TODO: Permissions class for sharing:q
+
