@@ -101,21 +101,15 @@
     </div>
   </script>
   <script type="text/template" id="viewer-img-template">
-    <img src="<%= result_img>" class="img-rounded" data-placement="right"
-       data-container="body" data-html="true" data-trigger="hover"
-       title="<div class='preview-img'>Result Image Preview <img src='<%= result_img %>' width='100%' height='100%'></div>"
-       target="_blank" role="button"
-       <span class="glyphicon glyphicon-new-window"></span> 
-    Image>
-    
+    <img src="<%= result_img %>" class="img-rounded"  width="50px" height="50px">   
   </script>
   <script type="text/template" id="cellq-name-template">
-    <img class="cellq-icon" src="{% static 'app/images/cellq_icon.png' %}"> <%= name %>
+<a href="<%= input_img %>"><img class="cellq-icon" src="{% static 'app/images/cellq_icon.png' %}"><%= name %></a>
   </script>
   <script>
     $(document).ready(function () {
       if ($('#result-list').length) { // check if user is logged in
-        var running_template = $('#loading-template').html() + '</i>';
+        var running_template = $('#loading-template').html() ;
         var view_btn_compiled = _.template($('#viewer-img-template').html());
         var cellq_name_compiled = _.template($('#cellq-name-template').html());
         var date_now = (new Date()).toLocaleDateString();
@@ -132,7 +126,6 @@
               render: function (data, type, row, meta) {
                 if (type === 'display')
                   return view_btn_compiled({
-                    task_url: data,
                     result_img: row.result_img
                   });
                 else
@@ -143,7 +136,10 @@
               name: 'file-name', data: 'name',
               render: function (data, type, row, meta) {
                 if (type === 'display')
-                  return cellq_name_compiled({ name: data });
+                  return cellq_name_compiled({ 
+                    name: data, 
+                    input_img: row.input_img
+                  });
                 else
                   return data;
               }
@@ -153,19 +149,19 @@
             },
 
             {
-              name: 'A', type: 'num', data: '', defaultContent: running_template, width: '20px', 
+              name: 'A', type: 'text', data: 'grade', defaultContent: running_template, width: '20px', 
             },
             {
-              name: 'B', type: 'num', data: '', defaultContent: running_template, width: '20px'
+              name: 'B', type: 'text', data: 'grade', defaultContent: running_template, width: '20px'
             },
             {
-              name: 'C', type: 'num', data: '', defaultContent: running_template, width: '20px'
+              name: 'C', type: 'text', data: 'grade', defaultContent: running_template, width: '20px'
             },
             {
-              name: 'D', type: 'num', data: '', defaultContent: running_template, width: '20px'
+              name: 'D', type: 'text', data: 'grade', defaultContent: running_template, width: '20px'
             },
             {
-              name: 'E', type: 'num', data: '', defaultContent: running_template, width: '20px'
+              name: 'E', type: 'text', data: 'grade', defaultContent: running_template, width: '20px'
             },
             {
               name: 'created', type: 'date', data: 'created', width: '100px',
@@ -188,6 +184,8 @@
             $('.viewer-btn', row).tooltip();
           }
         });
+
+        // get status 
         var unfinished = ['queued', 'running'];
         var unfinished_task_ids;
         var polling = false;
@@ -196,7 +194,7 @@
           // get a list of queued and running tasks
           //console.log(e, settings, json, xhr);
           if (!json) return; // consecutive ajax.reload() may result in 'abort' status
-          unfinished_task_ids = _.pluck(_.filter(json.data, (t) => _.contains(unfinished, t.result_status)), 'id');
+          unfinished_task_ids = _.pluck(_.filter(json.data, (t) => _.contains(unfinished, t.result)), 'id');
           //console.log(unfinished_task_ids);
           if (unfinished_task_ids.length > 0 && polling == false) {
             polling = true;
@@ -210,7 +208,7 @@
                 traditional: true,
                 success: function (data, status) {
                   //console.log(_.some(finished, (c) => _.contains(_.pluck(data.data, 'result_status'), c)));
-                  if (_.some(finished, (c) => _.contains(_.pluck(data.data, 'result_status'), c))) {
+                  if (_.some(finished, (c) => _.contains(_.pluck(data.data, 'result'), c))) {
                     polling = false;
                     result_table.ajax.reload();
                   } else

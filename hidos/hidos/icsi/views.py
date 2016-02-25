@@ -34,9 +34,6 @@ def tasks(request):
             for ovum in analysis.ovums.all():
                 ovum_objects.append(ovum)
 
-
-
-
         tmp = JsonResponse({
             'data': [{
                 'id': t.ovum_id,
@@ -44,8 +41,7 @@ def tasks(request):
                 #'url': reverse('icsi_retrieve', kwargs={'task_id': t.task_id}),
                 'url': 'test',
                 'result_img': settings.MEDIA_URL + 'icsi/task/' + t.parent_imageanalysis.task_id + '/' + t.parent_imageanalysis.task_id + '_Crop' + t.ovum_id + '.jpg',
-                
-                # 'input_img': settings.MEDIA_URL + 'cellcount/task/' + t.task_id + '/' + t.task_id + '_in.jpg',
+                'input_img': settings.MEDIA_URL + 'icsi/task/' + t.parent_imageanalysis.task_id + '/' + t.parent_imageanalysis.task_id + '_in.jpg',
                 'grade': t.grade,
                 'result_status': t.status,
                 #'created': current_tz.normalize(t.enqueue_date.astimezone(current_tz)).isoformat(),
@@ -56,21 +52,25 @@ def tasks(request):
 
         return(tmp)
 
+
 def status(request):
     task_ids = []
+
+
+  
     if request.method == 'GET':
-        task_ids = request.GET.getlist('id')
+        ovum_ids = request.GET.getlist('id')
     elif request.method == 'POST':
-        task_ids = request.POST.getlist('id')
+        ovum_ids = request.POST.getlist('id')
     else:
         return JsonResponse({})
     if not task_ids:
         return JsonResponse({})
     return JsonResponse({
         'data': [{
-            'id': t.task_id,
-            'result_status': t.result_status,
-            } for t in ICSIImageAnalysis.objects.filter(task_id__in=task_ids)]
+            'id': t.id,
+            'result_status': t.status,
+            } for t in OvumGrade.objects.filter(ovum_id__in=ovum_ids)]
         })
 
 
