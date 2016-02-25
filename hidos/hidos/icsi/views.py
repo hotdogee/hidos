@@ -3,7 +3,7 @@ from django.shortcuts import redirect
 from django.http import HttpRequest
 from django.http import JsonResponse
 from datetime import datetime
-from .models import ICSIImageAnalysis
+from .models import ICSIImageAnalysis, OvumGrade
 from django.http.response import HttpResponse
 from django.conf import settings
 from uuid import uuid4
@@ -16,11 +16,7 @@ from django.utils import timezone
 from django.core.urlresolvers import reverse
 from os import chmod, mkdir, path
 
-
-
-from django.conf import settings 
-
-version = settings.VERSION
+version = '0.1.0'
 
 # Create your views here.
 
@@ -30,18 +26,35 @@ def tasks(request):
         return JsonResponse({})
     else:
         current_tz = timezone.get_current_timezone()
-        return JsonResponse({
+        
+        ICSIImageAnalysis_get_by_user = ICSIImageAnalysis.objects.filter(user=request.user)
+        
+        ovum_objects = []
+        for analysis in ICSIImageAnalysis_get_by_user:
+            for ovum in analysis.ovums.all():
+                ovum_objects.append(ovum)
+
+
+
+
+        tmp = JsonResponse({
             'data': [{
-                'id': t.task_id,
-                'name': t.user_filename,
-                'url': reverse('retrieve', kwargs={'task_id': t.task_id}),
-                'result_img': settings.MEDIA_URL + 'cellcount/task/' + t.task_id + '/' + t.task_id + '_out.jpg',
+                'id': t.ovum_id,
+                'name': t.parent_imageanalysis.user_filename,
+                #'url': reverse('icsi_retrieve', kwargs={'task_id': t.task_id}),
+                'url': 'test',
+                'result_img': settings.MEDIA_URL + 'icsi/task/' + t.parent_imageanalysis.task_id + '/' + t.parent_imageanalysis.task_id + '_Crop' + t.ovum_id + '.jpg',
+                
                 # 'input_img': settings.MEDIA_URL + 'cellcount/task/' + t.task_id + '/' + t.task_id + '_in.jpg',
-                'result': json.loads(t.result or '{}'),
-                'result_status': t.result_status,
-                'created': current_tz.normalize(t.enqueue_date.astimezone(current_tz)).isoformat(),
-                } for t in ICSIImageAnalysis.objects.filter(user=request.user)]
+                'grade': t.grade,
+                'result_status': t.status,
+                #'created': current_tz.normalize(t.enqueue_date.astimezone(current_tz)).isoformat(),
+                } for t in ovum_objects]
             })
+        print(request.user)
+        print(tmp)
+
+        return(tmp)
 
 def status(request):
     task_ids = []
@@ -95,7 +108,7 @@ def retrieve(request, task_id='1'):
             {
                 'title': 'CellQ Error',
                 'year': datetime.now().year,
-                'version': vpathersion,
+                'version': version,
                 'message': message,
             }
         )
@@ -164,8 +177,7 @@ def upload(request):
             record.save()
 
             run_image_analysis_task.delay(task_id, args_list, path_prefix)
-
         # debug
         #run_image_analysis_task.delay(task_id, args_list, path_prefix).get()
-        return HttpResponse(task_id)
+        return HttpResponse('icsi')
 

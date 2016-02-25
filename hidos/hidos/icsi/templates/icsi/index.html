@@ -100,13 +100,14 @@
       <div class="sk-circle12 sk-circle"></div>
     </div>
   </script>
-  <script type="text/template" id="viewer-btn-template">
-    <a class="btn btn-default btn-xs viewer-btn" data-toggle="tooltip" data-placement="right" 
+  <script type="text/template" id="viewer-img-template">
+    <img src="<%= result_img>" class="img-rounded" data-placement="right"
        data-container="body" data-html="true" data-trigger="hover"
        title="<div class='preview-img'>Result Image Preview <img src='<%= result_img %>' width='100%' height='100%'></div>"
-       target="_blank" href="<%= task_url %>" role="button">
-      <span class="glyphicon glyphicon-new-window"></span> Image
-    </a>
+       target="_blank" role="button"
+       <span class="glyphicon glyphicon-new-window"></span> 
+    Image>
+    
   </script>
   <script type="text/template" id="cellq-name-template">
     <img class="cellq-icon" src="{% static 'app/images/cellq_icon.png' %}"> <%= name %>
@@ -114,20 +115,20 @@
   <script>
     $(document).ready(function () {
       if ($('#result-list').length) { // check if user is logged in
-        var running_template = '<i>Running ' + $('#loading-template').html() + '</i>';
-        var view_btn_compiled = _.template($('#viewer-btn-template').html());
+        var running_template = $('#loading-template').html() + '</i>';
+        var view_btn_compiled = _.template($('#viewer-img-template').html());
         var cellq_name_compiled = _.template($('#cellq-name-template').html());
         var date_now = (new Date()).toLocaleDateString();
         var result_table;
         result_table = $('#result-list').DataTable({
-          ajax: '/api/v1/tasks',
+          ajax: 'api/v1/tasks',
           deferRender: true,
           scroller: true,
           scrollY: 500,
           order: [[4, 'desc']],
           columns: [
             {
-              name: 'viewer', data: 'url', width: '50px', orderable: false,
+              name: 'viewer', data: 'result_img', width: '50px', orderable: false,
               render: function (data, type, row, meta) {
                 if (type === 'display')
                   return view_btn_compiled({
@@ -148,16 +149,23 @@
               }
             },
             {
-              name: 'area', type: 'num', data: 'result.ratio', defaultContent: running_template, width: '100px',
-              render: function (data, type, row, meta) {
-                if (!data)
-                  return running_template;
-                else
-                  return type === 'display' ? Math.round(data * 10000) / 100 + '%' : data;
-              }
+              name: 'OvumID', type: 'num', data: 'id', defaultContent: running_template, width: '70px', 
+            },
+
+            {
+              name: 'A', type: 'num', data: '', defaultContent: running_template, width: '20px', 
             },
             {
-              name: 'count', type: 'num', data: 'result.count_min', defaultContent: running_template, width: '100px'
+              name: 'B', type: 'num', data: '', defaultContent: running_template, width: '20px'
+            },
+            {
+              name: 'C', type: 'num', data: '', defaultContent: running_template, width: '20px'
+            },
+            {
+              name: 'D', type: 'num', data: '', defaultContent: running_template, width: '20px'
+            },
+            {
+              name: 'E', type: 'num', data: '', defaultContent: running_template, width: '20px'
             },
             {
               name: 'created', type: 'date', data: 'created', width: '100px',

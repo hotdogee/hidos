@@ -1,10 +1,20 @@
+"""
+if you edit the tasks.py (in any app),
+you must restart the celery server to refresh the code.
+(gan, takes me so much to figure it out..)
+
+"""
+
+
+
+
 from __future__ import absolute_import
 from celery import shared_task
 from celery.task.schedules import crontab
 from celery.decorators import periodic_task
 from subprocess import Popen, PIPE
 from datetime import datetime, timedelta
-from .models import ICSIImageAnalysis
+from .models import ICSIImageAnalysis, OvumGrade
 from os import path, stat
 from pytz import utc
 from itertools import groupby
@@ -18,6 +28,7 @@ import glob
 
 logger = get_task_logger(__name__)
 
+
 if settings.USE_CACHE:
     LOCK_EXPIRE = 30
     LOCK_ID = 'task_list_cache_lock'
@@ -28,8 +39,7 @@ if settings.USE_CACHE:
 @shared_task() # ignore_result=True
 def run_image_analysis_task(task_id, args_list, path_prefix):
     import django
-    django.setup()
-    
+    django.setup() 
     logger.info("icsi_analysis task_id: %s" % (task_id,))
 
     # update dequeue time
@@ -45,16 +55,24 @@ def run_image_analysis_task(task_id, args_list, path_prefix):
     # update result state
     result_status = ''
 
-    crop_img_path = glob.glob(path_prefix+'*_Crop*')
-
-    
+    crop_img_path = glob.glob(path_prefix+'_Crop*')
     record.result_status = 'failed'
     if len(crop_img_path) == 0:
        result_status = 'NO_OUT_JPG' 
+       logger.info("There is no output.")
     else:
         record.number_of_ovum = len(crop_img_path)
         record.result_status = 'success'
-        
+        ovum_count = 1
+        for crop in crop_img_path:
+            logger.info("cropping")
+            Ovum = OvumGrade()
+            Ovum.ovum_id = ovum_count; ovum_count += 1 
+            Ovum.parent_imageanalysis = ICSIImageAnalysis(task_id = task_id)
+            Ovum.status = 'success'
+            Ovum.grade = 'A' # Modify here when ML result is ready. 
+            Ovum.graded_time = datetime.utcnow().replace(tzinfo=utc)
+            Ovum.save()
     #    with open(output_json_path, 'r') as f:
     #        record.result = json.dumps(json.load(f)) 
     record.result_date = datetime.utcnow().replace(tzinfo=utc)
