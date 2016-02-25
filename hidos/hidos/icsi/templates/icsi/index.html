@@ -12,8 +12,10 @@
   </form>
   <hr />
   <div>
-    <h1>Results</h1>
+    <h1>Ovum Grade</h1>
     {% if user.is_authenticated %}
+    
+    <!-- 
     <table id="task-list" class="display" cellspacing="0" width="100%">
         <thead>
             <tr>
@@ -28,14 +30,14 @@
 
 
 
+    </hr>
 
-
-
+    -->
     <table id="result-list" class="display" cellspacing="0" width="100%">
       <thead>
         <tr>
           <th>Viewer</th>
-          <th>File Name</th>
+          <th>Original File Name</th>
           <th>Ovum ID</th>
           <th>A</th> 
           <th>B</th>
@@ -121,7 +123,14 @@
     <img src="<%= result_img %>" class="img-rounded"  width="50px" height="50px">   
   </script>
   <script type="text/template" id="cellq-name-template">
-<a href="<%= input_img %>"><img class="cellq-icon" src="{% static 'app/images/cellq_icon.png' %}"><%= name %></a>
+         <a class="btn btn-default btn-xs viewer-btn" data-toggle="popover" data-placement="top" 
+       data-container="body" data-html="true" data-trigger="hover"
+       title="<div class='preview-img'>Original Image Preview <img src='<%= input_img %>' width='100%' height='100%'></div>"
+       target="_blank" href="<%= input_img %>" role="button">
+      <img class="cellq-icon" src="{% static 'app/images/cellq_icon.png' %}"> <%= name %>
+
+    </a>
+
   </script>
 
     <script type="text/template" id="checked-template">
