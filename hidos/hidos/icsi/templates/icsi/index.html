@@ -15,13 +15,14 @@
     <h1>Ovum Grade</h1>
     {% if user.is_authenticated %}
     
-    <!-- 
+    
     <table id="task-list" class="display" cellspacing="0" width="100%">
         <thead>
             <tr>
                 <th>Viewer</th>
                 <th>File Name</th>
                 <th>Status</th>
+				<th>Created</th>
             </tr>
         </thread>
         <tbody>
@@ -30,9 +31,6 @@
 
 
 
-    </hr>
-
-    -->
     <table id="result-list" class="display" cellspacing="0" width="100%">
       <thead>
         <tr>
@@ -101,8 +99,8 @@
   <!--
   <script type="text/javascript" src="//cdn.datatables.net/1.10.10/js/dataTables.bootstrap.js"></script>
   -->
-  <script type="text/javascript" src="//cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
-  <script type="text/javascript" src="//cdn.datatables.net/scroller/1.4.0/js/dataTables.scroller.min.js"></script>
+  <script type="text/javascript" src="//cdn.datatables.net/1.10.10/js/jquery.dataTables.js"></script>
+  <script type="text/javascript" src="//cdn.datatables.net/scroller/1.4.0/js/dataTables.scroller.js"></script>
   <script type="text/template" id="loading-template">
     <div class="sk-fading-circle">
       <div class="sk-circle1 sk-circle"></div>
@@ -120,30 +118,25 @@
     </div>
   </script>
   <script type="text/template" id="viewer-img-template">
-    <img src="<%= result_img %>" class="img-rounded"  width="50px" height="50px">   
+    <img src="<%= result_img %>" class="img-rounded"  width="70px" height="70px">   
   </script>
   <script type="text/template" id="cellq-name-template">
-         <a class="btn btn-default btn-xs viewer-btn" data-toggle="popover" data-placement="top" 
+    <a class="btn btn-default btn-xs viewer-btn" data-toggle="popover" data-placement="top" 
        data-container="body" data-html="true" data-trigger="hover"
        title="<div class='preview-img'>Original Image Preview <img src='<%= input_img %>' width='100%' height='100%'></div>"
        target="_blank" href="<%= input_img %>" role="button">
-      <img class="cellq-icon" src="{% static 'app/images/cellq_icon.png' %}"> <%= name %>
-
-    </a>
-
+    <img class="cellq-icon" src="{% static 'app/images/cellq_icon.png' %}"> <%= name %></a>
   </script>
 
     <script type="text/template" id="checked-template">
     <div class="glyphicon glyphicon-check"></div>
     </script>
-
-
     <script type="text/template" id="unchecked-template">
     <div class="glyphicon glyphicon-unchecked"></div>
     </script>
 
   <script>
-    $(document).ready(function () {
+$(document).ready(function () {
       if ($('#result-list').length) { // check if user is logged in
         var running_template = $('#loading-template').html() ;
         var view_btn_compiled = _.template($('#viewer-img-template').html());
@@ -153,7 +146,7 @@
         var date_now = (new Date()).toLocaleDateString();
         var result_table;
         result_table = $('#result-list').DataTable({
-          ajax: 'api/v1/tasks',
+          ajax: 'api/v1/tasks/ovum',
           deferRender: true,
           scroller: true,
           scrollY: 500,
@@ -185,15 +178,13 @@
             {
               name: 'OvumID', type: 'num', data: 'count', width: '70px',
             },
-
             {
               name: 'A', type: 'text', data: 'grade', defaultContent: running_template, width: '20px',
                     render: function(data, type, row, meta){
                     if(data === 'A'){
-                        return checked_compiled()
-                    
+                        return checked_compiled();
                     }else{
-                        return unchecked_compiled()
+                        return unchecked_compiled();
                     }
                 }
             },
@@ -201,22 +192,21 @@
               name: 'B', type: 'text', data: 'grade', defaultContent: running_template, width: '20px',
                     render: function(data, type, row, meta){
                     if(data === 'B'){
-                        return checked_compiled()
+                        return checked_compiled();
                     
                     }else{
-                        return unchecked_compiled()
+                        return unchecked_compiled();
                     }
                 }
-
             },
             {
               name: 'C', type: 'text', data: 'grade', defaultContent: running_template, width: '20px',
                     render: function(data, type, row, meta){
                     if(data === 'C'){
-                        return checked_compiled()
+                        return checked_compiled();
                     
                     }else{
-                        return unchecked_compiled()
+                        return unchecked_compiled();
                     }
                 }
 
@@ -225,10 +215,10 @@
               name: 'D', type: 'text', data: 'grade', defaultContent: running_template, width: '20px',
                     render: function(data, type, row, meta){
                     if(data === 'D'){
-                        return checked_compiled()
+                        return checked_compiled();
                     
                     }else{
-                        return unchecked_compiled()
+                        return unchecked_compiled();
                     }
                 }
 
@@ -237,13 +227,12 @@
               name: 'E', type: 'text', data: 'grade', defaultContent: running_template, width: '20px',
                     render: function(data, type, row, meta){
                     if(data === 'F'){
-                        return checked_compiled()
+                        return checked_compiled();
                     
                     }else{
-                        return unchecked_compiled()
+                        return unchecked_compiled();
                     }
                 }
-
             },
             {
               name: 'created', type: 'date', data: 'created', width: '100px',
@@ -266,19 +255,75 @@
             $('.viewer-btn', row).tooltip();
           }
         });
+    }
 
+
+     if ($('#task-list').length) { // check if user is logged in
+		var running_template = $('#loading-template').html() ;
+        var view_btn_compiled = _.template($('#viewer-img-template').html());
+        var cellq_name_compiled = _.template($('#cellq-name-template').html());
+        var checked_compiled = _.template($('#checked-template').html());
+        var unchecked_compiled = _.template($('#unchecked-template').html());
+        var date_now = (new Date()).toLocaleDateString();
+
+        task_table = $('#task-list').DataTable({
+          ajax: 'api/v1/tasks',
+          deferRender: true,
+          scroller: true,
+          scrollY: 500,
+          order: [[3, 'desc']],
+          columns: [
+            {
+              name: 'viewer', data: 'input_img', width: '50px', orderable: false,
+              render: function (data, type, row, meta) {
+                if (type === 'display')
+                  return view_btn_compiled({ 
+                    result_img: data
+                  });
+                else
+                  return data;
+              }
+            },
+            {
+              name: 'file-name', data: 'name', width: '100px'
+            },
+            {
+              name: 'status',  data: 'status', defaultContent: running_template, width: '100px'
+            },
+            {
+              name: 'created', type: 'date', data: 'created', width: '100px',
+              render: function (data, type, row, meta) {
+                var date = (new Date(data));
+                if (type === 'display') {
+                  var date_str = date.toLocaleDateString();
+                  if (date_now === date_str)
+                    return date.toLocaleTimeString();
+                  else
+                    return date_str;
+                }
+                else
+                  return date;
+              }
+            }
+          ],
+          createdRow: function (row, data, index) {
+            // initialize bootstrap tooltip
+            $('.viewer-btn', row).tooltip();
+          }
+		}); 
+    
         // get status 
         var unfinished = ['queued', 'running'];
         var unfinished_task_ids;
         var polling = false;
-        $('#result-list').on('xhr.dt', function (e, settings, json, xhr) {
+        $('#task-list').on('xhr.dt', function (e, settings, json, xhr) {
           // json data loaded
           // get a list of queued and running tasks
           //console.log(e, settings, json, xhr);
           if (!json) return; // consecutive ajax.reload() may result in 'abort' status
           unfinished_task_ids = _.pluck(_.filter(json.data, (t) => _.contains(unfinished, t.result)), 'id');
           //console.log(unfinished_task_ids);
-          if (unfinished_task_ids.length > 0 && polling == false) {
+          if (unfinished_task_ids.length > 0 && polling === false) {
             polling = true;
             var finished = ['success', 'failed'];
             var poll = function () {
@@ -292,7 +337,7 @@
                   //console.log(_.some(finished, (c) => _.contains(_.pluck(data.data, 'result_status'), c)));
                   if (_.some(finished, (c) => _.contains(_.pluck(data.data, 'result'), c))) {
                     polling = false;
-                    result_table.ajax.reload();
+                    task_table.ajax.reload();
                   } else
                     setTimeout(poll, 3000);
                 }
@@ -303,6 +348,7 @@
             polling = false;
           }
         });
+
         Dropzone.options.addPhotos = {
           maxFilesize: 256, // MB
           uploadMultiple: false,
@@ -314,7 +360,7 @@
           init: function () {
             this.on('success', function (file, response) {
               // reload result table data
-              result_table.ajax.reload()
+              task_table.ajax.reload();
             });
           }
         };
@@ -334,6 +380,7 @@
           }
         };
       }
-    });
+    
+	});
   </script>
 {% endblock %}

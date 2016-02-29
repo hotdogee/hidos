@@ -20,7 +20,7 @@ version = '0.1.0'
 
 # Create your views here.
 
-def tasks(request):
+def ovums(request):
     """returns task list for logged in user"""
     if not request.user.is_authenticated():
         return JsonResponse({})
@@ -32,10 +32,9 @@ def tasks(request):
         for analysis in ICSIImageAnalysis_get_by_user:
             for ovum in analysis.ovums.all():
                 ovum_objects.append(ovum)
-        print(len(ovum_objects))
-
+        
     
-        tmp = JsonResponse({
+        return JsonResponse({
             'data': [{
                 'count': t.ovum_number,
                 'name': t.parent_imageanalysis.user_filename,
@@ -47,32 +46,50 @@ def tasks(request):
                 'result_status': t.status,
                 'created': current_tz.normalize(t.graded_time.astimezone(current_tz)).isoformat(),
                 } for t in ovum_objects]
+            }) 
+
+
+
+def tasks(request):
+    if not request.user.is_authenticated():
+        return JsonResponse({})
+    else:
+        current_tz = timezone.get_current_timezone()
+        
+        tmp = JsonResponse({
+            'data': [{
+                'id': t.task_id,
+                'name': t.user_filename,
+                'input_img': settings.MEDIA_URL + 'icsi/task/' + t.task_id + '/' + t.task_id + '_in.jpg',
+                'status': t.result_status,
+                'created': current_tz.normalize(t.enqueue_date.astimezone(current_tz)).isoformat(),
+                } for t in ICSIImageAnalysis.objects.filter(user=request.user)]
             })
-        print(request.user)
+
         print(tmp)
 
-        return(tmp)
+        return tmp
 
 
 def status(request):
     task_ids = []
-
-
-  
     if request.method == 'GET':
-        ovum_ids = request.GET.getlist('id')
+        task_ids = request.GET.getlist('id')
     elif request.method == 'POST':
-        ovum_ids = request.POST.getlist('id')
+        task_ids = request.POST.getlist('id')
     else:
         return JsonResponse({})
     if not task_ids:
         return JsonResponse({})
     return JsonResponse({
         'data': [{
-            'id': t.id,
-            'result_status': t.status,
-            } for t in OvumGrade.objects.filter(ovum_id__in=ovum_ids)]
+            'id': t.task_id,
+            'result_status': t.result_status,
+            'created': current_tz.normalize(t.enqueue_date.astimezone(current_tz)).isoformat(),
+            } for t in ICSIImageAnalysis.objects.filter(task_id__in=task_ids)]
         })
+
+
 
 
 def retrieve(request, task_id='1'):
