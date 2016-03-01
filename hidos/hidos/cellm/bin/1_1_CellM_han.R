@@ -42,7 +42,7 @@ nuclabel3 = bwlabel(nuct4)
 nuclabel3_gray<-channel(nuclabel3,"gray")
 ratio = length(nuclabel3[nuclabel3<1])/length(nuclabel3)
 
-img_processed = paintObjects(nuclabel3_gray, imgc, col='#ff0000', opac=c(1, 0.4), thick=TRUE, closed=TRUE)
+img_processed = paintObjects(nuclabel3_gray, imgc, col='#ffff00', opac=c(1, 0.4), thick=TRUE, closed=TRUE)
 file_name_output = args[2]
 writeImage(img_processed,file_name_output, quality=100)
 
