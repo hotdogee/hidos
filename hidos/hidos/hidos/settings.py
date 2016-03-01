@@ -115,7 +115,7 @@ TEMPLATES = [
                 'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',
                 # `allauth` needs this from django
-                'django.core.context_processors.request',
+                'django.template.context_processors.request',
             ],
         },
     },
@@ -151,6 +151,7 @@ INSTALLED_APPS = (
     'allauth.socialaccount.providers.facebook',
     'allauth.socialaccount.providers.google',
     'app.apps.AppConfig',
+    'cellm.apps.AppConfig',
     # Uncomment the next line to enable the admin:
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
