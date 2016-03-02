@@ -20,6 +20,29 @@ version = '0.1.0'
 
 # Create your views here.
 
+def getdata(request):
+    if not request.user.is_authenticated():
+        return JsonResponse({})
+
+    else:
+       
+        json = JsonResponse({
+            'data': [{
+                'id': t.task_id,
+                'name': t.user_filename,
+                'input_img':settings.MEDIA_URL + 'icsi/task/' + t.task_id + '/' + t.task_id + '_in.jpg',
+                'status':t.result_status,
+                'created':t.enqueue_date,
+                'ovums': [{
+                    'count':o.ovum_number,
+                    'grade':o.grade,
+                    'result_img':settings.MEDIA_URL + 'icsi/task/' + o.parent_imageanalysis.task_id + '/' + o.parent_imageanalysis.task_id + '_Crop' + str(o.ovum_number) + '.jpg',
+                    }for o in t.ovums.all()]
+                }for t in ICSIImageAnalysis.objects.filter(user=request.user)]
+            })
+
+        return json
+
 def ovums(request):
     """returns task list for logged in user"""
     if not request.user.is_authenticated():
@@ -32,8 +55,7 @@ def ovums(request):
         for analysis in ICSIImageAnalysis_get_by_user:
             for ovum in analysis.ovums.all():
                 ovum_objects.append(ovum)
-        
-    
+
         return JsonResponse({
             'data': [{
                 'count': t.ovum_number,
@@ -47,8 +69,6 @@ def ovums(request):
                 'created': current_tz.normalize(t.graded_time.astimezone(current_tz)).isoformat(),
                 } for t in ovum_objects]
             }) 
-
-
 
 def tasks(request):
     if not request.user.is_authenticated():
