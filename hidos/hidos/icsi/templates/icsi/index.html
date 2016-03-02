@@ -166,53 +166,53 @@ $(document).ready(function () {
   // });
 
 
-  var task_table = $('#task-list').dataTable({
-    ajax: 'api/v1/tasks',
-    deferRender: true,
-    scroller: true,
-    scrollY: 500,
-    aoColumns: [
-    {
-     mDataProp: null,
-     sClass: "control center",
-     sDefaultContent: '<img src="http://i.imgur.com/SD7Dz.png">',
-     width:'10px'
-   },
-   {
-    name: 'viewer', data: 'input_img', width: '50px', orderable: false,
-    render: function (data, type, row, meta) {
-      if (type === 'display')
-        return view_btn_compiled({ 
-          result_img: data
-        });
-      else
-        return data;
-    }
-  },
-  {name: 'file-name', data: 'name', width: '100px'},
-  {name: 'status',  data: 'status', defaultContent: running_template, width: '100px'},
+var task_table = $('#task-list').dataTable({
+  ajax: 'api/v1/tasks',
+  deferRender: true,
+  scroller: true,
+  scrollY: 500,
+  aoColumns: [
   {
-    name: 'created', type: 'date', data: 'created', width: '100px',
-    render: function (data, type, row, meta) {
-      var date = (new Date(data));
-      if (type === 'display') {
-        var date_str = date.toLocaleDateString();
-        if (date_now === date_str)
-          return date.toLocaleTimeString();
-        else
-          return date_str;
-      }
-      else
-        return date;
-    }
+   mDataProp: null,
+   sClass: "control center",
+   sDefaultContent: '<img src="http://i.imgur.com/SD7Dz.png" id="img_button">',
+   width:'10px'
+ },
+ {
+  name: 'viewer', data: 'input_img', width: '50px', orderable: false,
+  render: function (data, type, row, meta) {
+    if (type === 'display')
+      return view_btn_compiled({ 
+        result_img: data
+      });
+    else
+      return data;
   }
-  ],
-  createdRow: function (row, data, index) {
+},
+{name: 'file-name', data: 'name', width: '100px'},
+{name: 'status',  data: 'status', defaultContent: running_template, width: '100px'},
+{
+  name: 'created', type: 'date', data: 'created', width: '100px',
+  render: function (data, type, row, meta) {
+    var date = (new Date(data));
+    if (type === 'display') {
+      var date_str = date.toLocaleDateString();
+      if (date_now === date_str)
+        return date.toLocaleTimeString();
+      else
+        return date_str;
+    }
+    else
+      return date;
+  }
+}
+],
+createdRow: function (row, data, index) {
               // initialize bootstrap tooltip
               $('.viewer-btn', row).tooltip();
             },
-  aaSorting: [[1,'asc']]
-  }); 
+            aaSorting: [[1,'asc']]
+          }); 
 
 
 
@@ -255,35 +255,36 @@ $(document).ready(function () {
 
 
 $('#task-list').on('click', 'tbody td img', function(){
-  var ovumTableHtml = $("#result-list").html();
-  var data = $.ajax({url:"api/v1/tasks/data",async:false});
-  var dataAll = data.responseJSON.data;
-  var nTr = $(this).parents('tr')[0];
-  var nTds = this;
+  if(this.id == 'img_button'){
+    var ovumTableHtml = $("#result-list").html();
+    var data = $.ajax({url:"api/v1/tasks/data",async:false});
+    var dataAll = data.responseJSON.data;
+    var nTr = $(this).parents('tr')[0];
+    var nTds = this;
 
-  if (task_table.fnIsOpen(nTr)){
-    this.src = "http://i.imgur.com/SD7Dz.png";
-    task_table.fnClose(nTr);
-  }
-  else{
-    var rowIndex = task_table.fnGetPosition( $(nTds).closest('tr')[0] )
-    var detailsRowData = dataAll[rowIndex].ovums;
+    if (task_table.fnIsOpen(nTr)){
+      this.src = "http://i.imgur.com/SD7Dz.png";
+      task_table.fnClose(nTr);
+    }
+    else{
+      var rowIndex = task_table.fnGetPosition( $(nTds).closest('tr')[0] )
+      var detailsRowData = dataAll[rowIndex].ovums;
 
-    this.src = "http://i.imgur.com/d4ICC.png";
-    task_table.fnOpen(nTr, fnFormatDetails(iTableCounter, ovumTableHtml), 'ovums');
+      this.src = "http://i.imgur.com/d4ICC.png";
+      task_table.fnOpen(nTr, fnFormatDetails(iTableCounter, ovumTableHtml), 'ovums');
 
 
 
-    ovum_table = $("#ovumTable_" + iTableCounter).DataTable({
-      deferRender: true,
-      info: false,
-      paging:false,
-      bFilter: false,
-      aaData: detailsRowData,
-      aoColumns: [
-      {name: 'Viewer', data: 'result_img', width: '50px',
+      ovum_table = $("#ovumTable_" + iTableCounter).DataTable({
+        deferRender: true,
+        info: false,
+        paging:false,
+        bFilter: false,
+        aaData: detailsRowData,
+        aoColumns: [
+        {name: 'Viewer', data: 'result_img', width: '50px',
         render: function (data, type, row, meta) {
-        return view_btn_compiled({result_img: data})
+          return view_btn_compiled({result_img: data})
         }
       },
       {name: 'OvumID', data:'count',width:'50px'},
@@ -337,26 +338,26 @@ $('#task-list').on('click', 'tbody td img', function(){
 iTableCounter = iTableCounter + 1;
 
 }
+} 
 });
 
         // if user logged in.
-        Dropzone.options.addPhotos = {
-          maxFilesize: 256, // MB
-          uploadMultiple: false,
-          parallelUploads: 2,
-          maxFiles: null,
-          thumbnailWidth: null,
-          thumbnailHeight: 120,
-          dictDefaultMessage: 'Drop one or more images here to upload',
-          init: function () {
-            this.on('success', function (file, response) {
-              // reload result table data
-              task_table.ajax.reload();
-            });
-          }
-        };
+Dropzone.options.addPhotos = {
+  maxFilesize: 256, // MB
+  uploadMultiple: false,
+  parallelUploads: 2,
+  maxFiles: null,
+  thumbnailWidth: null,
+  thumbnailHeight: 120,
+  dictDefaultMessage: 'Drop one or more images here to upload',
+  init: function () {
+    this.on('success', function (file, response) {
+      // reload result table data
+      task_table.ajax.reload();
+    });
+  }
+};
 
-
-      });
+});
 </script>
 {% endblock %}
