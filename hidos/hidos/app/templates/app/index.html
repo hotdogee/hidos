@@ -46,6 +46,8 @@
   -->
   <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.10/css/jquery.dataTables.min.css"/>
   <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/scroller/1.4.0/css/scroller.dataTables.min.css"/>
+  <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/buttons/1.1.2/css/buttons.bootstrap.min.css"/>
+  <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css"/>
   <link rel="stylesheet" type="text/css" href="{% static 'app/content/spinkit.css' %}" />
  
   <style type="text/css">
@@ -81,6 +83,13 @@
   -->
   <script type="text/javascript" src="//cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
   <script type="text/javascript" src="//cdn.datatables.net/scroller/1.4.0/js/dataTables.scroller.min.js"></script>
+  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+  <script type="text/javascript" src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
+  <script type="text/javascript" src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+  <script type="text/javascript" src="//cdn.datatables.net/buttons/1.1.2/js/dataTables.buttons.min.js"></script>
+  <script type="text/javascript" src="//cdn.datatables.net/buttons/1.1.2/js/buttons.bootstrap.min.js"></script>
+  <script type="text/javascript" src="//cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
+  <script type="text/javascript" src="//cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
   <script type="text/template" id="loading-template">
     <div class="sk-fading-circle">
       <div class="sk-circle1 sk-circle"></div>
@@ -122,6 +131,7 @@
           scroller: true,
           scrollY: 500,
           order: [[4, 'desc']],
+          dom: 'Bfrtip',
           columns: [
             {
               name: 'viewer', data: 'url', width: '50px', orderable: false,
@@ -175,7 +185,39 @@
           createdRow: function (row, data, index) {
             // initialize bootstrap tooltip
             $('.viewer-btn', row).tooltip();
-          }
+          },
+          buttons: [
+            {
+              extend: 'collection',
+              text: '<span class="glyphicon glyphicon-cloud-download" aria-hidden="true"></span> Export',
+              buttons: [
+                {
+                  extend: 'copy',
+                  exportOptions: {
+                    columns: (idx, data, node) => idx !== 0
+                  }
+                },
+                {
+                  extend: 'csv',
+                  exportOptions: {
+                    columns: (idx, data, node) => idx !== 0
+                  }
+                },
+                {
+                  extend: 'excel',
+                  exportOptions: {
+                    columns: (idx, data, node) => idx !== 0
+                  }
+                },
+                {
+                  extend: 'pdf',
+                  exportOptions: {
+                    columns: (idx, data, node) => idx !== 0
+                  }
+                },
+              ]
+            },
+          ],
         });
         var unfinished = ['queued', 'running'];
         var unfinished_task_ids;
