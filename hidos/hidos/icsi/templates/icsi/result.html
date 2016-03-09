@@ -1,6 +1,37 @@
 {% extends "app/layout.html" %}
 {% load staticfiles %}
 {% block content %}
-<h1> ICSI Image analysis </h1>
+<section id="result">
+  <h1> Grading reuslt </h1>
+  <div>
+  {{ user_filename }}
+  <img src="{{ result_img }}">
+  </div>
+
+  <table >
+    <span>{{ images }}</span>
+    {% for img in images %}
+    <tr>
+      <td> Ovum {{ forloop.counter }}</td>
+      <td>
+        <img src="{{ img.path }}">
+        <span>{{ img.grade }}</span>
+      </td>
+    </tr>
+
+
+    {% endfor %}
+  </table>
+
+</section>
+
+
+
+
+
+
+
+
+
 
 {% endblock %}

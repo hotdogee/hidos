@@ -9,6 +9,13 @@ class ICSIFolder(Folder):
 
 class ICSIImageAnalysis(ImageAnalysis):
     number_of_ovum = models.IntegerField(null=True)
+    number_of_A = models.IntegerField(null=True)
+    number_of_B = models.IntegerField(null=True)
+    number_of_C = models.IntegerField(null=True)
+    number_of_D = models.IntegerField(null=True)
+    number_of_E = models.IntegerField(null=True)
+    mother_name = models.CharField(max_length=32,null=True)
+    description = models.CharField(max_length=32,null=True)
 
     def __unicode__(self):
         return self.task_id
@@ -23,12 +30,10 @@ class OvumGrade(models.Model):
     ovum_id = models.CharField(max_length=32, primary_key=True)
     ovum_number = models.IntegerField(null=True)
     parent_imageanalysis = models.ForeignKey('ICSIImageAnalysis',related_name = 'ovums', null = True)
-    status = models.CharField(max_length=32, default='undefined')
     grade = models.CharField(max_length=32, default='A')
     graded_time = models.DateTimeField(null=True)
-    
 
 
 
-# TODO: Permissions class for sharing:q
+# TODO: Permissions class for sharing
 

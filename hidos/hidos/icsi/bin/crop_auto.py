@@ -52,13 +52,32 @@ PATCH_SIZE = 30 # glcm patch sizes
 MIN_OBJECT_PATCH_NUMBER = 20
 MARGIN_SIZE = 0
 
-
+ori_img = imread(INPUT_IMAGE_PATH)
 img = imread(INPUT_IMAGE_PATH,as_grey=True)
 img = img*256
 IMG_HEIGHT, IMG_WIDTH  = img.shape[:2]
 
-img = img[:-(IMG_HEIGHT % PATCH_SIZE),:-(IMG_WIDTH % PATCH_SIZE)]  # small trick, ori image = 1220*915
-img[img >= 256] = 255
+
+rm_margin_x = IMG_HEIGHT % PATCH_SIZE
+rm_margin_y = IMG_WIDTH % PATCH_SIZE
+
+
+if rm_margin_x and rm_margin_y != 0:
+    img = img[:(-(img.shape[0] % PATCH_SIZE)),:(-(img.shape[1] % PATCH_SIZE))]
+    ori_img = ori_img[:(-(ori_img.shape[0] % PATCH_SIZE)),:(-(ori_img.shape[1] % PATCH_SIZE)),:]
+elif rm_margin_x == 0:
+    img = img[:,:(-(img.shape[1] % PATCH_SIZE))]
+    ori_img = ori_img[:,:(-(ori_img.shape[1] % PATCH_SIZE)),:]
+elif rm_margin_y == 0:
+    img = img[:(-(img.shape[0] % PATCH_SIZE)),:]
+    ori_img = ori_img[:(-(ori_img.shape[0] % PATCH_SIZE)),:,:]
+else:
+    img = img[:,:]
+    ori_img = ori_img[:,:,:]
+
+img[img >= 256] = 255 
+
+ori_img_for_out = ori_img.copy()
 
 # Define the locations of each pathes
 locs = []
@@ -82,7 +101,7 @@ for patch in patches:
 
 # the background patches have high similarity, thus we can remove it.
 # and rebuilt a binary mask
-selected_patch_idx =[xs.index(x) for x in xs if x > 5]
+selected_patch_idx =[xs.index(x) for x in xs if x > 8]
 img_zeros = np.zeros((img.shape[0],img.shape[1]))
 loc_select = []
 for i in selected_patch_idx:
@@ -122,10 +141,32 @@ for props in regions:
         x1_old, x2_old, y1_old, y2_old =  findExtreme(props.coords)
         x1,x2,y1,y2 = findSquare(x1_old,x2_old,y1_old,y2_old)
             
-        img_crop = img[x1:x2,y1:y2]/256
+        if x2 > ori_img.shape[0]:
+            x2 = ori_img.shape[0]-1
+        if y2 > ori_img.shape[1]:
+            y2 = ori_img.shape[1]-1
+
+        img_crop = ori_img[x1:x2,y1:y2]/256
+
+
+        for i in range(0,3):
+            if i == 0:
+                ori_img_for_out[x1,y1:y2,i]=255
+                ori_img_for_out[x2,y1:y2,i]=255
+                ori_img_for_out[x1:x2,y1,i]=255
+                ori_img_for_out[x1:x2,y2,i]=255
+            else:
+                ori_img_for_out[x1,y1:y2,i]=0
+                ori_img_for_out[x2,y1:y2,i]=0
+                ori_img_for_out[x1:x2,y1,i]=0
+                ori_img_for_out[x1:x2,y2,i]=0
+
         img_crop_path = OUTPUT_IMAGE_PATH +'_Crop' + str(img_time)+'.jpg'
         imsave(img_crop_path, img_crop)
-        
+
+ori_img_out_path = OUTPUT_IMAGE_PATH + '_out.jpg'
+imsave(ori_img_out_path, ori_img_for_out)
+
 if img_time == 0:
     print('This photo does not crop out anything!!')
 

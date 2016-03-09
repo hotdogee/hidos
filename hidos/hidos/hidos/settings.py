@@ -157,6 +157,7 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     'icsi',
     'cellcount',
+    'debug_toolbar.apps.DebugToolbarConfig',
 )
 
 SITE_ID = 1
@@ -226,7 +227,7 @@ CELERY_DEFAULT_QUEUE = 'hidos'
 CELERY_DEFAULT_EXCHANGE = 'hidos'
 CELERY_DEFAULT_EXCHANGE_TYPE = 'direct'
 CELERY_DEFAULT_ROUTING_KEY = 'hidos'
-CELERY_QUEUES = ( 
+CELERY_QUEUES = (
     Queue('hidos', Exchange('hidos'), routing_key='hidos'),
 )
 BROKER_URL = 'amqp://'
