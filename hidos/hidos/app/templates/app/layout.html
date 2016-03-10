@@ -13,7 +13,6 @@
 
 <body>
   <div class="navbar navbar-inverse navbar-fixed-top">
-    <div class="container">
       <div class="navbar-header">
         <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
           <span class="icon-bar"></span>
@@ -26,30 +25,41 @@
         <ul class="nav navbar-nav">
           <li><a href="{% url 'home' %}">Home</a></li>
           <!-- <li><a href="{% url 'cellcount' %}">Cell Q</a></li> -->
-          <li><a href="{% url 'icsi' %}">Cell E</a></li>
+          <li><a href="{% url 'icsi' %}">Cell E {{ version }}</a></li>
         </ul>
         {% include 'app/loginpartial.html' %}
       </div>
-    </div>
   </div>
 
 {% block content-body %}{% endblock %}
   <div class="container-fluid">
-{% block content-fluid %}
-    <div class="container body-content">
-{% block content %}{% endblock %}
-      <hr/>
-      <footer>
-        <p>{{ year|default:"2015" }} - Meridigen</p>
-      </footer>
-    </div>
-{% endblock %}
+{% block content-fluid %}{% endblock %}
   </div>
+
+<div class="container body-content">
+      {% block content %}{% endblock %}
+      <hr/>
+
+    </div>
+
+<nav class="navbar navbar-inverse navbar-fixed-bottom">
+  <div class="container">
+    <p class="text-right">{{ year|default:"2016" }} - Meridigen</p>
+  </div>
+</nav>
 
   <script src="{% static 'app/scripts/jquery-1.10.2.js' %}"></script>
   <script src="{% static 'app/scripts/bootstrap.js' %}"></script>
   <script src="{% static 'app/scripts/respond.js' %}"></script>
 {% block scripts %}{% endblock %}
+
+<style type="text/css">
+  .navbar p{
+    color: #ffffff
+  }
+</style>
+
+
 
 </body>
 </html>

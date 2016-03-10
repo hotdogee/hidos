@@ -25,7 +25,7 @@ def getdata(request):
         return JsonResponse({})
 
     else:
-       
+
         json = JsonResponse({
             'data': [{
                 'id': t.task_id,
@@ -49,7 +49,7 @@ def ovums(request):
         return JsonResponse({})
     else:
         current_tz = timezone.get_current_timezone()
-        
+
         ICSIImageAnalysis_get_by_user = ICSIImageAnalysis.objects.filter(user=request.user)
         ovum_objects = []
         for analysis in ICSIImageAnalysis_get_by_user:
@@ -68,14 +68,14 @@ def ovums(request):
                 'result_status': t.status,
                 'created': current_tz.normalize(t.graded_time.astimezone(current_tz)).isoformat(),
                 } for t in ovum_objects]
-            }) 
+            })
 
 def tasks(request):
     if not request.user.is_authenticated():
         return JsonResponse({})
     else:
         current_tz = timezone.get_current_timezone()
-        
+
         tmp = JsonResponse({
             'data': [{
                 'id': t.task_id,
@@ -85,8 +85,6 @@ def tasks(request):
                 'created': current_tz.normalize(t.enqueue_date.astimezone(current_tz)).isoformat(),
                 } for t in ICSIImageAnalysis.objects.filter(user=request.user)]
             })
-
-        print(tmp)
 
         return tmp
 
@@ -190,7 +188,7 @@ def upload(request):
             if not path.exists(path.dirname(input_image_path)):
                 mkdir(path.dirname(input_image_path))
             chmod(path.dirname(input_image_path), Perm.S_IRWXU | Perm.S_IRWXG | Perm.S_IRWXO) # ensure the standalone dequeuing process can open files in the directory
-        
+
             # write query to file
             if 'file' in request.FILES:
                 with open(input_image_path, 'wb') as input_image_f:
@@ -203,7 +201,7 @@ def upload(request):
             # %R_Script% 1_6_obj_area_cal_cmd.R IMG_0159.JPG IMG_0159_out.JPG IMG_0159_out.csv
             script_path = path.join(settings.PROJECT_ROOT, 'icsi', 'bin', 'crop_auto.py')
             args_list = [[settings.PYTHON_SCRIPT, script_path,'--input', input_image_path,'--output',output_image_path]]
-        
+
             # insert entry into database
             record = ICSIImageAnalysis()
             record.task_id = task_id

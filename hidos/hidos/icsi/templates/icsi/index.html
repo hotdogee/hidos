@@ -1,18 +1,22 @@
 {% extends "app/layout.html" %}
 {% load staticfiles %}
-{% block content %}
+{% block content-fluid %}
+
+<div class="div-left">
 <h1>Cell E <small>v{{ version }}</small></h1>
 <ul>
-  <li>Automatic ovum crop out</li>
+  <li>Automatic cropping out ovums</li>
   <li>Grade estimation by morphological feature</li>
 </ul>
 
 <form id="add-photos" action="{% url 'icsi' %}" class="dropzone">
   {% csrf_token %}
 </form>
-<hr />
-<div>
-  <h1>Ovum Grade</h1>
+
+</div>
+
+<div class="div-right">
+  <h1>Task Lists</h1>
   {% if user.is_authenticated %}
 
 
@@ -78,6 +82,21 @@
   .preview-img img {
     padding: 10px 0px 0px;
   }
+  .div-left{
+    width:30%;
+    height:100%;
+    padding: 20px 20px 20px;
+    float: left;
+  }
+  .div-right{
+    width:70%;
+    height:100%;
+    padding: 20px 20px 20px;
+    float: right;
+  }
+
+
+
 </style>
 {% endblock %}
 {% block scripts %}
@@ -135,7 +154,7 @@
           ajax: 'api/v1/tasks',
           deferRender: true,
           scroller: true,
-          scrollY: 500,
+          scrollY:550,
           order: [[4, 'desc']],
           columns: [
             {
