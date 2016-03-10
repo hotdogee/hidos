@@ -15,72 +15,29 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 from django.core.urlresolvers import reverse
 from os import chmod, mkdir, path
-
-version = '0.1.0'
+from glob import glob
+version = '0.2.0'
 
 # Create your views here.
-
-def getdata(request):
-    if not request.user.is_authenticated():
-        return JsonResponse({})
-
-    else:
-
-        json = JsonResponse({
-            'data': [{
-                'id': t.task_id,
-                'name': t.user_filename,
-                'input_img':settings.MEDIA_URL + 'icsi/task/' + t.task_id + '/' + t.task_id + '_in.jpg',
-                'status':t.result_status,
-                'created':t.enqueue_date,
-                'ovums': [{
-                    'count':o.ovum_number,
-                    'grade':o.grade,
-                    'result_img':settings.MEDIA_URL + 'icsi/task/' + o.parent_imageanalysis.task_id + '/' + o.parent_imageanalysis.task_id + '_Crop' + str(o.ovum_number) + '.jpg',
-                    }for o in t.ovums.all()]
-                }for t in ICSIImageAnalysis.objects.filter(user=request.user)]
-            })
-
-        return json
-
-def ovums(request):
-    """returns task list for logged in user"""
-    if not request.user.is_authenticated():
-        return JsonResponse({})
-    else:
-        current_tz = timezone.get_current_timezone()
-
-        ICSIImageAnalysis_get_by_user = ICSIImageAnalysis.objects.filter(user=request.user)
-        ovum_objects = []
-        for analysis in ICSIImageAnalysis_get_by_user:
-            for ovum in analysis.ovums.all():
-                ovum_objects.append(ovum)
-
-        return JsonResponse({
-            'data': [{
-                'count': t.ovum_number,
-                'name': t.parent_imageanalysis.user_filename,
-                #'url': reverse('icsi_retrieve', kwargs={'task_id': t.task_id}),
-                'url': 'test',
-                'result_img': settings.MEDIA_URL + 'icsi/task/' + t.parent_imageanalysis.task_id + '/' + t.parent_imageanalysis.task_id + '_Crop' + str(t.ovum_number) + '.jpg',
-                'input_img': settings.MEDIA_URL + 'icsi/task/' + t.parent_imageanalysis.task_id + '/' + t.parent_imageanalysis.task_id + '_in.jpg',
-                'grade': t.grade,
-                'result_status': t.status,
-                'created': current_tz.normalize(t.graded_time.astimezone(current_tz)).isoformat(),
-                } for t in ovum_objects]
-            })
 
 def tasks(request):
     if not request.user.is_authenticated():
         return JsonResponse({})
     else:
         current_tz = timezone.get_current_timezone()
-
         tmp = JsonResponse({
             'data': [{
                 'id': t.task_id,
                 'name': t.user_filename,
-                'input_img': settings.MEDIA_URL + 'icsi/task/' + t.task_id + '/' + t.task_id + '_in.jpg',
+                'url': reverse('icsi_retrieve', kwargs={'task_id': t.task_id}),
+                'result_img': settings.MEDIA_URL + 'icsi/task/' + t.task_id + '/' + t.task_id + '_out.jpg',
+                'mother_name': t.mother_name,
+                'number_ovum': t.number_of_ovum,
+                'number_of_A': t.number_of_A,
+                'number_of_B': t.number_of_B,
+                'number_of_C': t.number_of_C,
+                'number_of_D': t.number_of_D,
+                'number_of_E': t.number_of_E,
                 'status': t.result_status,
                 'created': current_tz.normalize(t.enqueue_date.astimezone(current_tz)).isoformat(),
                 } for t in ICSIImageAnalysis.objects.filter(user=request.user)]
@@ -111,17 +68,36 @@ def status(request):
 
 
 def retrieve(request, task_id='1'):
-    #return HttpResponse("retrieve = %s." % (task_id))
+    # return HttpResponse("retrieve = %s." % (task_id))
     try:
         record = ICSIImageAnalysis.objects.get(task_id=task_id)
+
+        images = []
+        paths = []
+        grades =[]
+        test = str()
+        for x in glob('.' + settings.MEDIA_URL + 'icsi/task/' + task_id + '/' + task_id + '_Crop*'):
+            paths.append(x[1:])
+
+        for ovums in record.ovums.all():
+            grades.append(ovums.grade)
+
+        for i in range(0,len(paths)):
+            img = {'path':paths[i], 'grade':grades[i]}
+            images.append(img)
+
+
         return render(
             request,
             'icsi/result.html',
             {
-                'title': 'CellQ - {0}'.format(record.user_filename),
+                'title': 'Cell E - {0}'.format(record.user_filename),
                 'year': datetime.now().year,
                 'version': record.version,
                 'user_filename': record.user_filename,
+                'result_img': settings.MEDIA_URL + 'icsi/task/' + task_id + '/' + task_id + '_out.jpg',
+                'images': images,
+
             }
         )
     except ObjectDoesNotExist:
@@ -213,6 +189,9 @@ def upload(request):
             record.save()
 
             run_image_analysis_task.delay(task_id, args_list, path_prefix)
+
+        else:
+            print("This file is already uploaded.")
         # debug
         #run_image_analysis_task.delay(task_id, args_list, path_prefix).get()
         return HttpResponse('icsi')

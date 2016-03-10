@@ -64,6 +64,7 @@ def run_image_analysis_task(task_id, args_list, path_prefix):
         record.number_of_ovum = len(crop_img_path)
         record.result_status = 'success'
         ovum_count = 1
+
         # sum up ML result
         ovum_A = 0
         ovum_B = 0
@@ -84,12 +85,12 @@ def run_image_analysis_task(task_id, args_list, path_prefix):
             Ovum.graded_time = datetime.utcnow().replace(tzinfo=utc)
             Ovum.save()
 
-    record.number_of_A = ovum_A
-    record.number_of_B = ovum_B
-    record.number_of_C = ovum_C
-    record.number_of_D = ovum_D
-    record.number_of_E = ovum_E
-    record.result_date = datetime.utcnow().replace(tzinfo=utc)
+        record.number_of_A = ovum_A
+        record.number_of_B = ovum_B
+        record.number_of_C = ovum_C
+        record.number_of_D = ovum_D
+        record.number_of_E = ovum_E
+        record.result_date = datetime.utcnow().replace(tzinfo=utc)
     record.save()
 
     return task_id # passed to 'result' argument of task_success_handler
