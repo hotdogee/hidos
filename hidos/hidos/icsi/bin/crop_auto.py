@@ -5,6 +5,7 @@ import os
 from skimage.measure import label, regionprops
 from scipy import ndimage as ndi
 import argparse 
+from skimage.transform import resize 
 
 parser = argparse.ArgumentParser(description='auto crop out the ovum from image')
 parser.add_argument('--input')
@@ -146,7 +147,8 @@ for props in regions:
         if y2 > ori_img.shape[1]:
             y2 = ori_img.shape[1]-1
 
-        img_crop = ori_img[x1:x2,y1:y2]/256
+        img_crop = ori_img[x1:x2,y1:y2]
+        img_crop = resize(img_crop, (64,64))
 
 
         for i in range(0,3):
