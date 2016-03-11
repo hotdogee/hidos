@@ -2,8 +2,13 @@
 {% load staticfiles %}
 {% block content %}
   <h1>Cell M1 (Migration) <small>v{{ version }}</small></h1>
+  <img src="{% static 'cellm/images/CellM1-diagram.png' %}">
+
+  <form id="add-photos" action="{% url 'home' %}" class="dropzone">
+    {% csrf_token %}
+  </form>
+  <br />
   <ul>
-    <li>Cell Ratio Analysis</li>
     <li>Example 1
       <ul>
         <li><a href="//cellm.hotdogee.com/media/cellm/task/897b2677175447e8339d59d0fa49e56b/897b2677175447e8339d59d0fa49e56b_in.jpg" download>Download Input Image 1024x682 (554 kB)</a></li>
@@ -17,10 +22,6 @@
       </ul>
     </li>
   </ul>
-
-  <form id="add-photos" action="{% url 'home' %}" class="dropzone">
-    {% csrf_token %}
-  </form>
   <hr />
   <div>
     <h1>Results</h1>

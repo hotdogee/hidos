@@ -70,6 +70,9 @@
     <Folder Include="cellm\" />
     <Folder Include="cellm\bin\" />
     <Folder Include="cellm\migrations\" />
+    <Folder Include="cellm\static\" />
+    <Folder Include="cellm\static\cellm\" />
+    <Folder Include="cellm\static\cellm\images\" />
     <Folder Include="cellm\templates\" />
     <Folder Include="cellm\templates\cellm\" />
     <Folder Include="hidos\" />
@@ -93,6 +96,7 @@
     <Content Include="app\templates\app\result.html" />
     <Content Include="cellm\bin\1_1_CellM_han.R" />
     <Content Include="cellm\migrations\__init__.pyc" />
+    <Content Include="cellm\static\cellm\images\CellM1-diagram.png" />
     <Content Include="cellm\templates\cellm\index.html" />
     <Content Include="cellm\templates\cellm\result.html" />
     <Content Include="requirements.txt" />
