@@ -18,7 +18,7 @@ image_file = file.path(image_file_path)
 imgc = readImage(image_file)
 imgcs = resize(imgc, 1024)
 
-imgc_data = imageData(imgc)
+imgc_data = imageData(imgcs)
 
 #--------------------------------------
 dimens = dim(imgc_data)
@@ -40,9 +40,12 @@ nuct4 = erode(nuct3, kern)
 
 nuclabel3 = bwlabel(nuct4)
 nuclabel3_gray<-channel(nuclabel3,"gray")
+
 ratio = length(nuclabel3[nuclabel3<1])/length(nuclabel3)
 
-img_processed = paintObjects(nuclabel3_gray, imgc, col='#ffff00', opac=c(1, 0.4), thick=TRUE, closed=TRUE)
+img_labeling = resize(nuclabel3_gray, dim(imgc)[1],  dim(imgc)[2])
+
+img_processed = paintObjects(img_labeling, imgc, col='#ffff00', opac=c(1, 0.4), thick=TRUE, closed=TRUE)
 file_name_output = args[2]
 writeImage(img_processed,file_name_output, quality=100)
 
