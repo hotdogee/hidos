@@ -36,6 +36,7 @@ def tasks(request):
                 'result_img': settings.MEDIA_URL + 'cellm/task/' + t.task_id + '/' + t.task_id + '_out.jpg',
                 'input_img': settings.MEDIA_URL + 'cellm/task/' + t.task_id + '/' + t.task_id + '_in.jpg',
                 'result': json.loads(t.result or '{}'),
+                'result_outerr': json.loads(t.result_outerr or '{}'),
                 'result_status': t.result_status,
                 'created': current_tz.normalize(t.enqueue_date.astimezone(current_tz)).isoformat(),
                 } for t in CellMAnalysis.objects.filter(user=request.user)]
