@@ -1,3 +1,5 @@
 call ./hidos/env/Scripts/activate
-python ./hidos/manage.py runserver
+cd hidos
+python manage.py runserver
+cd ..
 call deactivate
