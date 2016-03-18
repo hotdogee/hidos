@@ -66,7 +66,7 @@ def home(request):
             request,
             'app/index.html',
             {
-                'title':'Home',
+                'title':'Cell C',
                 'year':datetime.now().year,
                 'version': version,
             }
@@ -134,7 +134,7 @@ def retrieve(request, task_id='1'):
             request,
             'app/result.html',
             {
-                'title': 'CellQ - {0}'.format(record.user_filename),
+                'title': 'Cell C - {0}'.format(record.user_filename),
                 'year': datetime.now().year,
                 'version': record.version,
                 'user_filename': record.user_filename,
@@ -146,7 +146,7 @@ def retrieve(request, task_id='1'):
             request,
             'app/error.html',
             {
-                'title': 'CellQ Error',
+                'title': 'Cell C Error',
                 'year': datetime.now().year,
                 'version': version,
                 'message': message,
@@ -158,7 +158,7 @@ def retrieve(request, task_id='1'):
             request,
             'app/error.html',
             {
-                'title': 'CellQ Error',
+                'title': 'Cell C Error',
                 'year': datetime.now().year,
                 'version': version,
                 'message': message,
