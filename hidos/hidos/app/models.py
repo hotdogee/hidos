@@ -20,6 +20,7 @@ class ImageAnalysis(models.Model):
     enqueue_date = models.DateTimeField(auto_now_add=True)
     dequeue_date = models.DateTimeField(null=True)
     result = models.TextField(blank=True)
+    result_outerr = models.TextField(blank=True)
     result_date = models.DateTimeField(null=True)
     result_status = models.CharField(max_length=32, default='queued') # queued, running, success, failed
     user = models.ForeignKey(User, null=True)
