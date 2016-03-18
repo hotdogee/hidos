@@ -174,6 +174,11 @@ AUTHENTICATION_BACKENDS = (
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'simple': {
+            'format': '%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s',
+        },
+    },
     'filters': {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse'
@@ -181,21 +186,20 @@ LOGGING = {
     },
     'handlers': {
         'mail_admins': {
-            'level': 'ERROR',
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
         },
         'django_log': {
-            'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': '../../log/django.log',
             'maxBytes': 1024 * 1024 * 100,  # 100 mb
+            'formatter': 'simple',
         },
         'celery_log': {
-            'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': '../../log/celery.log',
             'maxBytes': 1024 * 1024 * 100,  # 100 mb
+            'formatter': 'simple',
         }
     },
     'loggers': {

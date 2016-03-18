@@ -24,11 +24,12 @@ if settings.USE_CACHE:
     acquire_lock = lambda: cache.add(LOCK_ID, 'true', LOCK_EXPIRE)
     release_lock = lambda: cache.delete(LOCK_ID)
 
-@shared_task() # ignore_result=True
-def run_image_analysis_task(task_id, args_list, path_prefix):
+@shared_task(bind=True) # ignore_result=True
+def run_image_analysis_task(self, task_id, args_list, path_prefix):
     import django
     django.setup()
     
+    self.app.log.redirect_stdouts_to_logger(logger)
     logger.info("image_analysis task_id: %s" % (task_id,))
 
     # update dequeue time
@@ -38,22 +39,24 @@ def run_image_analysis_task(task_id, args_list, path_prefix):
     record.save()
 
     # run
+    outerr = []
     for args in args_list:
-        Popen(args, stdin=PIPE, stdout=PIPE).wait()
+        stdoutdata, stderrdata = Popen(args, stdin=PIPE, stdout=PIPE, stderr=PIPE).communicate()
+        outerr.append((stdoutdata, stderrdata))
+    record.result_outerr = json.dumps(outerr)
 
     # update result state
-    result_status = ''
     output_image_path = path_prefix + '_out.jpg'
     output_json_path = path_prefix + '_out.json'
     record.result_status = 'failed'
     if not path.isfile(output_image_path):
-        result_status = 'NO_OUT_JPG'
+        record.result_status = 'NO_OUT_JPG'
     elif stat(output_image_path)[6] == 0:
-        result_status = 'OUT_JPG_EMPTY'
+        record.result_status = 'OUT_JPG_EMPTY'
     elif not path.isfile(output_json_path):
-        result_status = 'NO_OUT_JSON'
+        record.result_status = 'NO_OUT_JSON'
     elif stat(output_json_path)[6] == 0:
-        result_status = 'OUT_JSON_EMPTY'
+        record.result_status = 'OUT_JSON_EMPTY'
     else:
         record.result_status = 'success'
         with open(output_json_path, 'r') as f:
