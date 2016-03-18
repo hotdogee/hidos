@@ -2,8 +2,11 @@
 {% load staticfiles %}
 {% block content-fluid %}
 
-<div class="div-left">
-<h1>File upload</h1>
+
+<div class="div-right">
+<div class="panel panel-success">
+<div class="panel-heading">File upload</div>
+<div class="panel-body">
 <ul>
   <li>Automatic cropping out ovums</li>
   <li>Grade estimation by morphological feature</li>
@@ -12,14 +15,16 @@
 <form id="add-photos" action="{% url 'icsi' %}" class="dropzone">
   {% csrf_token %}
 </form>
-
+</div>
+</div>
 </div>
 
-<div class="div-right">
-  <h1>Tasks List</h1>
+<div class="div-left">
+<div class="panel panel-primary">
+<div class="panel-heading">Task List</div>
+
   {% if user.is_authenticated %}
-
-
+  <div class="panel-body">
   <table id="result-list" class="display"  cellspacing="0" width="100%">
     <thead>
       <tr>
@@ -37,7 +42,7 @@
     <tbody>
     </tbody>
   </table>
-
+  </div>
 
 
   {% else %}
@@ -45,6 +50,7 @@
   <div>Log in to save your results</div>
 
   {% endif %}
+</div>
 </div>
 
 {% endblock %}
@@ -83,13 +89,13 @@
     padding: 10px 0px 0px;
   }
   .div-left{
-    width:30%;
+    width:70%;
     height:100%;
     padding: 20px 20px 20px;
     float: left;
   }
   .div-right{
-    width:70%;
+    width:30%;
     height:100%;
     padding: 20px 20px 20px;
     float: right;
@@ -145,7 +151,7 @@
   <script>
     $(document).ready(function () {
       if ($('#result-list').length) { // check if user is logged in
-        var running_template = '<i>Running ' + $('#loading-template').html() + '</i>';
+        var running_template = $('#loading-template').html();
         var view_btn_compiled = _.template($('#viewer-btn-template').html());
         var cellq_name_compiled = _.template($('#cellq-name-template').html());
         var date_now = (new Date()).toLocaleDateString();
@@ -155,7 +161,7 @@
           deferRender: true,
           scroller: true,
           scrollY:550,
-          order: [[4, 'desc']],
+          order: [[7, 'desc']],
           columns: [
             {
               name: 'viewer', data: 'url', width: '50px', orderable: false,
@@ -170,7 +176,7 @@
               }
             },
             {
-              name: 'file-name', data: 'name',
+              name: 'file-name', data: 'name', width: '100px',
               render: function (data, type, row, meta) {
                 if (type === 'display')
                   return cellq_name_compiled({ name: data });
@@ -179,25 +185,25 @@
               }
             },
             {
-              name: 'mother-name', data: 'mother_name', width:'100px',
+              name: 'mother-name', data: 'mother_name', width:'50px',
             },
             {
-              name: 'ovum-A', type: 'num', data: 'number_of_A', defaultContent: running_template, width:'20px',
+              name: 'ovum-A', type: 'num', data: 'number_of_A', defaultContent: running_template, width:'10px',
             },
             {
-              name: 'ovum-B', type: 'num', data: 'number_of_B', defaultContent: running_template, width:'20px',
+              name: 'ovum-B', type: 'num', data: 'number_of_B', defaultContent: running_template, width:'10px',
             },
             {
-              name: 'ovum-C', type: 'num', data: 'number_of_C', defaultContent: running_template, width:'20px',
+              name: 'ovum-C', type: 'num', data: 'number_of_C', defaultContent: running_template, width:'10px',
             },
             {
-              name: 'ovum-D', type: 'num', data: 'number_of_D', defaultContent: running_template, width:'20px',
+              name: 'ovum-D', type: 'num', data: 'number_of_D', defaultContent: running_template, width:'10px',
             },
             {
-              name: 'ovum-E', type: 'num', data: 'number_of_E', defaultContent: running_template, width:'20px',
+              name: 'ovum-E', type: 'num', data: 'number_of_E', defaultContent: running_template, width:'10px',
             },
             {
-              name: 'created', type: 'date', data: 'created', width: '100px',
+              name: 'created', type: 'date', data: 'created', width: '200px',
               render: function (data, type, row, meta) {
                 var date = (new Date(data));
                 if (type === 'display') {
@@ -224,16 +230,17 @@
         $('#result-list').on('xhr.dt', function (e, settings, json, xhr) {
           // json data loaded
           // get a list of queued and running tasks
-          //console.log(e, settings, json, xhr);
+          console.log(e, settings, json, xhr);
           if (!json) return; // consecutive ajax.reload() may result in 'abort' status
-          unfinished_task_ids = _.pluck(_.filter(json.data, (t) => _.contains(unfinished, t.result_status)), 'id');
-          //console.log(unfinished_task_ids);
+          unfinished_task_ids = _.pluck(_.filter(json.data, (t) => _.contains(unfinished, t.status)), 'id');
+          console.log(unfinished_task_ids);
+         
           if (unfinished_task_ids.length > 0 && polling == false) {
             polling = true;
             var finished = ['success', 'failed'];
             var poll = function () {
               $.ajax({
-                url: 'api/v1/status',
+                url: 'api/v1/tasks/status',
                 dataType: 'json',
                 type: 'GET',
                 data: { 'id': unfinished_task_ids },

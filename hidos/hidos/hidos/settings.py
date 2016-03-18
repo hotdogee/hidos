@@ -211,8 +211,8 @@ if platform == 'darwin':  # for mac
 
 
 # Python path
-PYTHON_SCRIPT = '/Users/Weian/GitHub/hidos/venv/bin/python'  # this is development on weian's mac
-
+# PYTHON_SCRIPT = '/Users/Weian/GitHub/hidos/venv/bin/python'  # this is development on weian's mac
+PYTHON_SCRIPT = '/home/weian/.pyenv/versions/2.7.11/bin/python'
 
 # Version
 VERSION = '0.6.1'

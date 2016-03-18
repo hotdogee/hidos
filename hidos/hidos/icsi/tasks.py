@@ -50,12 +50,18 @@ def run_image_analysis_task(task_id, args_list, path_prefix):
 
     # run
     for args in args_list:
-        Popen(args, stdin=PIPE, stdout=PIPE).wait()
+        logger.info(args)
+	Popen(args, stdin=PIPE, stdout=PIPE).wait()
 
+    
+		
     # update result state
     result_status = ''
+    with open('/'.join(path_prefix.split('/')[:-1]) + '/predict_result.json') as data_file:
+        predict_result = json.load(data_file)
 
-    crop_img_path = glob.glob(path_prefix+'_Crop*')
+
+    crop_img_path = glob.glob(path_prefix+'_Crop[1-9].jpg')
     record.result_status = 'failed'
     if len(crop_img_path) == 0:
        result_status = 'NO_OUT_JPG'
@@ -73,15 +79,27 @@ def run_image_analysis_task(task_id, args_list, path_prefix):
         ovum_E = 0
 
         for crop in crop_img_path:
-            logger.info("cropping")
+            file_name = crop.split('/')[-1]
+            predict_score = float(predict_result[file_name])
+            logger.info(predict_score) 
             Ovum = OvumGrade()
+            if predict_score < 0.5:
+                Ovum.grade = "A"
+                ovum_A +=1
+            else:
+                Ovum.grade = "E"
+                ovum_E +=1
+
+
+            logger.info("cropping")
             Ovum.ovum_id = task_id + '_' + str(ovum_count)
             Ovum.ovum_number = ovum_count
             ovum_count += 1
-            ovum_A += 1
             Ovum.parent_imageanalysis = ICSIImageAnalysis(task_id = task_id)
             Ovum.status = 'success'
-            Ovum.grade = 'A' # Modify here when ML result is ready.
+
+
+
             Ovum.graded_time = datetime.utcnow().replace(tzinfo=utc)
             Ovum.save()
 

@@ -48,6 +48,8 @@ def tasks(request):
 
 def status(request):
     task_ids = []
+    current_tz = timezone.get_current_timezone()
+
     if request.method == 'GET':
         task_ids = request.GET.getlist('id')
     elif request.method == 'POST':
@@ -76,7 +78,7 @@ def retrieve(request, task_id='1'):
         paths = []
         grades =[]
         test = str()
-        for x in glob('.' + settings.MEDIA_URL + 'icsi/task/' + task_id + '/' + task_id + '_Crop*'):
+        for x in glob('.' + settings.MEDIA_URL + 'icsi/task/' + task_id + '/' + task_id + '_Crop[1-9].jpg'):
             paths.append(x[1:])
 
         for ovums in record.ovums.all():
@@ -85,13 +87,13 @@ def retrieve(request, task_id='1'):
         for i in range(0,len(paths)):
             img = {'path':paths[i], 'grade':grades[i]}
             images.append(img)
-
+        print(images)
 
         return render(
             request,
             'icsi/result.html',
             {
-                'title': 'Cell E - {0}'.format(record.user_filename),
+                'title': u'Cell E - {0}'.format(record.user_filename),
                 'year': datetime.now().year,
                 'version': record.version,
                 'user_filename': record.user_filename,
@@ -100,6 +102,8 @@ def retrieve(request, task_id='1'):
 
             }
         )
+    
+    
     except ObjectDoesNotExist:
         message = 'Result not found'
         return render(
@@ -175,9 +179,18 @@ def upload(request):
             # build command
             # set R_Script="C:\Program Files\R\R-3.2.2\bin\RScript.exe"
             # %R_Script% 1_6_obj_area_cal_cmd.R IMG_0159.JPG IMG_0159_out.JPG IMG_0159_out.csv
-            script_path = path.join(settings.PROJECT_ROOT, 'icsi', 'bin', 'crop_auto.py')
-            args_list = [[settings.PYTHON_SCRIPT, script_path,'--input', input_image_path,'--output',output_image_path]]
+            script_path =[path.join(settings.PROJECT_ROOT, 'icsi', 'bin', 'crop_auto.py'),
+            path.join(settings.PROJECT_ROOT, 'icsi', 'bin', 'mxnet_IVF.py')]
+	    
+            task_path = path.join(settings.MEDIA_ROOT, 'icsi', 'task', task_id)
 
+            args_list = [
+            [settings.PYTHON_SCRIPT, script_path[0],'--input', input_image_path,'--output',output_image_path],
+            [settings.PYTHON_SCRIPT, script_path[1],'--input', task_path ,'--output',task_path  ]
+            ]
+
+            print(args_list)
+           
             # insert entry into database
             record = ICSIImageAnalysis()
             record.task_id = task_id

@@ -25,7 +25,7 @@
         <ul class="nav navbar-nav">
           <li><a href="{% url 'home' %}">Home</a></li>
           <!-- <li><a href="{% url 'cellcount' %}">Cell Q</a></li> -->
-          <li><a href="{% url 'icsi' %}">Cell E {{ version }}</a></li>
+          <li><a href="{% url 'icsi' %}">Cell S</a></li>
         </ul>
         {% include 'app/loginpartial.html' %}
       </div>
@@ -42,11 +42,9 @@
 
     </div>
 
-<nav class="navbar navbar-inverse navbar-fixed-bottom">
-  <div class="container">
-    <p class="text-right">{{ year|default:"2016" }} - Meridigen</p>
-  </div>
-</nav>
+<footer class="footer">
+    <p class="text-right" style="padding-right:20px">{{ year|default:"2016" }} - Meridigen</p>
+</footer>
 
   <script src="{% static 'app/scripts/jquery-1.10.2.js' %}"></script>
   <script src="{% static 'app/scripts/bootstrap.js' %}"></script>

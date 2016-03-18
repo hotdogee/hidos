@@ -35,7 +35,7 @@ urlpatterns = [
         },
         name='logout'),
     url(r'^accounts/', include('allauth.urls')),
-    
+
     # Uncomment the admin/doc line below to enable admin documentation:
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
