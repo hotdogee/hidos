@@ -35,7 +35,6 @@
           <th>Viewer</th>
           <th>File Name</th>
           <th>Confluency</th>
-          <th>Count</th>
           <th>Created</th>
         </tr>
       </thead>
@@ -144,7 +143,7 @@
           deferRender: true,
           scroller: true,
           scrollY: 500,
-          order: [[4, 'desc']],
+          order: [[3, 'desc']],
           dom: 'Bfrtip',
           columns: [
             {
@@ -176,9 +175,6 @@
                 else
                   return type === 'display' ? Math.round(data * 10000) / 100 + '%' : data;
               }
-            },
-            {
-              name: 'count', type: 'num', data: 'result.count_min', defaultContent: running_template, width: '100px'
             },
             {
               name: 'created', type: 'date', data: 'created', width: '100px',
