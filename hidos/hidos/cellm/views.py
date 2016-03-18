@@ -67,8 +67,8 @@ def home(request):
             request,
             'cellm/index.html',
             {
-                'title':'Home',
-                'year':datetime.now().year,
+                'title': 'Cell M1',
+                'year': datetime.now().year,
                 'version': version,
             }
         )
@@ -135,7 +135,7 @@ def retrieve(request, task_id='1'):
             request,
             'cellm/result.html',
             {
-                'title': 'CellM - {0}'.format(record.user_filename),
+                'title': 'Cell M1 - {0}'.format(record.user_filename),
                 'year': datetime.now().year,
                 'version': record.version,
                 'user_filename': record.user_filename,
@@ -147,7 +147,7 @@ def retrieve(request, task_id='1'):
             request,
             'cellm/error.html',
             {
-                'title': 'CellM Error',
+                'title': 'Cell M1 Error',
                 'year': datetime.now().year,
                 'version': version,
                 'message': message,
@@ -159,7 +159,7 @@ def retrieve(request, task_id='1'):
             request,
             'cellm/error.html',
             {
-                'title': 'CellM Error',
+                'title': 'Cell M1 Error',
                 'year': datetime.now().year,
                 'version': version,
                 'message': message,
