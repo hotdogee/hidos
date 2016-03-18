@@ -184,12 +184,34 @@ LOGGING = {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
+        },
+        'django_log': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': '../../log/django.log',
+            'maxBytes': 1024 * 1024 * 100,  # 100 mb
+        },
+        'celery_log': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': '../../log/celery.log',
+            'maxBytes': 1024 * 1024 * 100,  # 100 mb
         }
     },
     'loggers': {
         'django.request': {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
+            'propagate': True,
+        },
+        'django': {
+            'handlers': ['django_log'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'celery': {
+            'handlers': ['celery_log'],
+            'level': 'INFO',
             'propagate': True,
         },
     }
