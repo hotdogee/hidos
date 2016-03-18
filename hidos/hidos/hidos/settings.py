@@ -241,13 +241,19 @@ USE_CACHE = False
 
 # Celery Settings
 from kombu import Exchange, Queue
-CELERY_DEFAULT_QUEUE = 'hidos'
+CELERY_DEFAULT_QUEUE = 'app'
 CELERY_DEFAULT_EXCHANGE = 'hidos'
 CELERY_DEFAULT_EXCHANGE_TYPE = 'direct'
-CELERY_DEFAULT_ROUTING_KEY = 'hidos'
+CELERY_DEFAULT_ROUTING_KEY = 'cellc.task'
 CELERY_QUEUES = ( 
-    Queue('hidos', Exchange('hidos'), routing_key='hidos'),
+    Queue('app', Exchange('hidos'), routing_key='cellc.task'),
 )
+CELERY_ROUTES = {
+    'app.tasks.run_image_analysis_task': {
+        'queue': 'app',
+        'routing_key': 'cellc.task',
+    },
+}
 BROKER_URL = 'amqp://'
 CELERY_RESULT_BACKEND = 'amqp://'
 CELERY_TASK_SERIALIZER = 'json'
