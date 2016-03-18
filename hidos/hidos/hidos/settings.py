@@ -175,44 +175,55 @@ AUTHENTICATION_BACKENDS = (
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'file': {
+            'format': '%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s',
+        },
+    },
     'filters': {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse'
-        }
+        },
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
     },
     'handlers': {
+        'console': {
+            'level': 'INFO',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+        },
         'mail_admins': {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
         },
         'django_log': {
-            'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': '../../log/django.log',
             'maxBytes': 1024 * 1024 * 100,  # 100 mb
+            'formatter': 'file',
         },
         'celery_log': {
-            'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': '../../log/celery.log',
             'maxBytes': 1024 * 1024 * 100,  # 100 mb
+            'formatter': 'file',
         }
     },
     'loggers': {
-        'django.request': {
-            'handlers': ['mail_admins'],
-            'level': 'ERROR',
-            'propagate': True,
-        },
         'django': {
-            'handlers': ['django_log'],
+            'handlers': ['console', 'django_log', 'mail_admins'],
             'level': 'INFO',
             'propagate': False,
         },
+        'py.warnings': {
+            'handlers': ['console'],
+        },
         'celery': {
             'handlers': ['celery_log'],
-            'level': 'DEBUG',
+            'level': 'INFO',
             'propagate': True,
         },
     }
