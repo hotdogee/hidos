@@ -231,13 +231,19 @@ USE_CACHE = False
 
 # Celery Settings
 from kombu import Exchange, Queue
-CELERY_DEFAULT_QUEUE = 'hidos'
+CELERY_DEFAULT_QUEUE = 'cellm'
 CELERY_DEFAULT_EXCHANGE = 'hidos'
 CELERY_DEFAULT_EXCHANGE_TYPE = 'direct'
-CELERY_DEFAULT_ROUTING_KEY = 'hidos'
+CELERY_DEFAULT_ROUTING_KEY = 'cellm.task'
 CELERY_QUEUES = ( 
-    Queue('hidos', Exchange('hidos'), routing_key='hidos'),
+    Queue('cellm', Exchange('hidos'), routing_key='cellm.task'),
 )
+CELERY_ROUTES = {
+    'cellm.tasks.run_cellm_task': {
+        'queue': 'cellm',
+        'routing_key': 'cellm.task',
+    },
+}
 BROKER_URL = 'amqp://'
 CELERY_RESULT_BACKEND = 'amqp://'
 CELERY_TASK_SERIALIZER = 'json'
