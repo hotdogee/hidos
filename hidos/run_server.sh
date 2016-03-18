@@ -1,4 +1,6 @@
 #!/bin/bash -ve
 . hidos/env/bin/activate
-python ./hidos/manage.py runserver 0.0.0.0:8000 &
+cd hidos
+python ./hidos/manage.py runserver 0.0.0.0:8000 > ../../log/runserverout.log 2> ../../log/runservererr.log &
+cd ..
 deactivate
