@@ -26,7 +26,7 @@ from PIL import Image
 version = '0.1'
 
 # Get an instance of a logger
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__) # __name__ == cellq.views
 
 def tasks(request):
     """returns task list for logged in user"""
