@@ -84,14 +84,14 @@ $(document).ready(function () {
               }
             },
             {
-              extend: 'excel',
+              extend: 'excel', // TODO: jquery.dataTables.export2Excel.js
               exportOptions: {
                 columns: (idx, data, node) => idx !== 0,
                 orthogonal: 'filter',
               }
             },
             {
-              extend: 'pdf',
+              extend: 'pdf', // TODO: http://pdfmake.org/
               exportOptions: {
                 columns: (idx, data, node) => idx !== 0,
                 orthogonal: 'filter',

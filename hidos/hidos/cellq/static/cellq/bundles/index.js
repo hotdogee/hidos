@@ -67,7 +67,7 @@ $(document).ready(function () {
             orthogonal: 'filter'
           }
         }, {
-          extend: 'excel',
+          extend: 'excel', // TODO: jquery.dataTables.export2Excel.js
           exportOptions: {
             columns: function columns(idx, data, node) {
               return idx !== 0;
@@ -75,7 +75,7 @@ $(document).ready(function () {
             orthogonal: 'filter'
           }
         }, {
-          extend: 'pdf',
+          extend: 'pdf', // TODO: http://pdfmake.org/
           exportOptions: {
             columns: function columns(idx, data, node) {
               return idx !== 0;
