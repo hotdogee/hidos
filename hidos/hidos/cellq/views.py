@@ -85,10 +85,15 @@ def home(request):
             return HttpResponse('Invalid file')
         uploaded_file = request.FILES['file']
         uploaded_file_data = uploaded_file.read()
+        
         # check if file is image
         image_type = imghdr.what('', uploaded_file_data)
         if not image_type:
+            logger.info('Uploaded image type is unsupported, filename: {0}'.format(uploaded_file.name))
             return HttpResponse('Uploaded image type is unsupported')
+        else:
+            logger.info('Uploaded image type: {0}, filename: {1}'.format(image_type, uploaded_file.name))
+            
         # calculate file hash
         m = hashlib.md5()
         m.update(version)
@@ -98,18 +103,26 @@ def home(request):
         task_id = m.hexdigest()
         # check database for duplicate
         if not CellQAnalysis.objects.filter(task_id=task_id).exists():
-            logger.info('New task_id={0}'.format(task_id))
+            logger.info('New task_id: {0}'.format(task_id))
             # setup file paths
             #task_id = uuid4().hex # TODO: Create from hash of input to check for duplicate inputs
             path_prefix = path.join(settings.MEDIA_ROOT, 'cellq', 'task', task_id, task_id)
+            original_image_path = path_prefix + '_in'
             input_image_path = path_prefix + '_in.jpg'
             output_image_path = path_prefix + '_out.jpg'
             output_json_path = path_prefix + '_out.json'
-
-            if not path.exists(path.dirname(input_image_path)):
-                makedirs(path.dirname(input_image_path))
-            chmod(path.dirname(input_image_path), Perm.S_IRWXU | Perm.S_IRWXG | Perm.S_IRWXO) # ensure the standalone dequeuing process can open files in the directory
+            
+            # create directory
+            if not path.exists(path.dirname(path_prefix)):
+                makedirs(path.dirname(path_prefix))
+            chmod(path.dirname(path_prefix), Perm.S_IRWXU | Perm.S_IRWXG | Perm.S_IRWXO) # ensure the standalone dequeuing process can open files in the directory
         
+            # write query to file
+            if 'file' in request.FILES:
+                with open(original_image_path, 'wb') as original_image_f:
+                    for chunk in uploaded_file.chunks():
+                        original_image_f.write(chunk)
+                  
             # write query to file
             if 'file' in request.FILES:
                 with open(input_image_path, 'wb') as input_image_f:
@@ -135,7 +148,7 @@ def home(request):
 
             run_cellq_task.delay(task_id, args_list, path_prefix)
         else:
-            logger.info('Duplicate task_id={0}'.format(task_id))
+            logger.info('Duplicate task_id: {0}'.format(task_id))
             
         # debug
         #run_cellq_task.delay(task_id, args_list, path_prefix).get()
