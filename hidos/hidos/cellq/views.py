@@ -67,7 +67,7 @@ def home(request):
             request,
             'cellq/index.html',
             {
-                'title': 'Cell M1',
+                'title': 'Cell Q',
                 'year': datetime.now().year,
                 'version': version,
             }
@@ -135,7 +135,7 @@ def retrieve(request, task_id='1'):
             request,
             'cellq/result.html',
             {
-                'title': 'Cell M1 - {0}'.format(record.user_filename),
+                'title': 'Cell Q - {0}'.format(record.user_filename),
                 'year': datetime.now().year,
                 'version': record.version,
                 'user_filename': record.user_filename,
@@ -147,7 +147,7 @@ def retrieve(request, task_id='1'):
             request,
             'cellq/error.html',
             {
-                'title': 'Cell M1 Error',
+                'title': 'Cell Q Error',
                 'year': datetime.now().year,
                 'version': version,
                 'message': message,
@@ -159,7 +159,7 @@ def retrieve(request, task_id='1'):
             request,
             'cellq/error.html',
             {
-                'title': 'Cell M1 Error',
+                'title': 'Cell Q Error',
                 'year': datetime.now().year,
                 'version': version,
                 'message': message,

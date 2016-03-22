@@ -1,7 +1,7 @@
 {% extends "app/layout.html" %}
 {% load staticfiles %}
 {% block content %}
-  <h1>Cell M1: Transwell Migration Assay <small>v{{ version }}</small></h1>
+  <h1>Cell Q: Transwell Migration Assay <small>v{{ version }}</small></h1>
   <img src="{% static 'cellq/images/cellq-diagram-v0.1.png' %}">
 
   <form id="add-photos" action="{% url 'home' %}" class="dropzone">
@@ -32,7 +32,7 @@
         <tr>
           <th>Viewer</th>
           <th>File Name</th>
-          <th>Area</th>
+          <th>Count</th>
           <th>Created</th>
         </tr>
       </thead>
