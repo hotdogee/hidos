@@ -21,6 +21,7 @@ from django.utils import timezone
 from django.core.urlresolvers import reverse
 import logging
 import imghdr
+from PIL import Image
 
 version = '0.1'
 
@@ -107,7 +108,7 @@ def home(request):
             # setup file paths
             #task_id = uuid4().hex # TODO: Create from hash of input to check for duplicate inputs
             path_prefix = path.join(settings.MEDIA_ROOT, 'cellq', 'task', task_id, task_id)
-            original_image_path = path_prefix + '_in'
+            original_image_path = path_prefix + '_in.' + image_type # avoid exploits, don't any part of the user filename
             input_image_path = path_prefix + '_in.jpg'
             output_image_path = path_prefix + '_out.jpg'
             output_json_path = path_prefix + '_out.json'
@@ -117,24 +118,20 @@ def home(request):
                 makedirs(path.dirname(path_prefix))
             chmod(path.dirname(path_prefix), Perm.S_IRWXU | Perm.S_IRWXG | Perm.S_IRWXO) # ensure the standalone dequeuing process can open files in the directory
         
-            # write query to file
-            if 'file' in request.FILES:
-                with open(original_image_path, 'wb') as original_image_f:
-                    for chunk in uploaded_file.chunks():
-                        original_image_f.write(chunk)
+            # write original image data to file
+            with open(original_image_path, 'wb') as original_image_f:
+                original_image_f.write(uploaded_file_data)
+            chmod(original_image_path, Perm.S_IRWXU | Perm.S_IRWXG | Perm.S_IRWXO) # ensure the standalone dequeuing process can access the file
                   
-            # write query to file
-            if 'file' in request.FILES:
-                with open(input_image_path, 'wb') as input_image_f:
-                    for chunk in uploaded_file.chunks():
-                        input_image_f.write(chunk)
+            # convert to jpeg for web display
+            Image.open(original_image_path).save(input_image_path)
             chmod(input_image_path, Perm.S_IRWXU | Perm.S_IRWXG | Perm.S_IRWXO) # ensure the standalone dequeuing process can access the file
 
             # build command
             # set R_Script="C:\Program Files\R\R-3.2.2\bin\RScript.exe"
             # "C:\Program Files\R\R-3.2.2\bin\RScript.exe" 1_1_CellQ_han.R "171-1 40x_c005_24.96.JPG" "171-1 40x_c005_24.96_out.JPG" "171-1 40x_c005_24.96.json"
             script_path = path.join(settings.PROJECT_ROOT, 'cellq', 'bin', 'r_cellq_sever_run.R')
-            args_list = [[settings.R_SCRIPT, script_path, input_image_path, output_image_path, output_json_path]]
+            args_list = [[settings.R_SCRIPT, script_path, original_image_path, output_image_path, output_json_path]]
         
             # insert entry into database
             record = CellQAnalysis()
