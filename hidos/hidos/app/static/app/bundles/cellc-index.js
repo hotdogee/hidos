@@ -29,7 +29,7 @@ $(document).ready(function () {
           if (type === 'display') return cellq_name_compiled({ name: data });else return data;
         }
       }, {
-        name: 'area', type: 'num', data: 'result.ratio', defaultContent: running_template, width: '100px',
+        name: 'area', type: 'num', data: 'result.mesh', defaultContent: running_template, width: '100px',
         render: function render(data, type, row, meta) {
           if (!data) return running_template;else return type === 'display' ? Math.round(data * 10000) / 100 + '%' : data;
         }

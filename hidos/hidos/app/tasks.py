@@ -28,7 +28,7 @@ if settings.USE_CACHE:
 def run_image_analysis_task(self, task_id, args_list, path_prefix):
     import django
     django.setup()
-    
+
     self.app.log.redirect_stdouts_to_logger(logger)
     logger.info("image_analysis task_id: %s" % (task_id,))
 
@@ -43,6 +43,7 @@ def run_image_analysis_task(self, task_id, args_list, path_prefix):
     for args in args_list:
         stdoutdata, stderrdata = Popen(args, stdin=PIPE, stdout=PIPE, stderr=PIPE).communicate()
         outerr.append((stdoutdata, stderrdata))
+        logger.info("script %s" % args)
     record.result_outerr = json.dumps(outerr)
 
     # update result state
@@ -61,7 +62,7 @@ def run_image_analysis_task(self, task_id, args_list, path_prefix):
         record.result_status = 'success'
         with open(output_json_path, 'r') as f:
             record.result = json.dumps(json.load(f))
-        
+
     record.result_date = datetime.utcnow().replace(tzinfo=utc)
     record.save()
 

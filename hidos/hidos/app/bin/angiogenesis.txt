@@ -1,0 +1,1502 @@
+// getfile name
+name = getTitle;
+name = split(name,"_");
+filename = name[0];
+file_path = getDirectory('image');
+
+
+
+run("Size...","width=1000 height=667");
+new_img  = getImageID();
+selectImage(new_img);
+saveAs('jpg',file_path+filename+'_in');
+
+var batchChoice = 0;
+var menuanalysis = 0;
+var treeOption = 1;
+var objects = 1;
+var mapJunctionID=0, mapSegmentID=0, mapBranchID=0, mapMasterJunctionID=0;
+var initid=0,workid=0,workingima="",mapExtremaID=0,mapNodesID=0,starttime,q3id,excludeObjectsSize=10,seconds=0;
+var twigSize=25,nbExtrema=0,nbNodes=0,nbJunctions=0,nbLoop=0,nbTwigs,nbSegments,nbIsolated,nbTotalPeaces,loopSize=850, seuilIsolFinal=25,showLoopInBlue=0;
+var nbMesh=0, totalMeshSize=0, initSkeleton=0;
+var totalLenght=0, totalSegmentsLenght=0, totalTwigsLenght=0, totalBranchingLenght=0,totalIsolatedLenght=0,analyzedArea=0,branchingIndex=0,meshIndex=0,meanMeshSize=0;
+var findloopOption=1,pass=0,supressTwig =1,supressIsolated=0,showSupressIsolated=1,nbIt=3;
+var TwigID,showOnlyFinal=1,showLoops=0,showMesh=1,showNodes=1,showExtrema=1,showTwig=1,showMasterSegments=1,showSegments=1,showIsolated=1,showPassChoice=3,rmspeckles=1,Speckelradius=5;
+var supressVerySmallSegments=1,smoothEachLimbing=1; // state = 1 required for ImageJ skeletonize function
+var supressSmallSegments=1, sizeExcludeSegments=30;
+var finalmapBigNodesID=0, smootMapID=0;
+var recordStepOption=0, step=1, stepByStep=0;
+var analyseMasterTree=1, masterTreeID=0, mapMasterTreeID=0, nbMasterJunctions=0, nbMasterJunctionsFinal=0, nbMasterSgment=0, totalMasterSegmentLenght=0;
+var singleAnaMapExtID=0, singleAnaMapNodeID=0, singleShowMaps=0;
+// variable for tab part
+var windowTabName="Stat Results Table",nameOfStatTab="["+windowTabName+"]",label="",undoErease="",batchChoice=0,imageFolder="",nameInitImageorFolder="";
+var objectsChoices= newArray ("Analyze HUVEC Phase Contrast","Analyze HUVEC Fluo"), objectsChoice="Analyze HUVEC Phase Contrast", objects=0, excludeIlandsSize = 20;
+var menuChoices= newArray ("-","Analyze Binary Tree","-","Save Current Analysis" , "Close Current Analysis","Save Current Analysis and Close","-","Blink Overlay [b]","Hide Overlay [h]","Show Overlay [s]");
+
+var TreatedFolderSuffix ="=AN/", treatedImageSuffix="", ext1=".tif",ext2=".TIF";
+var batchStatus="[Batch Progress Window]", batchStatusWindow="Batch Progress Window",countBatchTreated=0,countBatch=0,starttime=0,fileProcessed="";
+var ecranX=screenWidth, ecranY=screenHeight,onFoldeByImage=0,folderTreatedpath;
+var sufficAn="-tr";
+var segmentCoul = "#f00efc", branchCoul = "#6EA978", extremityCoul= "#f70133", extremityEdgeCoul= "#AAD9DB", junctionCoul="#0035ff", twigColour="#19e7fb", isolatedTwigCoul="#00f7fa";
+var nodesCoul="#EDB5BF", masterJunctionCoul="#4D6D9A", masterSegmentCoul="#CCFF00", isolatedElementCoul="#0005fe", meshCoul="#00CED1";
+var rebuiltMapId=0;
+var	reBuiltElements = newArray ("segment","branch","extremity","extremityEdge","junction","twig","isolatedTwig","nodes","masterJunction","masterSegment","isolatedElement","mesh");
+var	reBuiltChoices = newArray (12), reBuiltChoicesNames = newArray (12);
+
+var errorNetMessage ="Error: ";
+var urllist = "http://image.bio.methods.free.fr/ij/ijupdatetest/ListOfMacros.txt";// to check the internet access
+var onlinedoclink = "http://image.bio.methods.free.fr/ImageJ/?Angiogenesis-Analyzer-for-ImageJ.html";
+
+var demoimagelink1 = "http://image.bio.methods.free.fr/ij/ijmacro/Angiogenesis/HUVEC-Pseudo-Phase-Contrast.tif.zip";
+var demoimagelink2 = "http://image.bio.methods.free.fr/ij/ijmacro/Angiogenesis/HUVEC-Fluo.tif.zip";
+
+var demoimagename1 = "HUVEC-Pseudo-Phase-Contrast.tif";
+var demoimagename2 = "HUVEC-Fluo.tif";
+
+var xx = requires147d(); // check version at install time
+function requires147d() {requires("1.47d"); return 0; }
+
+var concatMenuChoices=Array.concat(objectsChoices,menuChoices);
+var menuanalysis=0
+var dCmds = newMenu("Network Analysis Menu Tool",concatMenuChoices);
+
+singleNetworkAnalysis();
+
+function singleNetworkAnalysis () {
+	makeRectangle(0,0,1000,677);
+    if (is("binary")) exit ("This function requires an 8, 16 or 24 bits image.");
+	getStatistics(area, mean, min, max, std, histogram);
+	testDepth=pow(2,bitDepth())-1;
+	if (bitDepth() == 24) testDepth = 255;
+	if (mean == 0 || mean == testDepth) exit ("Empty image");
+	batchChoice=0;
+	workingImagTemp="";
+	windowTabName="Stat Results Table"; nameOfStatTab="["+windowTabName+"]";
+	nameInitImageorFolder="";
+	starttime=getTime;
+	imageFolder=getDirectory("image");
+	findNodes (1);
+	if (isOpen (workid)) selectImage (workid);
+	nomdimage = getTitle;
+	if (lastIndexOf(nomdimage, sufficAn) > 1) {
+		workingima = substring (nomdimage,0,lastIndexOf(nomdimage, sufficAn));
+	} else {workingima=nomdimage;}
+	nameInitImageorFolder=workingima;
+	if (isOpen (q3id)) selectImage (q3id);
+	rename(workingima+"-Final Tree (q3)");
+	if (isOpen (mapExtremaID)) {
+		selectImage(mapExtremaID);
+		run("Duplicate...", "title=Map_of_Extremities");
+		singleAnaMapExtID=getImageID();
+		selectImage (mapExtremaID); close ();
+	}
+	if (isOpen (mapNodesID)) {
+		selectImage(mapNodesID);
+		run("Duplicate...", "title=Map_of_Nodes");
+		singleAnaMapNodeID=getImageID();
+		selectImage (mapNodesID); close ();
+	}
+	if (singleShowMaps == 0) {
+		if (isOpen (singleAnaMapExtID)) {selectImage (singleAnaMapExtID); close ();}
+		if (isOpen (singleAnaMapNodeID)) {selectImage (singleAnaMapNodeID); close ();}
+		if (isOpen (q3id)) {selectImage (q3id); close ();}
+		if (isOpen(mapMasterTreeID)) {selectImage (mapMasterTreeID); close();}
+		if (isOpen(masterTreeID)) {selectImage (masterTreeID); close();}
+	}
+
+    run("Flatten");
+    final_img = getImageID();
+    selectImage(final_img);
+	saveAs('jpg',file_path+filename+'_out');
+    seconds = (getTime-starttime)/1000;
+	setBatchMode("exit and display");
+	if (isOpen (workid)) selectImage (workid);
+   	menuanalysis=0;
+    print('{"mesh":' + nbMesh +'}');
+}
+
+
+function findNodes (treeOption) {
+	if (batchChoice == 0 && (treeOption == 1) && (menuanalysis==0));
+	meanBgGreenValue=0;
+	workid=getImageID();
+	getStatistics(area, mean, min, max, std, histogram);
+	testDepth=pow(2,bitDepth())-1;
+	if (bitDepth() == 24) testDepth = 255;
+	if (mean != 0 && mean != testDepth) {
+		//step=0;
+		if (treeOption == 1) tree ();
+		run("Options...", "iterations=1 count=1 edm=Overwrite do=Nothing");
+		node ();
+		selectImage (workid);
+		metaResults="Results for vascular branching analysis:\n";
+		metaResults=metaResults+ "Analyzed area="+analyzedArea+ " timing=" +seconds +" sec\n";
+		metaResults=metaResults+"nb Extrema="+ nbExtrema +" nb Nodes="+ nbNodes + " nb Junctions=" + nbJunctions + "\n";
+		metaResults=metaResults+"Nb master segments="+ nbMasterSgment + " Tot. master segments lenght="+  totalMasterSegmentLenght + "\n";
+		metaResults=metaResults+"Nb meshes="+ nbMesh + " Tot.meshes area="+  totalMeshSize + "\n";
+		metaResults=metaResults+"nb total peaces="+ nbTotalPeaces +" nb segments="+ nbSegments + " nb branches="+ nbTwigs + " nb isolated segments="+ nbIsolated+"\n";
+		metaResults=metaResults+"Total lenght="+totalLenght+ " total branching lenght="+totalBranchingLenght +"\n";
+		metaResults=metaResults+"Total segments lenght="+totalSegmentsLenght+" total branches lenght="+ totalTwigsLenght + " total isolated branches lenght="+totalIsolatedLenght+"\n";
+		metaResults=metaResults+"Branching interval=" + branchingIndex + " Mesh Index=" + meshIndex + " Mean Mesh Size = " + meanMeshSize + "\n";
+		metaResults=metaResults+"Path of analyzed file=" + imageFolder ;
+		selectImage (workid);
+		setMetadata("Info", metaResults);
+	} else {
+		workingima=getTitle();
+		if (lastIndexOf(workingima, ".") > 1) {
+			workingima = substring (workingima,0,lastIndexOf(workingima, "."));
+		}
+		rename (workingima);
+		run("Clear Results");
+		analyzedArea=0;  nbExtrema=0; nbNodes=0; nbJunctions=0; nbMasterJunctionsFinal=0;  nbMasterSgment=0; totalMasterSegmentLenght=0; nbMesh=0; totalMeshSize=0; nbTotalPeaces=0; nbSegments=0; nbTwigs=0; nbIsolated=0; totalLenght=0; totalBranchingLenght=0; totalSegmentsLenght=0; totalTwigsLenght=0; totalIsolatedLenght=0; branchingIndex=0; meshIndex=0;  meanMeshSize=0;
+	}
+	if (recordStepOption == 1) {
+		workingimaArch=workingima;
+		workingima = workingima + "-step=" + step;
+		TabWindow (1);
+		workingima = workingimaArch;
+		titreStep=" pass="+stepByStep+"-step"+ (step++);
+		recordSteps (workid,workingima,titreStep);
+	} else {
+		TabWindow (1);
+	}
+	return workid;
+}
+
+function tree () {
+	requires("1.43f");
+	setBatchMode(true);
+	run("Set Scale...", "distance=0 known=0 pixel=1 unit=pixel");
+	depth = bitDepth; nbslice = getSliceNumber();
+	if (depth != 24 && (objects == 1)) exit('Image must be 8 bit RGB encoded');
+	if (bitDepth() == 24 && objects == 2) exit('Image must be 8 or 16 bits encoded');
+	nomdimage = getTitle;
+	initid=getImageID();
+	imageFolder=getDirectory("image");
+	sufix= ".";
+	if (lastIndexOf(nomdimage, sufix) > 1) {
+		workingima = substring (nomdimage,0,lastIndexOf(nomdimage, sufix));
+	} else {workingima=nomdimage;}
+ 	run("Select None");
+ 	titre=workingima+sufficAn;
+ 	workingima=workingima+sufficAn;
+  	run("Duplicate...", "title=&titre");
+	workid = getImageID();
+	q3id = treeHUVECPhase(workid); // HUVEC Phase contrast
+	selectImage (q3id);
+	setForegroundColor (255,255 ,255);
+	getDimensions(width, height, channels, slices, frames);
+	setLineWidth(1);drawRect(0, 0, width, height);
+	run("Options...", "iterations=1 count=1 edm=Overwrite do=Nothing");
+}
+
+function treeHUVECPhase(workid) {
+    run("Duplicate...", "title=initRGB");
+	imaid=getImageID();
+	if (rmspeckles==1) {
+		// find small bright objects
+		selectImage (imaid);
+		run("RGB Stack");
+		setSlice(2);
+		run("Duplicate...", "temp");
+		tempIDee=getImageID();
+		selectImage (imaid);
+		run("RGB Color");
+		selectImage (tempIDee);
+		deflouageRelief2(tempIDee);
+		histoAnalyse(1,"Mean");
+		segmentSpec ();
+		specID=getImageID();
+		selectImage (tempIDee); close ();
+		selectImage (specID);rename ("speckles");
+		run("Dilate");
+	}
+	selectImage (imaid);
+	run("RGB Stack");
+	setSlice(2);
+	run("Duplicate...", "tempfinale");
+	run("Select All");
+	run("Copy"); close ();
+	selectImage (imaid);
+	run("RGB Color");
+	run("8-bit");
+	run("Paste");
+	run("Select None");
+	deflouageRelief(imaid);
+	run("Maximum...", "radius=0");
+	run("Gaussian Blur...", "sigma=0.1");
+	histoAnalyse(1,"MinError");
+	if (rmspeckles==1) {
+		imageCalculator("Subtract ", imaid,specID);
+		if (isOpen (specID)) {selectImage  (specID); close ();}
+		selectImage (imaid);
+	}
+	segMaskMeas=getTitle(); segMaskMeasid=getImageID();
+	rename("q3"); q3Name=getTitle;
+	q3id = getImageID();
+	run("Options...", "iterations=2 count=3 pad edm=Overwrite do=Erode");
+	run("Skeletonize");
+	run("Options...", "iterations=2 count=2 pad edm=Overwrite do=Dilate");
+	run("Skeletonize");
+	selectImage(q3id);
+	return q3id;
+}
+
+function settings () {
+	Dialog.create("Settings for analysis");
+	Dialog.addChoice("Kind of objects:", objectsChoices, objectsChoice);
+	Dialog.show();
+	objectsChoice = Dialog.getChoice();
+	if (objectsChoice == objectsChoices[0]) objects = 1;
+	if (objectsChoice == objectsChoices[1]) objects = 2;
+}
+
+function deflouageRelief(tempDEid) {
+	selectImage(tempDEid);
+	run("Bandpass Filter...", "filter_large=10 filter_small=0 suppress=None tolerance=5 autoscale");
+	run("Duplicate...", "title=tempdefloue");
+	tempdefloueID=getImageID();
+	run("Enhance Contrast", "saturated=0 normalize ");
+	selectImage(tempDEid);
+	run("Enhance Contrast", "saturated=0 normalize "); // a verifier
+	run("Find Edges");
+	imageCalculator("Average", tempDEid,tempdefloueID);
+	selectImage(tempdefloueID); close ();
+	selectImage (tempDEid);
+}
+
+function deflouageRelief2(tempDEid) {
+	selectImage(tempDEid);
+	run("Bandpass Filter...", "filter_large=10 filter_small=0 suppress=None tolerance=5 autoscale");
+	run("Find Edges");
+}
+
+function treeHUVECFluo (workid) {
+	selectImage(workid);
+	run("Duplicate...", "title=initRGB");
+	setAutoThreshold("Percentile dark");
+	run("Convert to Mask");
+	run("Options...", "iterations=1 count=1 pad edm=Overwrite");
+	run("Dilate");
+	run("Skeletonize");
+	rename("q3"); q3Name=getTitle;
+	q3id = getImageID();
+	return q3id;
+}
+
+
+function segmentSpec () {
+	//Speckelradius=2;
+	limiteSpec=floor((Speckelradius*Speckelradius)*3);
+	run("Set Measurements...", "area min perimeter shape redirect=None decimal=2");
+	run("Analyze Particles...", "size=2-"+(limiteSpec)+" circularity=0-1.00 show=Masks clear");
+}
+
+function findLoop (treeID,showBigLoops) {
+	if (! is("Batch Mode")) {setBatchMode(true);}
+	nbLoop=1;
+	nbMesh=0; totalMeshSize=0;
+	if (isOpen (treeID)) selectImage (treeID); else exit ("no tree image available");
+	nom="loopTemp";
+	run("Duplicate...", "title=&nom");
+	loopTempID = getImageID();
+	run("Options...", "iterations=1 count=1 edm=Overwrite do=Dilate");
+	nom="q3-loops";
+	run("Duplicate...", "title=&nom");
+	loopsID = getImageID();
+	getDimensions(width, height, channels, slices, frames);
+	selectImage (loopTempID);
+	getStatistics(area, mean, min, max, std, histogram);
+	loopTemp=histogram[255];
+	while (loopTemp != 0) {
+		nbLoop=0;
+		setThreshold(255, 255, "none");
+		run("Set Measurements...", "area min perimeter redirect=None decimal=2");
+		run("Analyze Particles...", "size=0-Infinity circularity=0.00-1.00 show=Nothing clear include record");
+		for (i=0; i< nResults; i++) {
+			selectImage (loopTempID);
+			setThreshold(255, 255, "red");
+			doWand(getResult("XStart",i), getResult("YStart",i),0, "8-connected");
+			getStatistics(area, mean, min, max, std, histogram);
+			// erease objects without loop
+			if (histogram[0] == 0) {
+				selectImage (loopTempID);
+				run("Clear", "slice");
+				run("Select None");
+			}
+			// invert object containing almost on level of loop
+			if (histogram[0] != 0) {
+				run("Invert");run("Select None");
+				nbLoop ++;
+			}
+		}
+		run("Select None");
+		// remove loops from loopTemp, add loops in q3-loops - loops containing onbject kept in loopTemp
+		if (nbLoop > 0) {
+			selectImage (loopTempID);
+			run("Analyze Particles...", "size=0-Infinity circularity=0.00-1.00 show=Nothing clear include record");
+			selectImage (loopTempID);
+			if (nResults > 0) {
+				for (i=0; i< nResults; i++) {
+			 		selectImage (loopTempID);
+			 		doWand(getResult("XStart",i), getResult("YStart",i),0, "8-connected");
+					getStatistics(area, mean, min, max, std, histogram);
+			 		if (histogram[0] == 0) {
+						run("Clear", "slice");run("Select None");
+						if (area < loopSize) {
+							selectImage (loopsID);
+							run("Restore Selection");
+							run("Invert");
+							run("Select None");
+							if (showLoops == 1 && isOpen(workid)) {
+								selectImage (workid);
+								run("Restore Selection");
+								run("Enlarge...", "enlarge=1");
+								if (showLoopInBlue==1) {
+									run("Add Selection...", "stroke=blue width=1 ");
+								} else {
+									run("Add Selection...", "stroke=yellow width=1 ");
+								}
+								run("Select None");
+							}
+						} else {
+							if (showBigLoops == 1) {
+								// detect meshes
+								selectImage (workid);
+								run("Restore Selection");
+								nbMesh ++;
+								getStatistics(area, mean, min, max, std, histogram);
+								totalMeshSize = totalMeshSize + area;
+								run("Enlarge...", "enlarge=-8");
+								run("Add Selection...", "stroke=&meshCoul width=2 ");
+								run("Select None");
+							}
+						}
+					} else {
+						run("Invert");run("Select None");
+						if (showBigLoops == 1) {
+							// detect meshe included in another meshe
+							selectImage (workid);
+							run("Restore Selection");
+							nbMesh ++;
+							getStatistics(area, mean, min, max, std, histogram);
+							totalMeshSize = totalMeshSize + area;
+							run("Enlarge...", "enlarge=-8");
+							run("Add Selection...", "stroke=&meshCoul width=2 ");
+							run("Select None");
+						}
+					}
+				}
+			}
+		}
+		selectImage (loopTempID);
+		getStatistics(area, mean, min, max, std, histogram);
+		loopTemp=histogram[255];
+	} // end while
+	run("Select None");
+	selectImage (loopTempID);
+	getStatistics(area, mean, min, max, std, histogram);
+	loopTemp=histogram[255];
+	if (isOpen (loopTempID)) {selectImage (loopTempID); close ();}
+	if (isOpen (loopsID)) {
+		selectImage (loopsID);
+		run("Skeletonize");
+		run("Select All");
+		run("Copy"); close();
+		selectImage (treeID);
+		setPasteMode("Copy");
+		run("Paste");
+	}
+	if (totalMeshSize >0 && nbMesh > 0) {meanMeshSize=d2s((totalMeshSize/nbMesh),1);} else {meanMeshSize=0;}
+	setForegroundColor (255,255 ,255);
+	getDimensions(width, height, channels, slices, frames);
+	setLineWidth(1);drawRect(0, 0, width, height);
+}
+
+//setBatchMode("exit and display");
+//exit
+
+function simpleNode () {
+	// note: q3id contains the tree
+	if (isOpen (q3id)) selectImage (q3id); else exit ("no tree image available");
+	getStatistics(area, mean, min, max, std, histogram);
+	analyzedArea=area;
+	totalLenght=0; totalSegmentsLenght=0; totalTwigsLenght=0; totalBranchingLenght=0; branchingIndex=0; meshIndex=0;
+	mapExtremaID= mapExtrema (q3id,workid,1,0);
+	mapNodesID= mapNodes (q3id,workid,1,0,"Nodes");
+	mapTwigID=twigMap (q3id,workid,mapExtremaID,mapNodesID,0);
+	mapExtremaID= mapExtrema (q3id,q3id,1,0);
+	mapNodesID= mapNodes (q3id,q3id,1,0,"Nodes");
+	if (isOpen (mapTwigID)) {selectImage (mapTwigID); close ();}
+	if (isOpen (mapExtremaID)) {selectImage (mapExtremaID); close ();}
+	if (isOpen (mapNodesID)) {selectImage (mapNodesID); close ();}
+	if (isOpen (mapJunctionID)) {selectImage (mapJunctionID); close ();}
+	if (isOpen (mapSegmentID)) {selectImage (mapSegmentID); close ();}
+	if (isOpen (mapBranchID)) {selectImage (mapBranchID); close ();}
+}
+
+function node () {
+	// note: q3id contains the tree
+	if (isOpen (q3id)) selectImage (q3id); else exit ("no tree image available");
+	getStatistics(area, mean, min, max, std, histogram);
+	analyzedArea=area;
+	totalLenght=0; totalSegmentsLenght=0; totalTwigsLenght=0; totalBranchingLenght=0; branchingIndex=0; meshIndex=0;
+	pass = -1; // initial branching
+	if (showPassChoice <0) {
+		mapExtremaID= mapExtrema (q3id,workid,1,0);
+		mapNodesID= mapNodes (q3id,workid,1,0,"Nodes");
+	}
+	if (showPassChoice >=0) {
+		mapExtremaID= mapExtrema (q3id,workid,0,0);
+		mapNodesID= mapNodes (q3id,workid,0,0,"Nodes");
+	}
+	for (pass=0; pass<= nbIt; pass++) {
+		if (showPassChoice >= pass) {
+			if (pass <2 && findloopOption == 1) {
+				findLoop (q3id,0); // remove loops created by the first main simplification
+				mapExtremaID= mapExtrema (q3id,workid,0,0);
+				mapNodesID= mapNodes (q3id,workid,0,0,"Nodes");
+			}
+			cutTwig=1;
+			if (pass==showPassChoice) cutTwig=0;
+			mapTwigID=twigMap (q3id,workid,mapExtremaID,mapNodesID,cutTwig);
+			if (isOpen (mapTwigID)) {selectImage (mapTwigID); close ();}
+			if (isOpen (mapExtremaID)) {selectImage (mapExtremaID); close ();}
+			if (isOpen (mapNodesID)) {selectImage (mapNodesID); close ();}
+			if (isOpen (q3id) && smoothEachLimbing ==1) {
+				// to smooth the zig-zag aspect after limbing and to avoid edge effects
+				selectImage (q3id);
+				run("Smooth");
+				run("Maximum...", "radius=3");
+				run("Make Binary");
+				run("Skeletonize");
+				setForegroundColor (255,255 ,255);
+				getDimensions(width, height, channels, slices, frames);
+				setLineWidth(8);drawRect(0, 0, width, height);
+				setLineWidth(1);
+				setThreshold(255, 255, "none");
+			}
+			//mapExtremaID= mapExtrema (q3id,workid,1,0);
+			mapExtremaID= mapExtrema (q3id,workid,1,1);
+			mapNodesID= mapNodes (q3id,workid,1,1,"Nodes");
+			if (pass==showPassChoice && showMesh==1 && analyseMasterTree==0) {
+				findLoop (q3id,1);
+			}
+			if (isOpen (mapJunctionID)) {selectImage (mapJunctionID); close ();}
+			if (isOpen (mapSegmentID)) {selectImage (mapSegmentID); close ();}
+			if (isOpen (mapBranchID)) {selectImage (mapBranchID); close ();}
+		}
+	}
+}
+
+function twigMap (q3twigid,destination,extremeID,nodesID,rmTwigy) {
+	if (mapSegmentID ==1) {selectImage (mapSegmentID); close();}
+	if ( !isOpen (extremeID) || !isOpen (nodesID) || !isOpen (q3twigid)) exit ("No maps available");
+	getDimensions(width, height, channels, slices, frames);
+	newImage("map Segments", "8-bit White", width, height, 1);
+	mapSegmentID = getImageID();
+	if (isOpen(mapBranchID)) {selectImage(mapBranchID); close();}
+	getDimensions(width, height, channels, slices, frames);
+	newImage("map Twigs", "8-bit White", width, height, 1);
+	mapBranchID = getImageID();
+	// to remove small segments
+	if (isOpen (nodesID) && supressVerySmallSegments == 1) {
+		// to avoide too small segments betxeen two near nodes
+		selectImage (nodesID);
+		nom="finalmapBigNodes";
+		run("Duplicate...", "title=&nom");
+		run("Options...", "iterations=1 count=1 edm=Overwrite do=Dilate");
+		finalmapBigNodesID= getImageID();
+		imageCalculator("Subtract create", q3twigid,finalmapBigNodesID);
+		mapTwigID= getImageID(); // contains segments separated by nodes
+	} else {
+		imageCalculator("Subtract create", q3twigid,nodesID);
+		mapTwigID= getImageID(); // contains segments separated by nodes
+	}
+	selectImage (mapTwigID);
+	rename ("twigDetection and Analysis");
+	run("Analyze Particles...", "size=0-Infinity circularity=0.00-1.00 show=Nothing clear include record");
+	nbSegments=0;nbTwigs=0;nbIsolated=0;nbTotalPeaces=0;
+	totalLenght=0; totalTwigsLenght=0; totalSegmentsLenght=0; totalBranchingLenght=0; totalIsolatedLenght=0;
+	segmentcount=0;
+	if (nResults > 0) {
+		for (i=0; i< nResults; i++) {
+			selectImage (mapTwigID);
+			longueurSegment= floor (getResult ("Perim.",i)/2);
+			doWand(getResult("XStart",i), getResult("YStart",i),0, "8-connected");
+			xstartSelect=getResult("XStart",i);
+			ystartSelect=getResult("YStart",i);
+			selectImage (extremeID);
+			run("Restore Selection");
+			getStatistics(area, mean, min, max, std, histogram);
+			extremHisto=histogram;
+			rmCol=0;supress=0;
+			if (extremHisto [255] ==1 ) {
+				if (area < twigSize) {
+					supress=1;
+					showSelection=0;
+					if (showOnlyFinal == 1 && pass == showPassChoice && showTwig==1) showSelection=1;
+					if (showOnlyFinal == 0 && showTwig==1) showSelection=1;
+					if (showSelection == 1 && isOpen (destination) && rmCol==0) {
+						selectImage (destination);
+						run("Restore Selection");
+						run("Add Selection...", "stroke=&twigColour width=1"); // show too short twigs as overlay
+						selectImage (mapBranchID);
+						run("Restore Selection");
+						run("Add Selection...", "stroke=&twigColour width=1"); // show too short twigs as overlay
+						setForegroundColor(0, 0, 0);
+						run("Fill", "slice");
+						run("Select None");
+						nbTwigs++; totalTwigsLenght=totalTwigsLenght+longueurSegment;
+					}
+				} else {
+					if (rmCol==0)  {
+						nbTwigs++; totalTwigsLenght=totalTwigsLenght+longueurSegment;
+						// place to put the mean green value of twig for futur option of color sorting
+					}
+					run("Select None");
+					showSelection=0;
+					if (showOnlyFinal == 1 && pass == showPassChoice && showTwig==1) showSelection=1;
+					if (showOnlyFinal == 0 && showTwig==1) showSelection=1;
+					if (showSelection == 1 && isOpen (destination) && rmCol==0) {
+						// futur color test here
+						selectImage (destination);
+						run("Restore Selection");
+						run("Add Selection...", "stroke=&branchCoul width=1"); // show twigs as overlay
+						selectImage (mapBranchID);
+						run("Restore Selection");
+						run("Add Selection...", "stroke=&branchCoul width=1"); // show nodes as overlay
+						setForegroundColor(0, 0, 0);
+						run("Fill", "slice");
+						run("Select None");
+					}
+				}
+				if (supress == 1 && supressTwig ==1 && rmTwigy && rmCol==0) {
+					selectImage (mapTwigID);
+					run("Restore Selection");
+					run("Clear", "slice");
+					run("Select None");
+				}
+			}
+			if (extremHisto [255] == 2 ) {
+				if (supressIsolated == 0 && rmCol==0 && longueurSegment > seuilIsolFinal) {totalIsolatedLenght=totalIsolatedLenght+longueurSegment; nbIsolated ++;}
+				showSelection=0;
+				if (showOnlyFinal == 1 && pass == showPassChoice && showTwig==1) showSelection=1;
+				if (showOnlyFinal == 0 && showTwig==1) showSelection=1;
+				if (showSelection == 1 && isOpen (destination) && rmCol==0) {
+					selectImage (destination);
+					run("Restore Selection");
+					if (supressIsolated == 0 && longueurSegment > seuilIsolFinal) {run("Add Selection...", "stroke=&isolatedElementCoul width=1");}
+					if (supressIsolated == 1 && showSupressIsolated == 1) {run("Add Selection...", "stroke=&isolatedTwigCoul width=1"); }
+					if (showSupressIsolated == 1 && longueurSegment <= seuilIsolFinal) {run("Add Selection...", "stroke=&isolatedTwigCoul width=1");}
+					run("Select None");
+					if (supressIsolated == 1 || longueurSegment < seuilIsolFinal && rmCol==0) {
+						selectImage (mapTwigID);
+						run("Restore Selection");
+						run("Clear", "slice");
+						run("Select None");
+					}
+				}
+			}
+			if (extremHisto [255] == 0) {
+				if (rmCol==0) {nbSegments ++; totalSegmentsLenght=totalSegmentsLenght+longueurSegment;}
+				showSelection=0;
+				if (showOnlyFinal == 1 && pass == showPassChoice && showSegments==1) showSelection=1;
+				if (showOnlyFinal == 0 && showTwig==1) showSelection=1;
+				if (showSelection == 1 && isOpen (destination) && rmCol==0) {
+					// futur test for color here
+					selectImage (destination);
+					run("Restore Selection");
+					run("Add Selection...", "stroke=&segmentCoul  width=1"); // show segment as overlay
+					selectImage (mapSegmentID);
+					run("Restore Selection");
+					setForegroundColor(0, 0, 0);
+					run("Fill", "slice");
+					run("Add Selection...", "stroke=&segmentCoul width=1"); // show segment as overlay
+					run("Select None");
+					selectImage (mapSegmentID);
+					run("Select None");
+				}
+			}
+		}
+		selectImage (mapTwigID);
+		run("Analyze Particles...", "size=0-Infinity circularity=0.00-1.00 show=Nothing clear include record");
+	}
+	run("Select None");
+	if (supressVerySmallSegments == 0) imageCalculator("Add ", mapTwigID, nodesID);
+	if (isOpen (nodesID) && isOpen (finalmapBigNodesID) && supressVerySmallSegments == 1 ) {
+		if (isOpen(finalmapBigNodesID)) {
+			selectImage (finalmapBigNodesID);
+			getStatistics(area, mean, min, max, std, histogram);
+		}
+		if (isOpen(finalmapBigNodesID) && max!=0) {
+			selectImage (finalmapBigNodesID);
+			run("Options...", "iterations=1 count=1 edm=Overwrite do=Dilate");
+			imageCalculator("Add ", mapTwigID, finalmapBigNodesID);
+			selectImage (mapTwigID);
+		}
+	}
+	selectImage (mapTwigID);
+	run("Select None");
+	rename ("twig resolve");
+	run("Skeletonize");
+	// remove smal objects
+	setForegroundColor (255,255 ,255);
+	getDimensions(width, height, channels, slices, frames);
+	setLineWidth(1);drawRect(0, 0, width, height);
+	setThreshold(255, 255, "none");
+	run("Analyze Particles...", "size=["+(excludeObjectsSize)+"] -Infinity circularity=0.00-1.00 show=Masks clear record");
+	masqueid=getImageID();
+	if (nResults >0) {
+		rename ("mask"+pass);
+		run("Select All");
+		run("Copy");
+		selectImage (mapTwigID);
+		setPasteMode("Copy");
+		run("Paste");
+		run("Select None");
+	}
+	selectImage (masqueid); close ();
+	selectImage (mapTwigID);
+	run("Select All");
+	run("Copy");
+	selectImage (q3twigid);
+	run("Paste");
+	run("Select None");
+	if (isOpen(finalmapBigNodesID)) {
+		selectImage (finalmapBigNodesID);
+		getStatistics(area, mean, min, max, std, histogram);
+		if (max ==0) close ();
+	}
+	// option analyseMasterTree
+	if (analyseMasterTree == 1 && (nbSegments >1) && pass == showPassChoice) {
+		masterJunstionMap (mapSegmentID, destination);
+	}
+	if (isOpen(finalmapBigNodesID)) {selectImage(finalmapBigNodesID); close ();}
+	if (isOpen (smootMapID)) {selectImage (smootMapID); close ();}
+	// end option analyseMasterTree
+	selectImage (q3twigid);
+	run("Select None");
+	selectImage (mapTwigID);
+	run("Select None");
+	nbTotalPeaces= nbIsolated+nbTwigs+nbSegments;
+	totalTwigsLenght=floor(totalTwigsLenght);
+	totalIsolatedLenght=floor(totalIsolatedLenght);
+	totalSegmentsLenght=floor(totalSegmentsLenght);
+	totalBranchingLenght=totalSegmentsLenght+totalTwigsLenght;
+	totalLenght=totalBranchingLenght+totalIsolatedLenght;
+	if (totalSegmentsLenght >=1 && nbTwigs >0)   { branchingIndex=d2s((totalSegmentsLenght/(nbTwigs)),3);} else {branchingIndex =0;}
+	return mapTwigID;
+}
+
+function masterJunstionMap (mapSegment2Id, destination2ID) {
+	setForegroundColor (255, 255, 255);
+	nbMasterSgment=0; totalMasterSegmentLenght=0;
+	nom="masterTreeID";
+	if (isOpen(finalmapBigNodesID) && supressVerySmallSegments == 1) {
+		// method without the very small segments
+		selectImage (mapSegment2Id);
+		run("Invert");
+		imageCalculator("Add create", mapSegment2Id,finalmapBigNodesID); // verifier si n�c�ssaire
+		setThreshold(255, 255, "none");
+		rename(nom);
+		masterTreeID=getImageID();
+		run("Invert");
+		run("Skeletonize");
+		run("Invert");
+		mapNodes (masterTreeID,destination2ID,1,0,"MasterNodes");
+	} else {
+		// method with the very small segments
+		selectImage(nodesID);
+		run("Select None");
+		nom2="tempSmoothNodesMap";
+		run("Duplicate...", "title=&nom2");
+		smootMapID = getImageID();
+		run("Options...", "iterations=1 count=3 edm=Overwrite do=Dilate");
+		selectImage (mapSegment2Id);
+		run("Invert");
+		imageCalculator("Add create", mapSegment2Id,smootMapID);
+		rename(nom);
+		masterTreeID=getImageID();
+		run("Invert");
+		run("Skeletonize");
+		run("Invert");
+		mapNodes (masterTreeID,destination2ID,1,0,"MasterNodes");
+	}
+	// calulates and overlay the master segments
+	imageCalculator("Multiply create", mapMasterJunctionID,masterTreeID);
+	rename ("mapMasterTree");
+	mapMasterTreeID = getImageID();
+	run("Invert");
+	getDimensions(width, height, channels, slices, frames);
+	setForegroundColor (255, 255, 255);
+	setLineWidth(1);drawRect(0, 0, width, height);
+	setForegroundColor (0, 0, 0);
+	run("Select None");
+	run("Analyze Particles...", "size=0-Infinity circularity=0.00-1.00 show=Nothing clear include record");
+	// quantify and plot master segments
+	nbMasterSgment = nResults;
+	if (nResults > 0) {
+		for (i=0; i< nResults; i++) {
+			selectImage (mapMasterTreeID);
+			longueurSegment= floor (getResult ("Perim.",i)/2);
+			doWand(getResult("XStart",i), getResult("YStart",i),0, "8-connected");
+			getStatistics(area, mean, min, max, std, histogram);
+			if (min != max) longueurSegment= floor (getResult ("Perim.",i));
+			if (min == max) longueurSegment= floor (getResult ("Perim.",i)/2);
+			// option to supress small master segments
+			ereaseSegment=0;
+			if (longueurSegment <= sizeExcludeSegments && supressSmallSegments ==1) {
+				ereaseSegment=1;
+			}
+			xstartSelect=getResult("XStart",i);
+			ystartSelect=getResult("YStart",i);
+			if (ereaseSegment==0) {
+				selectImage (mapSegment2Id);
+				run("Restore Selection");
+				if (showMasterSegments==1) run("Add Selection...", "stroke=&masterSegmentCoul width=2");
+				run("Select None");
+				selectImage (destination2ID);
+				run("Restore Selection");
+				if (showMasterSegments==1) run("Add Selection...", "stroke=&masterSegmentCoul width=2");
+				run("Select None");
+				selectImage (mapMasterTreeID);
+				run("Select None");
+				totalMasterSegmentLenght = totalMasterSegmentLenght + longueurSegment;
+			} else {
+				selectImage (mapSegment2Id);
+				run("Restore Selection");
+				run("Clear", "slice");
+				run("Select None");
+				selectImage (mapMasterJunctionID);
+				run("Restore Selection");
+				run("Enlarge...", "enlarge=2");
+				run("Fill", "slice");
+				run("Select None");
+				nbMasterSgment=nbMasterSgment-1;
+			}
+		}
+	}
+	// plot the master junction (and quantify the merged nodes)
+	selectImage (mapMasterJunctionID);
+	run("Select None");
+	run("Analyze Particles...", "size=0-Infinity circularity=0.00-1.00 show=Nothing clear include record");
+	if (nResults > 0) {
+		nbMasterJunctions=0;
+		for (i=0; i< nResults; i++) {
+			selectImage (mapMasterJunctionID);
+			doWand(getResult("XStart",i), getResult("YStart",i),0, "8-connected");
+			run("Select None");
+			selectImage (destination);
+			run("Restore Selection");
+			run("Enlarge...", "enlarge=4");
+			run("Add Selection...", "stroke=&masterJunctionCoul width=2 "); // show master junction as overlay
+			run("Select None");
+			nbMasterJunctions ++;
+		}
+	}
+	if (showMesh==1 && analyseMasterTree==1) {
+		selectImage (masterTreeID);
+		run("Invert LUT");
+		findLoop (masterTreeID,1);
+	}
+	nbMasterJunctionsFinal=nbMasterJunctions;
+	if (totalMasterSegmentLenght > 0 && nbMasterJunctions > 0)   meshIndex=d2s((totalMasterSegmentLenght/(nbMasterJunctions)),3); else {
+	meshIndex =0;}
+}
+
+// return the mean value of an histogram
+function MeanStatHisto (histo,mini,maxi) {
+	volhisto=0;meanhisto=0;nbPixel=0;
+	if ((maxi-mini) > 0 ) {
+		for (i=mini; i<= maxi; i++) {
+			volhisto=volhisto +(i* histo[i]);
+			nbPixel=nbPixel+(histo[i]);
+		}
+	}
+	if (nbPixel >0) meanhisto=volhisto/nbPixel;
+	return meanhisto;
+}
+
+function mapExtrema (binID,destination,overlay,keepPreviousMap) {
+	//return mapExtremaID which contains the limits (as 1x1 pixels dots)
+	nbExtrema=0;
+	if (isOpen(mapExtremaID) && keepPreviousMap==0) {selectImage (mapExtremaID); close();} //else {exit ("no tree image available");}
+	if (isOpen (binID)) {selectImage (binID);} else {exit ("no tree image available");}
+	nomdArbre=getTitle;
+	nom="mapExtrema";
+	run("Duplicate...", "title=&nom");
+	mapExtremaID = getImageID();
+	roiManager("Show None");
+	run("Remove Overlay");
+	selectImage (mapExtremaID);
+	getDimensions(width, height, channels, slices, frames);
+	setBackgroundColor (255, 255, 255);
+	setForegroundColor (0, 0, 0);
+	run("Select All");
+	run("Clear", "slice");run("Select None");
+	showSelection=0;
+	if (showOnlyFinal == 1 && pass == showPassChoice  && overlay==1) showSelection=1;
+	if (showOnlyFinal == 0 && showExtrema==1 && overlay==1) showSelection=1;
+	for (j=0; j<height; j++) {
+		for (i=0; i<width; i++) {
+			selectImage(binID);
+			environs=0;
+			snif = getPixel(i,j);
+			if (snif > 0) {
+				if (getPixel(i-1,j-1) == 255) environs ++;
+				if (getPixel(i,j-1) == 255) environs ++;
+				if (getPixel(i+1,j-1) == 255) environs ++;
+				if (getPixel(i-1,j) == 255) environs ++;
+				if (getPixel(i+1,j) == 255) environs ++;
+				if (getPixel(i-1,j+1) == 255) environs ++;
+				if (getPixel(i,j+1) == 255) environs ++;
+				if (getPixel(i+1,j+1) == 255) environs ++;
+				if (environs == 1)  {
+					selectImage(mapExtremaID);
+					setPixel(i, j, 255);
+					showSelection=0;
+					if (showOnlyFinal == 1 && pass == showPassChoice && showExtrema==1 && overlay==1) showSelection=1;
+					if (showOnlyFinal == 0 && showExtrema==1 && overlay==1) showSelection=1;
+					if (showSelection == 1 && isOpen (destination)) {
+						selectImage (destination);
+						makePoint(i,j);
+						run("Add Selection...", "stroke=&extremityCoul width=1"); // show extremite as overlay
+						makeRectangle((i-1), (j-1), 3, 3);
+						run("Add Selection...", "stroke=&extremityEdgeCoul width=1"); // show extremite as overlay
+					}
+					nbExtrema ++;
+				}
+				run("Select None");
+			}
+		}
+	}
+	//mapExtremaID contains the limits
+	return mapExtremaID;
+}
+
+function mapNodes (binID,destination,overlay,keepPreviousMap,calculate) {
+	//returns mapNodesID which contains the map of the nodes (as 5x5 pixels circular dots)
+	nbNodes=0; nbJunctions=0; nbMasterJunctions=0;
+	if (isOpen(mapNodesID) && keepPreviousMap==0) {selectImage (mapNodesID); close();}
+	if (isOpen (binID)) selectImage (binID); else exit ("no tree image available");
+	if (isOpen (mapMasterJunctionID)) {selectImage (mapMasterJunctionID); close();}
+	if (calculate=="MasterNodes") {
+		getDimensions(width, height, channels, slices, frames);
+		newImage("map Master Junctions", "8-bit White", width, height, 1);
+		mapMasterJunctionID = getImageID();
+	}
+	selectImage (binID);
+	nomdArbre=getTitle;
+	nom="mapNodes";
+	run("Duplicate...", "title=&nom");
+	mapNodesID = getImageID();
+	roiManager("Show None");
+	run("Remove Overlay");
+	nom="tempNode";
+	selectImage (binID);
+	run("Duplicate...", "title=&tempNode");
+	tempNodeID=getImageID();
+	selectImage (mapNodesID);
+	getDimensions(width, height, channels, slices, frames);
+	setBackgroundColor (255, 255, 255);
+	setForegroundColor (0, 0, 0);
+	run("Select All");
+	run("Clear", "slice");run("Select None");
+	j=0;
+	for (j=0; j<height; j++) {
+		for (i=0; i<width; i++) {
+			selectImage(tempNodeID);
+			environs=0;
+			snif = getPixel(i,j);
+			if (snif > 0) {
+				if (getPixel(i-1,j-1) == 255) environs ++;
+				if (getPixel(i,j-1) == 255) environs ++;
+				if (getPixel(i+1,j-1) == 255) environs ++;
+				if (getPixel(i-1,j) == 255) environs ++;
+				if (getPixel(i+1,j) == 255) environs ++;
+				if (getPixel(i-1,j+1) == 255) environs ++;
+				if (getPixel(i,j+1) == 255) environs ++;
+				if (getPixel(i+1,j+1) == 255) environs ++;
+				if (environs > 2)  {
+					selectImage(mapNodesID);
+					//makeRectangle((i-1), (j-1), 3, 3);
+					makeOval((i-3), (j-3), 7, 7);
+					//if (pass == showPassChoice && supressVerySmallSegments == 1) makeOval((i-4), (j-4), 9, 9); //to avoid very small segments due to two near nodes (1 or 2 pixels distant)
+					run("Fill", "slice");
+					run("Select None");
+					showSelection=0;
+					if (showOnlyFinal == 1 && pass == showPassChoice && showNodes==1 && overlay==1) showSelection=1;
+					if (showOnlyFinal == 0 && showNodes==1 && overlay==1) showSelection=1;
+					if (showSelection == 1 && isOpen (destination)) {
+						selectImage (destination);
+						//makeRectangle((i-1), (j-1), 3, 3);
+						makeOval((i-3), (j-3), 7, 7);
+						if (calculate=="Nodes") run("Add Selection...", "stroke=&nodesCoul width=1 fill=&nodesCoul"); // show nodes as overlay
+					}
+					if (calculate=="Nodes") nbNodes ++;
+				}
+				run("Select None");
+			}
+		}
+	}
+	if (isOpen(tempNodeID)) { selectImage (tempNodeID); close ();}
+	run("Select None");
+	selectImage (mapNodesID);
+	nom="mapJunction";
+	run("Duplicate...", "title=&nom");
+	mapJunctionID=getImageID();
+	run("Set Measurements...", "area min perimeter redirect=None decimal=2");
+	run("Analyze Particles...", "size=0-Infinity circularity=0.00-1.00 show=Nothing clear include record");
+	for (i=0; i< nResults; i++) {
+		selectImage (mapJunctionID);
+		doWand(getResult("XStart",i), getResult("YStart",i),0, "8-connected");
+		if (showSelection == 1 && isOpen (destination)) {
+			selectImage (destination);
+			run("Restore Selection");
+			if (supressVerySmallSegments==1) {run("Enlarge...", "enlarge=0");} else {run("Enlarge...", "enlarge=1");}
+			if (calculate=="Nodes") {
+				run("Add Selection...", "stroke=&junctionCoul width=2 "); // show junctions as overlay
+				run("Select None");
+				nbJunctions ++;
+			}
+			if (calculate=="MasterNodes") {
+				nbMasterJunctions ++;  // number to be recalculated in the final master node map
+				selectImage (mapMasterJunctionID);
+				run("Restore Selection");
+				run("Fill", "slice");
+				run("Select None");
+			}
+		}
+		selectImage (mapJunctionID);
+		run("Select None");
+	}
+	if (isOpen(mapJunctionID)) { selectImage (mapJunctionID); close ();}
+	selectImage (mapNodesID);
+	return mapNodesID;
+	// mapNodes contains the nodes
+}
+
+// for segmentation of the tree
+function histoAnalyse(Bright,method) {
+	// get the auto threshold values
+	partofHisto=0;histo1=0;
+	method = method +" dark";
+	setAutoThreshold(method);getThreshold (lower, upper);
+	resetThreshold();
+	// analyse of the histogram:
+	getStatistics(area, mean, min, max, std, histogram);
+	vol=newArray(3);
+	vol[0]=volume (histogram,min,lower);
+	vol[1]=volume (histogram,lower,upper);
+	vol[2]=volume (histogram,upper,max);
+	maxvol=maxOf(vol[1], vol[2]);
+	for (a=1; a<3; a++) {if (maxvol == vol[a]) partofHisto = a;}
+	if (partofHisto == 1) histo1=lower;
+	if (partofHisto == 2) histo1=upper;
+   	setThreshold(histo1, max,"black & white");
+	run("Convert to Mask");
+	if (Bright==0) run("Invert");
+}
+
+function volume (histo,mini,maxi) {
+	volhisto=0;
+	if ((maxi-mini) > 0) {
+		for (i=mini; i<= maxi; i++) {
+			volhisto=volhisto +(i* histo[i]);
+		}
+	}
+	return volhisto;
+}
+
+function recordTheStepOfLimbing () {
+	stepID=getImageID();
+	recordStepOption=1;
+	step=1;
+	batchChoice=1;
+	nomdimage = getTitle;
+	if (lastIndexOf(nomdimage, sufficAn) > 1) {
+		workingima = substring (nomdimage,0,lastIndexOf(nomdimage, sufficAn));
+	} else {workingima=nomdimage;}
+	nameInitImageorFolder=workingima;
+	workingImagTemp=nameInitImageorFolder;
+	windowTabName="Stat Results Table"; nameOfStatTab="["+windowTabName+"]";
+	if ( !is("binary")) settings ();
+	binStatus=0;
+	if ( is("binary")) binStatus =1;
+	imageFolder=getDirectory("image");
+	imageFolderStep=imageFolder;
+	for (stepByStep=-1; stepByStep<= nbIt; stepByStep++) {
+		if (stepByStep < 0) {
+			if ( !is("binary")) tree ();
+			if (is("binary")) q3id=getImageID();
+			workingImagTemp=workingima;
+			totreatTemp=getImageID();
+			if (isOpen(q3id)) {
+			 	selectImage(q3id);
+			 	titreStep=" pass="+(stepByStep)+"-step"+ (step++);
+				recordSteps (q3id,workingImagTemp,titreStep);
+				selectImage(q3id);
+			}
+			findLoop (totreatTemp,0);
+			if (isOpen(q3id)) {
+			 	selectImage(q3id);
+			 	titreStep=" pass="+(stepByStep)+"-step"+ (step++);
+				recordSteps (q3id,workingImagTemp,titreStep);
+				selectImage(q3id);
+			}
+			batchChoice=1;
+			loopIDTemp=getImageID();
+			batchChoice=1;
+			findNodesAndBranches ();
+			batchChoice=1;
+			imageFolder=imageFolderStep;
+			if (isOpen(workid)) {
+				selectImage(workid);
+				run("Grays");
+				titreStep=" pass="+(stepByStep)+"-step"+ (step++);
+				recordSteps (workid,workingImagTemp,titreStep);
+				selectImage(workid); close ();
+			}
+			if (isOpen(q3id)) {
+			 	selectImage(q3id);
+			 	run("Grays");
+			 	titreStep=" pass="+(stepByStep)+"-step"+ (step++);
+				recordSteps (q3id,workingImagTemp,titreStep);
+				selectImage(q3id); close ();
+			}
+		} else {
+			showPassChoice=stepByStep;
+			if ( binStatus== 0) {
+				selectImage (stepID);
+				findNodes (1);
+			} else {
+				workingima =workingImagTemp;
+			 	selectImage (stepID);
+			 	rename(workingima);
+				run("Duplicate...", "title=q3 bis");
+				q3id=getImageID();
+				findNodes (0);
+			}
+		}
+	}
+	recordStepOption=0; batchChoice=0;
+}
+
+//setBatchMode("exit and display");
+//exit
+
+function recordSteps (toRecordId,toRecordIma,curentStep) {
+
+ 	if (imageFolder  !="" && toRecordIma !="" )  {
+ 		recordFolderStep = imageFolder + toRecordIma + "=Steps" + File.separator;
+ 		recordFolderStepVisu = recordFolderStep + "Visus" + File.separator;
+ 		 File.makeDirectory(recordFolderStep);
+		if (!File.exists(recordFolderStep)) exit ("Unable to create the \"" + recordFolderStep + "\"" +" directory.");
+		File.makeDirectory(recordFolderStepVisu);
+		if (!File.exists(recordFolderStepVisu)) exit ("Unable to create the \"" + recordFolderStepVisu + "\"" +" directory.");
+		if (isOpen (toRecordId)) {
+			selectImage (toRecordId);
+			run("Flatten");
+			pathVisu=recordFolderStepVisu + toRecordIma + curentStep + "-visu";
+			saveAs("PNG",pathVisu);
+			close();
+			selectImage (toRecordId);
+			saveAs("tiff",recordFolderStep + toRecordIma + curentStep);
+		}
+		if (isOpen(windowTabName)) {saveTab (recordFolderStep,windowTabName,toRecordIma);}
+ 	}
+}
+
+// tab for results part
+// function building/managing a table window
+function TabWindow (addLine) {
+	// values:
+	undoErease = "";
+	if (! isOpen(windowTabName)) {
+		run("New... ", "name="+nameOfStatTab+" type=Table");
+		print(nameOfStatTab, "\\Headings:Image Name\tAnalysed area\tNb extrem.\tNb nodes\tNb Junctions\tNb master junction\tNb master segments\tTot. master segments lenght\tNb meshes\tTot.meshes area\tNb peaces\tNb segments\tNb branches\tNb isol. seg.\tTot. lenght\tTot. branching lenght\tTot. segments lenght\tTot. branches lenght\tTot. isol. branches lenght\tBranching interval\tMesh index\tMean Mesh Size\tPath");
+	}
+	if (addLine == 0) {print(nameOfStatTab, "\\Clear");}
+	print(nameOfStatTab,  workingima+ "\t" + analyzedArea + "\t" + nbExtrema + "\t" + nbNodes +  "\t" + nbJunctions + "\t" + nbMasterJunctionsFinal + "\t" + nbMasterSgment + "\t" + totalMasterSegmentLenght + "\t" + nbMesh + "\t" + totalMeshSize + "\t" + nbTotalPeaces +  "\t" + nbSegments+  "\t" + nbTwigs +  "\t" +nbIsolated +  "\t" + totalLenght +  "\t" + totalBranchingLenght +  "\t" + totalSegmentsLenght + "\t" + totalTwigsLenght  + "\t" + totalIsolatedLenght + "\t" + branchingIndex + "\t" + meshIndex + "\t" + meanMeshSize + "\t" + imageFolder);
+}
+
+// function removing the last line of the tab
+function rmLastLine () {
+	if ( isOpen (windowTabName)) {
+		selectWindow (windowTabName);
+   		tabContent = getInfo();
+   		linesInTab = split(tabContent, "\n");
+		if (linesInTab[linesInTab.length-1] > 0) {
+			print(nameOfStatTab, "\\Clear");
+			resteLines="";
+			for (i=1; i < (linesInTab.length -1); i++) {
+				resteLines=resteLines+linesInTab[i] +"\n";
+			}
+			if (linesInTab.length > 2) print (nameOfStatTab,resteLines);
+			if (linesInTab.length > 1) undoErease=linesInTab[linesInTab.length-1];
+		}
+	}
+}
+
+// function restoring the last ereased line in the table
+function undormLastLine () {
+	if (undoErease != "") print(nameOfStatTab,undoErease);
+	undoErease="";
+}
+
+function openStatResultTable () {
+    requires("1.39d");
+  	path = File.openDialog("Select a File");
+	name = File.getName(path);
+	if (endsWith(name, ".xls")) {name=substring(name, 0, indexOf(name, ".xls"));} else {exit ("This file doesn't seam to be an Excel type file.");}
+ 	openTab (path,name);
+ 	imageFolder=""; path="";
+}
+
+function saveAndCloseAnalysis (closeWin) {
+	workingImagTemp="";
+	setBatchMode(true);
+	if (isOpen (workid)) {
+		selectImage (workid);
+		workingImagTemp=getTitle();
+	}
+	if (isOpen(singleAnaMapExtID)) {
+		titreStep="-Map of Extremities";
+		recordSteps (singleAnaMapExtID,workingImagTemp,titreStep);
+		if (closeWin==1) {selectImage (singleAnaMapExtID); close ();}
+	}
+	if (isOpen(singleAnaMapNodeID)) {
+		titreStep="-Map of Nodes";
+		recordSteps (singleAnaMapNodeID,workingImagTemp,titreStep);
+		if (closeWin==1) {selectImage (singleAnaMapNodeID); close ();}
+	}
+	if (isOpen(masterTreeID)) {
+		titreStep="-Master Tree";
+		recordSteps (masterTreeID,workingImagTemp,titreStep);
+		if (closeWin==1) {selectImage (masterTreeID); close ();}
+	}
+	if (isOpen(mapMasterTreeID)) {
+		titreStep="-Map of Master Tree";
+		recordSteps (mapMasterTreeID,workingImagTemp,titreStep);
+		if (closeWin==1) {selectImage (mapMasterTreeID); close ();}
+	}
+	if (isOpen(initid)) {
+		titreStep="-init";
+		recordSteps (initid,workingImagTemp,titreStep);
+		if (closeWin==1) {selectImage (initid); close ();}
+	}
+	if (isOpen(workid)) {
+		titreStep="";
+		recordSteps (workid,workingImagTemp,titreStep);
+		if (closeWin==1) {selectImage (workid); close ();}
+	}
+	if (isOpen(q3id)) {
+		titreStep="-Final Tree";
+		selectImage (q3id);
+		run("Remove Overlay");
+		recordSteps (q3id,workingImagTemp,titreStep);
+		if (closeWin==1) {selectImage (q3id); close ();}
+	}
+}
+
+function settings () {
+	Dialog.create("Settings for analysis");
+	Dialog.addChoice("Kind of objects:", objectsChoices, objectsChoice);
+	Dialog.show();
+	objectsChoice = Dialog.getChoice();
+	if (objectsChoice == objectsChoices[0]) objects = 1;
+	if (objectsChoice == objectsChoices[1]) objects = 2;
+}
+
+function closeAll() {
+	if (! is("Batch Mode")) {setBatchMode(true);}
+	if (isOpen (mapExtremaID)) {selectImage (mapExtremaID); close ();}
+	if (isOpen (mapNodesID)) {selectImage (mapNodesID); close ();}
+	if (isOpen (q3id)) {selectImage (q3id); close ();}
+	if (isOpen (workid)) {selectImage (workid); close ();}
+	if (isOpen (initid)) {selectImage (initid); close ();}
+	if (isOpen(mapMasterTreeID)) {selectImage (mapMasterTreeID); close();}
+	if (isOpen(masterTreeID)) {selectImage (masterTreeID); close();}
+	if (isOpen(mapMasterJunctionID)) {selectImage (mapMasterJunctionID); close();}
+	if (isOpen(singleAnaMapExtID)) {selectImage (singleAnaMapExtID); close();}
+	if (isOpen(singleAnaMapNodeID)) {selectImage (singleAnaMapNodeID); close();}
+	if (isOpen(initSkeleton)) {selectImage (initSkeleton); close();}
+}
+
+// saving a tab as excel type file
+function saveTab (path,WinTab,nameinit) {
+	if (isOpen(windowTabName)) {
+		if (path == "--" || path =="") {
+			selectWindow (windowTabName);
+			run("Input/Output...", "jpeg=75 gif=-1 file=.xls");
+			saveAs("Text");
+		}
+		if (path != "--") {
+			selectWindow(windowTabName);
+			thepath = path+nameinit+"-"+WinTab+".xls";
+			if (WinTab != "Stat Results Table") {
+				thepath = path+ WinTab + ".xls";
+			} else
+				if (nameinit == "") {
+					thepath = path+nameinit + WinTab +".xls";
+				} else {
+					thepath = path+nameinit+"-"+WinTab +".xls";
+				}
+			}
+		saveAs("Text", thepath);
+	} else {exit ("No Stat Results Table. Tab files have to be opened or generated by the Angiogenesis Analyzer");}
+}
+
+function openTab (path,name) {
+	undoErease="";windowTabName=name; workingima="";
+	lines=split(File.openAsString(path), "\n");
+	if (lines.length < 2) { exit ("This file doesn't seam to contain data");}
+  	headings = lines[0];
+	titlesOfColumns = split(headings, ",\t");
+	nameOfStatTab="["+windowTabName+"]";
+	if (isOpen(windowTabName)) {selectWindow(windowTabName) ;run("Close");}
+	firstLine="";
+	for (i=0; i < (titlesOfColumns.length ); i++) {
+		firstLine=firstLine+ titlesOfColumns [i];
+		if ( i < (titlesOfColumns.length )-1) {firstLine=firstLine+ "\t";}
+	}
+	toPrint="";
+	for (i=1; i < (lines.length ); i++) {
+		toPrint=toPrint+lines[i]+"\n";
+	}
+	run("New... ", "name="+nameOfStatTab+" type=Table");
+	print(nameOfStatTab, "\\Headings:"+firstLine+"");
+	print(nameOfStatTab,toPrint);
+}
+
+//  batch processing adapter:
+function batchProcessing () {
+	selectedDir = getDirectory("Choose a Directory ");
+	nameInitImageorFolder = File.getName(selectedDir);
+	setBatchMode(true);
+	settings ();
+	workingImagTemp="";
+	windowTabName ="Stat Results Table";
+	nameOfStatTab="["+windowTabName+"]";	// ajuster le nom avec le nom de dossier master
+	if (isOpen(windowTabName)) {print(nameOfStatTab, "\\Clear");}
+	countBatch = 0; // number of file to analyse
+	countFiles(selectedDir);
+	incremcountBatch = 0;	fileProcessed=""; countBatchTreated=0;
+	starttime = getTime();
+	if (countBatch > 0) {
+		showMessageWithCancel (countBatch + " Image(s) will be processed");
+		if (isOpen(batchStatusWindow)) {print(batchStatus, "\\Clear");}
+		processFiles(selectedDir);
+		fileProcessed=fileProcessed + "Nb image(s) processed="+countBatchTreated+ ". Processing time= "+ HMS (getTime-starttime) ;
+		saveTab (selectedDir,windowTabName,nameInitImageorFolder);
+	} else {exit ("No .tiff file found");}
+}
+
+// count the number of file to process according to criteria, image suffix, folder name suffix, file type ?
+function countFiles(selectedDir) {
+	list = getFileList(selectedDir);
+	for (i=0; i<list.length; i++) {
+		if (endsWith(list[i], "/") && ! endsWith(list[i], TreatedFolderSuffix)) {
+			countFiles(""+selectedDir+list[i]);
+		} else {
+			path = selectedDir+list[i];
+			if (endsWith(path, ext1) || endsWith(path, ext2)) {
+				countBatch++;
+			}
+		}
+	}
+}
+
+function processFiles(selectedDir) {
+	list = getFileList(selectedDir);
+	for (i=0; i<list.length; i++) {
+		if (endsWith(list[i], "/") && ! endsWith(list[i], TreatedFolderSuffix)){
+			processFiles(""+selectedDir+list[i]);
+		} else {
+			showProgress(incremcountBatch++, countBatch);
+			path = selectedDir+list[i];
+			if (endsWith(path, ext1) || endsWith(path, ext2)) {
+				countBatchTreated++;
+				processFile(path,1);
+				call("java.lang.System.gc"); // empty the garbage memomry
+				print ("\\Clear");
+				fileProcessed=fileProcessed + path+ "\n";
+				// built the progess batch window
+				if (!isOpen(batchStatusWindow)) {run("New... ", "name="+batchStatus+" type=Table");}
+				print(batchStatus, "\\Clear");
+     			print(batchStatus, fileProcessed);
+				meanTime=(getTime-starttime)/countBatchTreated;
+				timeRemaining=(countBatch-countBatchTreated)*meanTime;
+				print(batchStatus, countBatchTreated + " image(s) processed on " + countBatch);
+				print(batchStatus, "Performed processing time: " + HMS (getTime-starttime));
+				print(batchStatus, "Mean processing time per image= " + HMS (meanTime));
+				if ((countBatch-countBatchTreated) != 0) print(batchStatus, "Estimated processing time remaining: " + HMS (timeRemaining));
+				if (isOpen(batchStatusWindow)) {
+					selectWindow (batchStatusWindow);
+					setLocation(0, (ecranY/2));
+				}
+			}
+		}
+	}
+}
+
+function HMS (milliSec) {
+	seconds = milliSec/1000;
+	Shours= (floor (seconds/3600));
+	Sminutes= floor ((seconds-(3600*Shours)) /60);
+	Sseconds= d2s ((seconds-(3600*Shours)-(60*Sminutes)),2);
+	theTime=toString(Shours) + " h " + toString(Sminutes) + " min "+ toString(Sseconds) + " sec";
+	return theTime;
+}
+
+function processFile(path,saveOption) {
+	open(path);
+	folderpath=getDirectory("image");
+	returnedImageID=Treatment();
+	if (saveOption ==1) {
+		format="tiff";
+		if (onFoldeByImage==1) {
+			folderTreatedpath=folderpath + imageName + TreatedFolderSuffix +File.separator; // on folder for each image
+		}
+		if (onFoldeByImage==0) {
+			foldername=File.getName(folderpath);
+			folderTreatedpath=folderpath + foldername + TreatedFolderSuffix +File.separator; // on folder for all images
+		}
+		File.makeDirectory(folderTreatedpath);
+		if (!File.exists(folderTreatedpath)) exit ("Unable to create the \"" + folderTreatedpath + "\"" +" directory.");
+		selectImage(returnedImageID);nom = getTitle;
+		if (folderTreatedpath != "") {
+			if (isOpen (workid)) {
+				selectImage (workid);
+				saveAs (format, folderTreatedpath+nom);
+				pathVisu=folderTreatedpath+nom+"-visu";
+				run("Flatten");
+				saveAs("jpeg",pathVisu);
+				close();
+			}
+		}
+	}
+	closeAll (); // for residual analysis images
+}
+
+// Image treatment function
+function Treatment() {
+	analysedID=findNodes (1);
+	return analysedID;
+}
+
+macro "Hide overlay [h]" {
+	run("Hide Overlay");
+}
+
+macro "Show overlay [s]" {
+	run("Show Overlay");
+}
+
+// for blinking to evaluate the pertinancy
+macro "Blink overlay [b]" {
+	blinkOverlay () ;
+}
+
+function blinkOverlay () {
+	source=getImageID();
+ 	blink (source);
+}
+
+function blink (image) {
+	selectImage (image);
+	start = getTime;
+	while (click()==0 && (getTime-start)<4000) {
+		wait(500);click();run("Hide Overlay");
+		wait(500);run("Show Overlay");
+	}
+}
+
+// adapted from the GetCursorLocDemo macro available at the
+// http://rsb.info.nih.gov/ij/macros/GetCursorLocDemo.txt
+function click() {
+	rightButton=4;leftButton=16;
+	getCursorLoc(x, y, z, flags);
+	if (flags&leftButton!=0) exit;
+    if (flags&rightButton!=0) exit;
+    return 0;
+}
+
+// additional utilities
+function aboutTheTools () {
+	requires("1.46i");
+	about="--------------------------- \"Angiogenesis Analyzer\" ------------------------------\n\n";
+	about= about+"This set of tools allows analysis of cellular networks. Typically it can detect and analyze the\n";
+	about= about+"pseudo vascular organization of endothelial cells cultured in gel medium.\n";
+	about= about+"Version 1.0.a for numerical support of 2012 edition of the  ImageJ Conferences, Luxembourg.\n";
+	about= about+"\n";
+	about= about+"------------------------------------------------------------------------------\n";
+	about= about+"Installation: the tools file has to be stored in the \"ImageJ/macros/toolset\" repertory \n";
+	about= about+"------------------------------------------------------------------------------\n";
+	about= about+"Short documentation:\n\n";
+	about= about+"- \" Network Analysis Menu Tool\" provides functions to analyze phase contrast and fluorescent\n";
+	about= about+"   images of endothelial cell networks.\n";
+	about= about+"- \" Blurred Mask Tool\" removes the gradient in a selected area, useful to remove aggregates of\n";
+	about= about+"   dirt in phase contrast images.\n";
+	about= about+"- \" Tuning Functions Menu Tool\" regroups a series of functions to test each step of analysis \n";
+	about= about+"   the best settings for a new image origin. It also provides a tool to get \n";
+	about= about+"   customized overlays of detected elements.\n";
+	about= about+"- \" Batch Image Treatment Tool\" allows analysis of batch of images in several level of directories.\n";
+	about= about+"   The function records individual results summarized in a table as an Excel like file and\n";
+	about= about+"   analyzed images containing the detected elements as overlay.\n";
+	about= about+"- \" Measurement Documents Menu Tool\" regroups functions to open, edit and save the result\n";
+	about= about+"- \" Online Documentation and Demo\" tool bar menu gives some internet resources including\n";
+	about= about+"  online documentation and downloadable images samples.\n";
+	about= about+"- \" Version and Update Information\" tool bar menu provides version and update information.\n";
+	about=about + "\n------------------------------------------------------------------------------";
+	about=about +"\nAuthor : Gilles Carpentier"+"\nFaculte des Sciences et Technologie"+"\nUniversite Paris Est Creteil Val de Marne, France.";
+	about=about + "\n------------------------------------------------------------------------------\n";
+	// from PrintToTextWindow macro available at the http://rsbweb.nih.gov/ij/macros/PrintToTextWindow.txt
+	// author: Wayne Rasband
+	title1 = "Infos for the \"Angiogenesis Analyzer\"";
+	title2 = "["+title1+"]";
+	f = title2;
+	if (isOpen(title1)) {
+		print(f, "\\Update:"); // clears the window
+  		print(f, about);
+		selectWindow (title1);
+	} else {
+		run("New... ", "name="+title2+" type=[Text File] width=80 height=16");
+  		print(f, about);
+	}
+}
+
+function netTest () {
+	if (indexOf (File.openUrlAsString(urllist), errorNetMessage) >0) exit("You need an internet access to run this function.");
+}
+
+function doc () {
+	netTest ();
+	showMessageWithCancel  ("A notice is avaible on line. Open it with your default web browser?");
+	run("URL...", "url=["+onlinedoclink +"]");
+}
+
+function OpenImageLink(link,name,question) {
+	// Check if already downloaded.
+	demoimalocation = getDirectory("startup");
+	fildestination = demoimalocation+ "Downloaded Demo Images/" + name;
+	if (File.exists(fildestination)) {
+		if (question ==1 ) showMessageWithCancel ("The \"" + name + "\" has already been downloaded. Open it?");
+		open(fildestination);
+	}
+	else {
+		netTest ();
+		showMessageWithCancel ("ImageJ will download a demo image. Continue?");
+		run("URL...", "url=["+link+"]");
+		imageid = getImageID();
+		nomdimage = getTitle;
+		// Create a <Downloaded Demo Images> repertory in ImageJ folder.
+		ImaDemo = demoimalocation+"Downloaded Demo Images"+File.separator;
+		File.makeDirectory(ImaDemo);
+		if (!File.exists(ImaDemo)) exit("Unable to create directory, something wrong in the ImageJ folder");
+		selectWindow(nomdimage);
+		save(""+ImaDemo+""+ nomdimage +"");
+	}
+}
+

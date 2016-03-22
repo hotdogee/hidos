@@ -14,7 +14,7 @@ class Folder(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
-# CellQ result model
+# Cell tube result model
 class ImageAnalysis(models.Model):
     task_id = models.CharField(max_length=32, primary_key=True) # ex. 128c8661c25d45b8-9ca7809a09619db9
     enqueue_date = models.DateTimeField(auto_now_add=True)
@@ -27,7 +27,7 @@ class ImageAnalysis(models.Model):
     parent_folder = models.ForeignKey(Folder, models.SET_NULL, null=True)
     version = models.CharField(max_length=32)
     user_filename = models.CharField(max_length=255) # ext3 max filename = 255
-    #cell_ratio = models.FloatField()
+    mesh_number = models.IntegerField(null=True) # now only count the mesh number
 
     def __unicode__(self):
         return self.task_id

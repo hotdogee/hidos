@@ -35,7 +35,7 @@ $(document).ready(function () {
           }
         },
         {
-          name: 'area', type: 'num', data: 'result.ratio', defaultContent: running_template, width: '100px',
+          name: 'area', type: 'num', data: 'result.mesh', defaultContent: running_template, width: '100px',
           render: function (data, type, row, meta) {
             if (!data)
               return running_template;

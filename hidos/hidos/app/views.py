@@ -96,7 +96,7 @@ def home(request):
             if not path.exists(path.dirname(input_image_path)):
                 makedirs(path.dirname(input_image_path))
             chmod(path.dirname(input_image_path), Perm.S_IRWXU | Perm.S_IRWXG | Perm.S_IRWXO) # ensure the standalone dequeuing process can open files in the directory
-        
+
             # write query to file
             if 'file' in request.FILES:
                 with open(input_image_path, 'wb') as input_image_f:
@@ -107,9 +107,16 @@ def home(request):
             # build command
             # set R_Script="C:\Program Files\R\R-3.2.2\bin\RScript.exe"
             # %R_Script% 1_6_obj_area_cal_cmd.R IMG_0159.JPG IMG_0159_out.JPG IMG_0159_out.csv
-            script_path = path.join(settings.PROJECT_ROOT, 'app', 'bin', '1_6_obj_area_cal_cmd.R')
-            args_list = [[settings.R_SCRIPT, script_path, input_image_path, output_image_path, output_json_path]]
-        
+            # script_path = path.join(settings.PROJECT_ROOT, 'app', 'bin', '1_6_obj_area_cal_cmd.R')
+            # args_list = [[settings.R_SCRIPT, script_path, input_image_path, output_image_path, output_json_path]]
+
+            # java -jar ij-1.50e.jar IMG_0346.JPG  -batch macros/toolsets/test.txt
+            ij_path = path.join(settings.PROJECT_ROOT, 'app', 'bin', 'imagej','jars','ij-1.50e.jar')
+            marco_path = path.join(settings.PROJECT_ROOT, 'app', 'bin', 'angiogenesis.txt')
+            args_list = [[settings.JAVA, '-jar', ij_path, input_image_path,'-batch', marco_path, '>', output_json_path]]
+            print(args_list)
+
+
             # insert entry into database
             record = ImageAnalysis()
             record.task_id = task_id

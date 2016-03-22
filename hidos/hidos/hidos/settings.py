@@ -237,6 +237,9 @@ R_SCRIPT = r"/usr/bin/Rscript"
 if platform == 'win32':
     R_SCRIPT = r"C:\Program Files\R\R-3.2.2\bin\RScript.exe"
 
+JAVA = r"/usr/bin/java"
+
+
 USE_CACHE = False
 
 # Celery Settings
@@ -245,7 +248,7 @@ CELERY_DEFAULT_QUEUE = 'app'
 CELERY_DEFAULT_EXCHANGE = 'hidos'
 CELERY_DEFAULT_EXCHANGE_TYPE = 'direct'
 CELERY_DEFAULT_ROUTING_KEY = 'cellc.task'
-CELERY_QUEUES = ( 
+CELERY_QUEUES = (
     Queue('app', Exchange('hidos'), routing_key='cellc.task'),
 )
 CELERY_ROUTES = {

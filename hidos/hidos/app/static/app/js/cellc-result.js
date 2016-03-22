@@ -18,7 +18,7 @@ $(function () {
         else {
           // get result json data
           $.getJSON(path_prefix + '_out.json', function (result) {
-            $('#ratio').text(Math.round(result['ratio'] * 10000) / 100 + '%');
+            $('#ratio').text(result['mesh']);
             $('#count').text(result['count_min']);
           });
           // display image

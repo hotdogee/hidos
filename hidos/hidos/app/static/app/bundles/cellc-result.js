@@ -18,7 +18,7 @@ $(function () {
         if (data.data[0].result_status.toLowerCase() != "success") setTimeout(poll, 3000);else {
           // get result json data
           $.getJSON(path_prefix + '_out.json', function (result) {
-            $('#ratio').text(Math.round(result['ratio'] * 10000) / 100 + '%');
+            $('#ratio').text(result['mesh']);
             $('#count').text(result['count_min']);
           });
           // display image
