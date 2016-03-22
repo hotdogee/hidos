@@ -56,7 +56,7 @@ $(document).ready(function () {
                 return date_str;
             }
             else
-              return date;
+              return date.toLocaleString();
           }
         }
       ],
@@ -72,25 +72,29 @@ $(document).ready(function () {
             {
               extend: 'copy',
               exportOptions: {
-                columns: (idx, data, node) => idx !== 0
+                columns: (idx, data, node) => idx !== 0,
+                orthogonal: 'filter',
               }
             },
             {
               extend: 'csv',
               exportOptions: {
-                columns: (idx, data, node) => idx !== 0
+                columns: (idx, data, node) => idx !== 0,
+                orthogonal: 'filter',
               }
             },
             {
               extend: 'excel',
               exportOptions: {
-                columns: (idx, data, node) => idx !== 0
+                columns: (idx, data, node) => idx !== 0,
+                orthogonal: 'filter',
               }
             },
             {
               extend: 'pdf',
               exportOptions: {
-                columns: (idx, data, node) => idx !== 0
+                columns: (idx, data, node) => idx !== 0,
+                orthogonal: 'filter',
               }
             },
           ]

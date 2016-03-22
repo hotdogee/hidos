@@ -40,7 +40,7 @@ $(document).ready(function () {
           if (type === 'display') {
             var date_str = date.toLocaleDateString();
             if (date_now === date_str) return date.toLocaleTimeString();else return date_str;
-          } else return date;
+          } else return date.toLocaleString();
         }
       }],
       createdRow: function createdRow(row, data, index) {
@@ -55,28 +55,32 @@ $(document).ready(function () {
           exportOptions: {
             columns: function columns(idx, data, node) {
               return idx !== 0;
-            }
+            },
+            orthogonal: 'filter'
           }
         }, {
           extend: 'csv',
           exportOptions: {
             columns: function columns(idx, data, node) {
               return idx !== 0;
-            }
+            },
+            orthogonal: 'filter'
           }
         }, {
           extend: 'excel',
           exportOptions: {
             columns: function columns(idx, data, node) {
               return idx !== 0;
-            }
+            },
+            orthogonal: 'filter'
           }
         }, {
           extend: 'pdf',
           exportOptions: {
             columns: function columns(idx, data, node) {
               return idx !== 0;
-            }
+            },
+            orthogonal: 'filter'
           }
         }]
       }]
