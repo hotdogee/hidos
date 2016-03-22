@@ -106,5 +106,23 @@
         "groups": [],
         "user_permissions": []
     }
+},
+{
+    "model": "auth.user",
+    "pk": 7,
+    "fields": {
+        "password": "pbkdf2_sha256$24000$NzbouW1sf7zH$vhOYq3OfEje2l28lF02zdziPItnYeShEVAJdtqCjsAE=",
+        "last_login": null,
+        "is_superuser": true,
+        "username": "hiservice",
+        "first_name": "",
+        "last_name": "",
+        "email": "",
+        "is_staff": true,
+        "is_active": true,
+        "date_joined": "2016-03-22T11:39:58.701Z",
+        "groups": [],
+        "user_permissions": []
+    }
 }
 ]
