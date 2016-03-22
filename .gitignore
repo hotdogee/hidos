@@ -62,3 +62,6 @@ target/
 # sqlite3
 *.sqlite3*
 
+# npm
+node_modules/
+
