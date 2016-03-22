@@ -55,6 +55,8 @@ def status(request):
     return JsonResponse({
         'data': [{
             'id': t.task_id,
+            'name': t.user_filename,
+            'result_outerr': json.loads(t.result_outerr or '{}'),
             'result_status': t.result_status,
             } for t in CellQAnalysis.objects.filter(task_id__in=task_ids)]
         })
