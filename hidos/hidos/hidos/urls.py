@@ -7,7 +7,7 @@ from django.conf.urls import include, url
 from app.forms import BootstrapAuthenticationForm
 from django.contrib.auth import views as auth_views
 #from app import views as app_views
-from cellm import views as app_views
+from cellq import views as app_views
 
 # Uncomment the next lines to enable the admin:
 # from django.conf.urls import include
