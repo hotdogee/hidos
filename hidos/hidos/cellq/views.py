@@ -19,8 +19,13 @@ import hashlib
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 from django.core.urlresolvers import reverse
+import logging
+import imghdr
 
 version = '0.1'
+
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
 
 def tasks(request):
     """returns task list for logged in user"""
@@ -79,16 +84,21 @@ def home(request):
         if 'file' not in request.FILES:
             return HttpResponse('Invalid file')
         uploaded_file = request.FILES['file']
+        uploaded_file_data = uploaded_file.read()
+        # check if file is image
+        image_type = imghdr.what('', uploaded_file_data)
+        if not image_type:
+            return HttpResponse('Uploaded image type is unsupported')
         # calculate file hash
         m = hashlib.md5()
         m.update(version)
         if request.user.is_authenticated():
             m.update(request.user.username)
-        for chunk in uploaded_file.chunks():
-            m.update(chunk)
+        m.update(uploaded_file_data)
         task_id = m.hexdigest()
         # check database for duplicate
         if not CellQAnalysis.objects.filter(task_id=task_id).exists():
+            logger.info('New task_id={0}'.format(task_id))
             # setup file paths
             #task_id = uuid4().hex # TODO: Create from hash of input to check for duplicate inputs
             path_prefix = path.join(settings.MEDIA_ROOT, 'cellq', 'task', task_id, task_id)
@@ -124,7 +134,9 @@ def home(request):
             record.save()
 
             run_cellq_task.delay(task_id, args_list, path_prefix)
-
+        else:
+            logger.info('Duplicate task_id={0}'.format(task_id))
+            
         # debug
         #run_cellq_task.delay(task_id, args_list, path_prefix).get()
         return HttpResponse(task_id)
