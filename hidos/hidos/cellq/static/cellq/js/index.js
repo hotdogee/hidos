@@ -36,12 +36,12 @@ $(document).ready(function () {
           }
         },
         {
-          name: 'area', type: 'num', data: 'result.ratio', defaultContent: running_template, width: '100px',
+          name: 'count', type: 'num', data: 'result.count', defaultContent: running_template, width: '100px',
           render: function (data, type, row, meta) {
             if (!data)
               return running_template;
             else
-              return type === 'display' ? Math.round(data * 10000) / 100 + '%' : data;
+              return data;
           }
         },
         {
