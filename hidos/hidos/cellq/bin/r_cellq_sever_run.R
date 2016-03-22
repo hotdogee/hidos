@@ -7,7 +7,6 @@ library("methods")
 library("base")
 library("EBImage")
 library("RJSONIO")
-library(rjson)
 
 args <- commandArgs(TRUE)
 #print(args)
