@@ -23,7 +23,7 @@ import logging
 import imghdr
 from PIL import Image
 
-version = '0.1'
+version = '0.2'
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__) # __name__ == cellc1.views
