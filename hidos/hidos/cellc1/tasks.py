@@ -4,7 +4,7 @@ from celery.task.schedules import crontab
 from celery.decorators import periodic_task
 from subprocess import Popen, PIPE
 from datetime import datetime, timedelta
-from .models import CellQAnalysis
+from .models import CellC1Analysis
 from os import path, stat
 from pytz import utc
 from itertools import groupby
@@ -25,15 +25,15 @@ if settings.USE_CACHE:
     release_lock = lambda: cache.delete(LOCK_ID)
 
 @shared_task(bind=True) # ignore_result=True
-def run_cellq_task(self, task_id, args_list, path_prefix):
+def run_cellc1_task(self, task_id, args_list, path_prefix):
     import django
     django.setup()
     
     self.app.log.redirect_stdouts_to_logger(logger)
-    logger.info("cellq task_id: %s" % (task_id,))
+    logger.info("cellc1 task_id: %s" % (task_id,))
 
     # update dequeue time
-    record = CellQAnalysis.objects.get(task_id__exact=task_id)
+    record = CellC1Analysis.objects.get(task_id__exact=task_id)
     record.dequeue_date = datetime.utcnow().replace(tzinfo=utc)
     record.result_status = 'running'
     record.save()

@@ -5,12 +5,12 @@
     <div class="jumbotron vertical-center">
       <div class="container text-center">
         <img src="{% static 'app/images/loading.gif' %}">
-        <h3>Cell Q is working...</h3>
+        <h3>Cell C1 is working...</h3>
       </div>
     </div>
   </div>
   <section id="result">
-    <h1>Cell Q: Quantification <small>v{{ version }}</small></h1>
+    <h1>Cell C1: Count <small>v{{ version }}</small></h1>
     <ul>
       <li><h3>Image Name: <span id="name">{{ user_filename }}</span></h3></li>
       <li><h3>Cell Count: <span id="count"></span></h3></li>
@@ -77,5 +77,5 @@
 {% block scripts %}
   <script src="{% static 'app/scripts/jquery.panzoom.js' %}"></script>
   <script src="{% static 'app/scripts/underscore-min.js' %}"></script>
-  <script src="{% static 'cellq/bundles/result.js' %}"></script>
+  <script src="{% static 'cellc1/bundles/result.js' %}"></script>
 {% endblock %}

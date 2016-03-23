@@ -1,8 +1,8 @@
 {% extends "app/layout.html" %}
 {% load staticfiles %}
 {% block content %}
-  <h1>Cell Q: Quantification <small>v{{ version }}</small></h1>
-  <img src="{% static 'cellq/images/cellc1-diagram-v0.2.png' %}">
+  <h1>Cell C1: Count <small>v{{ version }}</small></h1>
+  <img src="{% static 'cellc1/images/cellc1-diagram-v0.2.png' %}">
 
   <form id="add-photos" action="{% url 'home' %}" class="dropzone">
     {% csrf_token %}
@@ -11,13 +11,13 @@
   <ul>
     <li>Example 1
       <ul>
-        <li><a href="/media/cellq/task/9f6773bfb4ad706c69a5a023e3f5e790/9f6773bfb4ad706c69a5a023e3f5e790_in.jpg" download>Download Input Image 1068x1068 (142 kB)</a></li>
+        <li><a href="/media/cellc1/task/9f6773bfb4ad706c69a5a023e3f5e790/9f6773bfb4ad706c69a5a023e3f5e790_in.jpg" download>Download Input Image 1068x1068 (142 kB)</a></li>
         <li><a href="/9f6773bfb4ad706c69a5a023e3f5e790">View Result Page</a></li>
       </ul>
     </li>
     <li>Example 2
       <ul>
-        <li><a href="/media/cellq/task/591a19428ca96737cadd5082b43e6f50/591a19428ca96737cadd5082b43e6f50_in.jpg" download>Download Input Image 966x670 (45.5 kB)</a></li>
+        <li><a href="/media/cellc1/task/591a19428ca96737cadd5082b43e6f50/591a19428ca96737cadd5082b43e6f50_in.jpg" download>Download Input Image 966x670 (45.5 kB)</a></li>
         <li><a href="/591a19428ca96737cadd5082b43e6f50">View Result Page</a></li>
       </ul>
     </li>
@@ -74,7 +74,7 @@
     div.DTS div.dataTables_scrollBody {
       background: white;
     }
-    .cellq-icon {
+    .cellc1-icon {
       display: inline-block;
       width: 22px;
       height: 22px;
@@ -126,8 +126,8 @@
       <span class="glyphicon glyphicon-new-window"></span> Image
     </a>
   </script>
-  <script type="text/template" id="cellq-name-template">
-    <img class="cellq-icon" src="{% static 'app/images/cellq_icon.png' %}"> <%= name %>
+  <script type="text/template" id="cellc1-name-template">
+    <img class="cellc1-icon" src="{% static 'app/images/cellc1_icon.png' %}"> <%= name %>
   </script>
-  <script src="{% static 'cellq/bundles/index.js' %}"></script>
+  <script src="{% static 'cellc1/bundles/index.js' %}"></script>
 {% endblock %}

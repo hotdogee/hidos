@@ -5,7 +5,7 @@ $(document).ready(function () {
     // check if user is logged in
     var running_template = '<i>Running ' + $('#loading-template').html() + '</i>';
     var view_btn_compiled = _.template($('#viewer-btn-template').html());
-    var cellq_name_compiled = _.template($('#cellq-name-template').html());
+    var cellc1_name_compiled = _.template($('#cellc1-name-template').html());
     var date_now = new Date().toLocaleDateString();
     var result_table;
     result_table = $('#result-list').DataTable({
@@ -26,7 +26,7 @@ $(document).ready(function () {
       }, {
         name: 'file-name', data: 'name',
         render: function render(data, type, row, meta) {
-          if (type === 'display') return cellq_name_compiled({ name: data });else return data;
+          if (type === 'display') return cellc1_name_compiled({ name: data });else return data;
         }
       }, {
         name: 'count', type: 'num', data: 'result.count', defaultContent: running_template, width: '100px',

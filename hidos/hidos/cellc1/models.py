@@ -7,8 +7,8 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from app.models import Folder
 
-# CellQ result model
-class CellQAnalysis(models.Model):
+# CellC1 result model
+class CellC1Analysis(models.Model):
     task_id = models.CharField(max_length=32, primary_key=True) # ex. 128c8661c25d45b8-9ca7809a09619db9
     enqueue_date = models.DateTimeField(auto_now_add=True)
     dequeue_date = models.DateTimeField(null=True)
@@ -26,9 +26,9 @@ class CellQAnalysis(models.Model):
         return self.task_id
 
     def get_absolute_url(self):
-        return reverse('cellq:retrieve', args=[str(self.task_id)])
+        return reverse('cellc1:retrieve', args=[str(self.task_id)])
 
     class Meta:
-        verbose_name = 'CellQ Analysis'
+        verbose_name = 'Cell C1 Analysis'
 
 # TODO: Permissions class for sharing

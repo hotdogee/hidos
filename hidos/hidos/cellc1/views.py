@@ -7,12 +7,12 @@ from django.shortcuts import redirect
 from django.http import HttpRequest
 from django.http import JsonResponse
 from datetime import datetime
-from .models import CellQAnalysis
+from .models import CellC1Analysis
 from django.http.response import HttpResponse
 from django.conf import settings
 from os import path, makedirs, chmod
 from uuid import uuid4
-from .tasks import run_cellq_task
+from .tasks import run_cellc1_task
 import stat as Perm
 import json
 import hashlib
@@ -26,7 +26,7 @@ from PIL import Image
 version = '0.1'
 
 # Get an instance of a logger
-logger = logging.getLogger(__name__) # __name__ == cellq.views
+logger = logging.getLogger(__name__) # __name__ == cellc1.views
 
 def tasks(request):
     """returns task list for logged in user"""
@@ -39,13 +39,13 @@ def tasks(request):
                 'id': t.task_id,
                 'name': t.user_filename,
                 'url': reverse('retrieve', kwargs={'task_id': t.task_id}),
-                'result_img': settings.MEDIA_URL + 'cellq/task/' + t.task_id + '/' + t.task_id + '_out.jpg',
-                'input_img': settings.MEDIA_URL + 'cellq/task/' + t.task_id + '/' + t.task_id + '_in.jpg',
+                'result_img': settings.MEDIA_URL + 'cellc1/task/' + t.task_id + '/' + t.task_id + '_out.jpg',
+                'input_img': settings.MEDIA_URL + 'cellc1/task/' + t.task_id + '/' + t.task_id + '_in.jpg',
                 'result': json.loads(t.result or '{}'),
                 'result_outerr': json.loads(t.result_outerr or '{}'),
                 'result_status': t.result_status,
                 'created': current_tz.normalize(t.enqueue_date.astimezone(current_tz)).isoformat(),
-                } for t in CellQAnalysis.objects.filter(user=request.user)]
+                } for t in CellC1Analysis.objects.filter(user=request.user)]
             })
 
 def status(request):
@@ -64,7 +64,7 @@ def status(request):
             'name': t.user_filename,
             'result_outerr': json.loads(t.result_outerr or '{}'),
             'result_status': t.result_status,
-            } for t in CellQAnalysis.objects.filter(task_id__in=task_ids)]
+            } for t in CellC1Analysis.objects.filter(task_id__in=task_ids)]
         })
 
 def home(request):
@@ -73,9 +73,9 @@ def home(request):
     if request.method == 'GET':
         return render(
             request,
-            'cellq/index.html',
+            'cellc1/index.html',
             {
-                'title': 'Cell Q',
+                'title': 'Cell C1',
                 'year': datetime.now().year,
                 'version': version,
             }
@@ -103,11 +103,11 @@ def home(request):
         m.update(uploaded_file_data)
         task_id = m.hexdigest()
         # check database for duplicate
-        if not CellQAnalysis.objects.filter(task_id=task_id).exists():
+        if not CellC1Analysis.objects.filter(task_id=task_id).exists():
             logger.info('New task_id: {0}'.format(task_id))
             # setup file paths
             #task_id = uuid4().hex # TODO: Create from hash of input to check for duplicate inputs
-            path_prefix = path.join(settings.MEDIA_ROOT, 'cellq', 'task', task_id, task_id)
+            path_prefix = path.join(settings.MEDIA_ROOT, 'cellc1', 'task', task_id, task_id)
             original_image_path = path_prefix + '_in.' + image_type # avoid exploits, don't any part of the user filename
             input_image_path = path_prefix + '_in.jpg'
             output_image_path = path_prefix + '_out.jpg'
@@ -129,12 +129,12 @@ def home(request):
 
             # build command
             # set R_Script="C:\Program Files\R\R-3.2.2\bin\RScript.exe"
-            # "C:\Program Files\R\R-3.2.2\bin\RScript.exe" 1_1_CellQ_han.R "171-1 40x_c005_24.96.JPG" "171-1 40x_c005_24.96_out.JPG" "171-1 40x_c005_24.96.json"
-            script_path = path.join(settings.PROJECT_ROOT, 'cellq', 'bin', 'r_cellq_sever_run.R')
+            # "C:\Program Files\R\R-3.2.2\bin\RScript.exe" 1_1_CellC1_han.R "171-1 40x_c005_24.96.JPG" "171-1 40x_c005_24.96_out.JPG" "171-1 40x_c005_24.96.json"
+            script_path = path.join(settings.PROJECT_ROOT, 'cellc1', 'bin', 'r_cellc1_sever_run.R')
             args_list = [[settings.R_SCRIPT, script_path, original_image_path, output_image_path, output_json_path]]
         
             # insert entry into database
-            record = CellQAnalysis()
+            record = CellC1Analysis()
             record.task_id = task_id
             record.version = version
             record.user_filename = uploaded_file.name
@@ -143,23 +143,23 @@ def home(request):
                 record.user = request.user
             record.save()
 
-            run_cellq_task.delay(task_id, args_list, path_prefix)
+            run_cellc1_task.delay(task_id, args_list, path_prefix)
         else:
             logger.info('Duplicate task_id: {0}'.format(task_id))
             
         # debug
-        #run_cellq_task.delay(task_id, args_list, path_prefix).get()
+        #run_cellc1_task.delay(task_id, args_list, path_prefix).get()
         return HttpResponse(task_id)
 
 def retrieve(request, task_id='1'):
     #return HttpResponse("retrieve = %s." % (task_id))
     try:
-        record = CellQAnalysis.objects.get(task_id=task_id)
+        record = CellC1Analysis.objects.get(task_id=task_id)
         return render(
             request,
-            'cellq/result.html',
+            'cellc1/result.html',
             {
-                'title': 'Cell Q - {0}'.format(record.user_filename),
+                'title': 'Cell C1 - {0}'.format(record.user_filename),
                 'year': datetime.now().year,
                 'version': record.version,
                 'user_filename': record.user_filename,
@@ -169,9 +169,9 @@ def retrieve(request, task_id='1'):
         message = 'Result not found'
         return render(
             request,
-            'cellq/error.html',
+            'cellc1/error.html',
             {
-                'title': 'Cell Q Error',
+                'title': 'Cell C1 Error',
                 'year': datetime.now().year,
                 'version': version,
                 'message': message,
@@ -181,9 +181,9 @@ def retrieve(request, task_id='1'):
         message = 'Result not found ({0})'.format(e.message)
         return render(
             request,
-            'cellq/error.html',
+            'cellc1/error.html',
             {
-                'title': 'Cell Q Error',
+                'title': 'Cell C1 Error',
                 'year': datetime.now().year,
                 'version': version,
                 'message': message,

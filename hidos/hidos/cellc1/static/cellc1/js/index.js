@@ -3,7 +3,7 @@ $(document).ready(function () {
   if ($('#result-list').length) { // check if user is logged in
     var running_template = '<i>Running ' + $('#loading-template').html() + '</i>';
     var view_btn_compiled = _.template($('#viewer-btn-template').html());
-    var cellq_name_compiled = _.template($('#cellq-name-template').html());
+    var cellc1_name_compiled = _.template($('#cellc1-name-template').html());
     var date_now = (new Date()).toLocaleDateString();
     var result_table;
     result_table = $('#result-list').DataTable({
@@ -30,7 +30,7 @@ $(document).ready(function () {
           name: 'file-name', data: 'name',
           render: function (data, type, row, meta) {
             if (type === 'display')
-              return cellq_name_compiled({ name: data });
+              return cellc1_name_compiled({ name: data });
             else
               return data;
           }

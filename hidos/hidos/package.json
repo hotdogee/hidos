@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build:cellq:js": "babel cellq/static/cellq/js -d cellq/static/cellq/bundles",
-    "build": "npm run build:cellq:js"
+    "build:cellc1:js": "babel cellc1/static/cellc1/js -d cellc1/static/cellc1/bundles",
+    "build": "npm run build:cellc1:js"
   },
   "author": "",
   "license": "ISC",
