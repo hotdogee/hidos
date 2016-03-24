@@ -1,8 +1,8 @@
 {% extends "app/layout.html" %}
 {% load staticfiles %}
 {% block content %}
-  <h1>Cell C: Confluency <small>v{{ version }}</small></h1>
-  <img src="{% static 'app/images/cellc-diagram.png' %}">
+  <h1>Cell C2: Confluency <small>v{{ version }}</small></h1>
+  <img src="{% static 'app/images/cellc2-diagram.png' %}">
 
   <form id="add-photos" action="{% url 'home' %}" class="dropzone">
     {% csrf_token %}
@@ -130,5 +130,5 @@
   <script type="text/template" id="cellq-name-template">
     <img class="cellq-icon" src="{% static 'app/images/cellq_icon.png' %}"> <%= name %>
   </script>
-  <script src="{% static 'app/bundles/cellc-index.js' %}"></script>
+  <script src="{% static 'app/bundles/cellc2-index.js' %}"></script>
 {% endblock %}

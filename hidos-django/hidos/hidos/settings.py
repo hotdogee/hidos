@@ -244,14 +244,14 @@ from kombu import Exchange, Queue
 CELERY_DEFAULT_QUEUE = 'app'
 CELERY_DEFAULT_EXCHANGE = 'hidos'
 CELERY_DEFAULT_EXCHANGE_TYPE = 'direct'
-CELERY_DEFAULT_ROUTING_KEY = 'cellc.task'
+CELERY_DEFAULT_ROUTING_KEY = 'cellc2.task'
 CELERY_QUEUES = ( 
-    Queue('app', Exchange('hidos'), routing_key='cellc.task'),
+    Queue('app', Exchange('hidos'), routing_key='cellc2.task'),
 )
 CELERY_ROUTES = {
     'app.tasks.run_image_analysis_task': {
         'queue': 'app',
-        'routing_key': 'cellc.task',
+        'routing_key': 'cellc2.task',
     },
 }
 BROKER_URL = 'amqp://'
