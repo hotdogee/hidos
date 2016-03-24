@@ -239,7 +239,7 @@ TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 from sys import platform
 R_SCRIPT = r"/usr/bin/Rscript"
 if platform == 'win32':
-    R_SCRIPT = r"C:\Program Files\R\R-3.2.2\bin\RScript.exe"
+    R_SCRIPT = r"C:\Program Files\R\R-3.2.4revised\bin\RScript.exe"
 
 USE_CACHE = False
 
