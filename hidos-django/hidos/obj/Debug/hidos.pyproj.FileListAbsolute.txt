@@ -1,0 +1,15 @@
+C:\Han\Work\Meridigen\hidos\hidos\hidos\bin\Microsoft.PythonTools.WebRole.dll
+C:\Han\Work\Meridigen\hidos\hidos\hidos\obj\Debug\attach_server.py
+C:\Han\Work\Meridigen\hidos\hidos\hidos\obj\Debug\visualstudio_py_debugger.py
+C:\Han\Work\Meridigen\hidos\hidos\hidos\obj\Debug\visualstudio_py_repl.py
+C:\Han\Work\Meridigen\hidos\hidos\hidos\obj\Debug\visualstudio_py_util.py
+C:\Han\Work\Meridigen\hidos\hidos\hidos\obj\Debug\__init__.py
+C:\Han\Work\Meridigen\hidos\hidos\hidos\obj\Debug\__main__.py
+C:\Han\Work\Meridigen\hidos\hidos\hidos\bin\AzureSetup.cfg
+C:\Han\Work\Meridigen\hidos\hidos\hidos\bin\Microsoft.PythonTools.AzureSetup.exe
+C:\Han\Work\Meridigen\hidos\hidos\hidos\bin\Microsoft.PythonTools.AzureSetup.exe.config
+C:\Han\Work\Meridigen\hidos\hidos\hidos\bin\wfastcgi.py
+C:\Han\Work\Meridigen\hidos\hidos\hidos\obj\Debug\deployment-updated-orig-prefix.txt
+C:\Han\Work\Meridigen\hidos\hidos\hidos\ptvs_virtualenv_proxy.py
+C:\Han\Work\Meridigen\hidos\hidos\hidos\obj\Debug\web.config
+C:\Han\Work\Meridigen\hidos\hidos\hidos\obj\Debug\web.debug.config
