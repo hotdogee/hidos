@@ -3,16 +3,16 @@
     "model": "auth.user",
     "pk": 1,
     "fields": {
-        "password": "pbkdf2_sha256$24000$a13MmP4nt8Ns$tkgFmqMK20tP937+zwf15aTRVtRdI2qm05YnPyBtwvY=",
+        "password": "pbkdf2_sha256$24000$2aDE9DwSDaYy$bHOct8Ya8kNdShyR5/DoCkZ7OmKjdWRpjFR3dBZ5zks=",
         "last_login": null,
         "is_superuser": true,
-        "username": "hidos_admin",
+        "username": "hidos_test_ind",
         "first_name": "",
         "last_name": "",
         "email": "",
         "is_staff": true,
         "is_active": true,
-        "date_joined": "2016-03-18T10:37:33.378Z",
+        "date_joined": "2016-03-17T17:02:42.990Z",
         "groups": [],
         "user_permissions": []
     }
@@ -21,16 +21,16 @@
     "model": "auth.user",
     "pk": 2,
     "fields": {
-        "password": "pbkdf2_sha256$24000$hg5HDX3VMWk0$v6flFWil042dB3WR7/3BLkvRxoWSNKoWAlV3ZjcFtrg=",
+        "password": "pbkdf2_sha256$24000$zDzaqEq8mbJk$FoJHTgmo++Cu2wJMLqWRSfDpfWdXFsu9uRpKFnHYs1M=",
         "last_login": null,
         "is_superuser": true,
-        "username": "hidos_admin2",
+        "username": "hidos_admin",
         "first_name": "",
         "last_name": "",
         "email": "",
         "is_staff": true,
         "is_active": true,
-        "date_joined": "2016-03-18T10:37:49.633Z",
+        "date_joined": "2016-03-17T17:03:00.934Z",
         "groups": [],
         "user_permissions": []
     }
@@ -39,16 +39,16 @@
     "model": "auth.user",
     "pk": 3,
     "fields": {
-        "password": "pbkdf2_sha256$24000$T2fuhfQCHRHP$HmNpDmCYLHQ5a75kY0J5o8hZ2i4b85FFht26RqZrtvM=",
+        "password": "pbkdf2_sha256$24000$hRQ45DSWQv9B$EcOR+/08bSfaevQDStjU6m9FI+WGunlj+vqQCPbw7Ac=",
         "last_login": null,
         "is_superuser": true,
-        "username": "hidos_admin3",
+        "username": "hidos_admin2",
         "first_name": "",
         "last_name": "",
         "email": "",
         "is_staff": true,
         "is_active": true,
-        "date_joined": "2016-03-18T10:38:03.363Z",
+        "date_joined": "2016-03-18T13:31:39.624Z",
         "groups": [],
         "user_permissions": []
     }
@@ -57,16 +57,16 @@
     "model": "auth.user",
     "pk": 4,
     "fields": {
-        "password": "pbkdf2_sha256$24000$SA9Ki0Xp2hc8$34ev0FDg7DK8IDmljZrXcFCPeln4dAXDUJF7nialgw0=",
+        "password": "pbkdf2_sha256$24000$xSNtPCFIpmP4$O756LkBudGeVv/bfZuw9b3UhDk3DT/IKQoLh7RsTUvA=",
         "last_login": null,
         "is_superuser": true,
-        "username": "hidos_admin4",
+        "username": "hidos_admin3",
         "first_name": "",
         "last_name": "",
         "email": "",
         "is_staff": true,
         "is_active": true,
-        "date_joined": "2016-03-18T10:38:13.953Z",
+        "date_joined": "2016-03-18T13:31:57.710Z",
         "groups": [],
         "user_permissions": []
     }
@@ -75,7 +75,25 @@
     "model": "auth.user",
     "pk": 5,
     "fields": {
-        "password": "pbkdf2_sha256$24000$3nt8faaQMqEG$idX7mwFIUDFUGUeeVIZmTy9y5704LtyTc+vGj/1lWSE=",
+        "password": "pbkdf2_sha256$24000$npoVXVqjtEg0$eptiW8n21TbUKcYeG16xVh2QBQpgAiv/1c1yZQ5C200=",
+        "last_login": null,
+        "is_superuser": true,
+        "username": "hidos_admin4",
+        "first_name": "",
+        "last_name": "",
+        "email": "",
+        "is_staff": true,
+        "is_active": true,
+        "date_joined": "2016-03-18T13:32:07.799Z",
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "model": "auth.user",
+    "pk": 6,
+    "fields": {
+        "password": "pbkdf2_sha256$24000$dxiw87dxNyHB$+EBkPjE12STyykPCWnJVdk9QXGXnIdmZzmWB24gWH+s=",
         "last_login": null,
         "is_superuser": true,
         "username": "hidos_admin5",
@@ -84,7 +102,25 @@
         "email": "",
         "is_staff": true,
         "is_active": true,
-        "date_joined": "2016-03-18T10:56:05.944Z",
+        "date_joined": "2016-03-18T13:32:19.046Z",
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "model": "auth.user",
+    "pk": 7,
+    "fields": {
+        "password": "pbkdf2_sha256$24000$NzbouW1sf7zH$vhOYq3OfEje2l28lF02zdziPItnYeShEVAJdtqCjsAE=",
+        "last_login": null,
+        "is_superuser": true,
+        "username": "hiservice",
+        "first_name": "",
+        "last_name": "",
+        "email": "",
+        "is_staff": true,
+        "is_active": true,
+        "date_joined": "2016-03-22T11:39:58.701Z",
         "groups": [],
         "user_permissions": []
     }
