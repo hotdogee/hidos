@@ -220,6 +220,10 @@ LOGGING = {
         'py.warnings': {
             'handlers': ['console'],
         },
+        'app': {
+            'handlers': ['django_log'],
+            'level': 'INFO',
+        },
         'celery': {
             'handlers': ['celery_log'],
             'level': 'INFO',
