@@ -5,7 +5,7 @@ Setting up the development environment on Windows
 
 1. Install Git
    * Download: http://git-scm.com/downloads
-2. Install Python 2.7.x 64-bit (Does not work with Python 3.x)
+1. Install Python 2.7.x 64-bit (Does not work with Python 3.x)
    * Download: https://www.python.org/downloads/
    * The default installation location is `C:\Python27`, if you do not use the default, modify all following steps accordingly.
      * Choose to install "pip" and "Add python.exe to Path" during the Python Setup
@@ -17,27 +17,39 @@ Setting up the development environment on Windows
    * Install `virtualenv`
      * `pip install virtualenv`
        * Learn more: http://docs.python-guide.org/en/latest/dev/virtualenvs/
-3. Install Erlang/OTP 64-bit
+1. Install Erlang/OTP 64-bit
    * This is required for RabbitMQ server
    * Download: http://www.erlang.org/download.html
-4. Install RabbitMQ server
+1. Install RabbitMQ server
    * Download: http://www.rabbitmq.com/download.html
    * Start the RabbitMQ service after installation
      * http://technet.microsoft.com/en-us/library/cc736564(v=ws.10).aspx
-5. Clone the repo, initialize Python virtualenv(`init_venv.cmd`), and setup the database schema(`run_migrate.cmd`)
-```
+1. Install R
+   * Download: https://cran.r-project.org/bin/windows/base/
+   * Install EBImage package
+     * http://bioconductor.org/packages/release/bioc/html/EBImage.html
+     * Start R as Administrator and enter
+       * `source("https://bioconductor.org/biocLite.R")`
+       * `biocLite("EBImage")`
+   * Install RJSONIO package
+     * `install.packages('RJSONIO')`
+1. Clone the repo, initialize Python virtualenv(`init_venv.cmd`), and setup the database schema(`run_migrate.cmd`)
+   ```
 git clone https://github.com/hotdogee/hidos.git
 cd hidos\hidos
 init_venv.cmd
 run_migrate.cmd
 ```
-6. Run development web server
+
+1. Run development web server
   ```
 run_server.cmd
 ```
-7. Run job worker
+
+1. Run job worker
   ```
 run_celery.cmd
 ```
-8. Test the app
+
+1. Test the app
   * Check if the page `http://127.0.0.1:8000/` loads
