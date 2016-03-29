@@ -33,6 +33,8 @@ Setting up the development environment on Windows
        * `biocLite("EBImage")`
    * Install RJSONIO package
      * `install.packages('RJSONIO')`
+   * Add RScript to PATH environment variable
+     * C:\Program Files\R\R-3.x.x\bin\
 1. Clone the repo, initialize Python virtualenv(`init_venv.cmd`), and setup the database schema(`run_migrate.cmd`)
    ```
 git clone https://github.com/hotdogee/hidos.git
