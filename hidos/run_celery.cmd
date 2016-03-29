@@ -1,5 +1,5 @@
 call hidos\env\Scripts\activate
 cd hidos
-celery -A hidos worker --loglevel=info --concurrency=2 -Q cellc1 -n cellc1.%h
+celery -A hidos worker --loglevel=info --concurrency=2 -Q cellm2 -n cellm2.%h
 cd ..
 call deactivate

@@ -151,7 +151,7 @@ INSTALLED_APPS = (
     'allauth.socialaccount.providers.facebook',
     'allauth.socialaccount.providers.google',
     'app.apps.AppConfig',
-    'cellc1.apps.AppConfig',
+    'cellm2.apps.AppConfig',
     # Uncomment the next line to enable the admin:
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
@@ -221,7 +221,7 @@ LOGGING = {
         'py.warnings': {
             'handlers': ['console'],
         },
-        'cellc1': {
+        'cellm2': {
             'handlers': ['django_log'],
             'level': 'INFO',
         },
@@ -246,17 +246,17 @@ USE_CACHE = False
 
 # Celery Settings
 from kombu import Exchange, Queue
-CELERY_DEFAULT_QUEUE = 'cellc1'
+CELERY_DEFAULT_QUEUE = 'cellm2'
 CELERY_DEFAULT_EXCHANGE = 'hidos'
 CELERY_DEFAULT_EXCHANGE_TYPE = 'direct'
-CELERY_DEFAULT_ROUTING_KEY = 'cellc1.task'
+CELERY_DEFAULT_ROUTING_KEY = 'cellm2.task'
 CELERY_QUEUES = ( 
-    Queue('cellc1', Exchange('hidos'), routing_key='cellc1.task'),
+    Queue('cellm2', Exchange('hidos'), routing_key='cellm2.task'),
 )
 CELERY_ROUTES = {
-    'cellc1.tasks.run_cellc1_task': {
-        'queue': 'cellc1',
-        'routing_key': 'cellc1.task',
+    'cellm2.tasks.run_cellm2_task': {
+        'queue': 'cellm2',
+        'routing_key': 'cellm2.task',
     },
 }
 BROKER_URL = 'amqp://'
