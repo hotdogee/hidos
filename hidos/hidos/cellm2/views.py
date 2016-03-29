@@ -23,7 +23,7 @@ import logging
 import imghdr
 from PIL import Image
 
-version = '0.2'
+version = '0.1'
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__) # __name__ == cellm2.views
@@ -124,13 +124,18 @@ def home(request):
             chmod(original_image_path, Perm.S_IRWXU | Perm.S_IRWXG | Perm.S_IRWXO) # ensure the standalone dequeuing process can access the file
                   
             # convert to jpeg for web display
-            Image.open(original_image_path).save(input_image_path)
+            p = Image.open(original_image_path)
+            if p.mode.split(';')[1] == '16':
+              p = p.point(lambda x: x*(float(1)/256))
+            if p.mode != 'RGB':
+              p = p.convert('RGB')
+            p.save(input_image_path)
             chmod(input_image_path, Perm.S_IRWXU | Perm.S_IRWXG | Perm.S_IRWXO) # ensure the standalone dequeuing process can access the file
 
             # build command
             # set R_Script="C:\Program Files\R\R-3.2.2\bin\RScript.exe"
             # "C:\Program Files\R\R-3.2.2\bin\RScript.exe" 1_1_CellM2_han.R "171-1 40x_c005_24.96.JPG" "171-1 40x_c005_24.96_out.JPG" "171-1 40x_c005_24.96.json"
-            script_path = path.join(settings.PROJECT_ROOT, 'cellm2', 'bin', 'r_cellm2_sever_run.R')
+            script_path = path.join(settings.PROJECT_ROOT, 'cellm2', 'bin', '1_2_CellM_TWO_App_r1.R')
             args_list = [[settings.R_SCRIPT, script_path, original_image_path, output_image_path, output_json_path]]
         
             # insert entry into database
