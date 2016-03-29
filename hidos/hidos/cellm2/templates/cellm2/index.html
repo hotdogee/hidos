@@ -1,7 +1,7 @@
 {% extends "app/layout.html" %}
 {% load staticfiles %}
 {% block content %}
-  <h1>Cell M2: Count <small>v{{ version }}</small></h1>
+  <h1>Cell M2: Migration <small>v{{ version }}</small></h1>
   <img src="{% static 'cellm2/images/cellm2-diagram-v0.1.png' %}">
 
   <form id="add-photos" action="{% url 'home' %}" class="dropzone">
@@ -32,7 +32,7 @@
         <tr>
           <th>Viewer</th>
           <th>File Name</th>
-          <th>Count</th>
+          <th>Migration</th>
           <th>Created</th>
         </tr>
       </thead>

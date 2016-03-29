@@ -18,8 +18,8 @@ $(function () {
         else {
           // get result json data
           $.getJSON(path_prefix + '_out.json', function (result) {
-            //$('#ratio').text(Math.round(result['ratio'] * 10000) / 100 + '%');
-            $('#count').text(result['count']);
+            $('#ratio').text(Math.round(result['ratio'] * 10000) / 100 + '%');
+            //$('#count').text(result['count']);
           });
           // display image
           // /media/cellm2/task/7ef4f4782fc840738f67a43edafc9683/7ef4f4782fc840738f67a43edafc9683_in.jpg
