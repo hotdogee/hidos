@@ -112,7 +112,7 @@ function singleNetworkAnalysis () {
 	setBatchMode("exit and display");
 	if (isOpen (workid)) selectImage (workid);
    	menuanalysis=0;
-    print('{"mesh":' + nbMesh + ',"junction":' + nbJunctions +',"segments:"' + nbSegments + ',"branches:"' + nbTwigs +'}');
+    print('{"mesh":' + nbMesh + ',"junctions":' + nbJunctions +',"segments":' + nbSegments + ',"branches":' + nbTwigs +'}');
 }
 
 

@@ -13,7 +13,6 @@ $(document).ready(function () {
       deferRender: true,
       scroller: true,
       scrollY: 500,
-      order: [[3, 'desc']],
       dom: 'Bfrtip',
       columns: [{
         name: 'viewer', data: 'url', width: '50px', orderable: false,
@@ -29,11 +28,21 @@ $(document).ready(function () {
           if (type === 'display') return cellq_name_compiled({ name: data });else return data;
         }
       }, {
-        name: 'area', type: 'num', data: 'result.mesh', defaultContent: running_template, width: '100px',
+        name: 'regions', type: 'num', data: 'result.mesh', defaultContent: running_template, width: '100px',
         render: function render(data, type, row, meta) {
           if (!data) return running_template;else return type === 'display' ? data : data;
         }
-      }, {
+      },  {
+        name: 'junction', type: 'num', data: 'result.junctions', defaultContent: running_template, width: '100px',
+        render: function render(data, type, row, meta) {
+          if (!data) return running_template;else return type === 'display' ? data : data;
+        }
+      },  {
+        name: 'connect', type: 'num', data: 'result', defaultContent: running_template, width: '100px',
+        render: function render(data, type, row, meta) {
+          if (!data) return running_template;else return type === 'display' ? data['segments']*2 + data.branches :data;
+        }
+      },  {
         name: 'created', type: 'date', data: 'created', width: '100px',
         render: function render(data, type, row, meta) {
           var date = new Date(data);

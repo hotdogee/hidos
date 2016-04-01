@@ -104,14 +104,15 @@ def home(request):
                     for chunk in uploaded_file.chunks():
                         input_image_f.write(chunk)
 
-			# add margin to input Image
-			photo = io.imread(input_image_path)
-			h, w, _ = photo.shape
-			photo[0:20,0:w] = [0,0,0]
-			photo[-20:,0:w] = [0,0,0]
-			photo[0:h, 0:20] = [0,0,0]
-			photo[0:h, -20:] = [0,0,0]
-			io.imsave(input_image_path, photo)
+                    
+                # add margin to input Image 
+                photo = io.imread(input_image_path)
+                h, w, _ = photo.shape
+                photo[0:20,0:w] = [0,0,0]
+                photo[-20:,0:w] = [0,0,0]
+                photo[0:h, 0:20] = [0,0,0]
+                photo[0:h, -20:] = [0,0,0]
+                io.imsave(input_image_path, photo)
 
             chmod(input_image_path, Perm.S_IRWXU | Perm.S_IRWXG | Perm.S_IRWXO) # ensure the standalone dequeuing process can access the file
 

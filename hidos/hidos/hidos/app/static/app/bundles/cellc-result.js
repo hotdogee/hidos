@@ -14,13 +14,17 @@ $(function () {
       traditional: true,
       success: function success(data, status) {
         console.log(data);
-
+      
         if (data.data[0].result_status.toLowerCase() != "success") setTimeout(poll, 3000);else {
           // get result json data
           $.getJSON(path_prefix + '_out.json', function (result) {
-            $('#ratio').text(result['mesh']);
-            $('#count').text(result['count_min']);
+            $('#nbRegion').text(result['mesh']);
+            $('#nbJunction').text(result['junctions']);
+            $('#nbSeg').text(result['segments']);
+            $('#nbBranch').text(result['branches']);
+            $('#nbCon').text(result['segments']*2 + result['branches'])
           });
+          
           // display image
           // /media/image_analysis/task/7ef4f4782fc840738f67a43edafc9683/7ef4f4782fc840738f67a43edafc9683_in.jpg
           $('#input-img').attr('src', '/media/image_analysis/task/' + task_id + '/' + task_id + '_in.jpg');
