@@ -1,0 +1,127 @@
+{% extends "app/layout.html" %}
+{% load staticfiles %}
+{% block content-fluid %}
+    <div id="cover">
+        <div class="jumbotron vertical-center">
+            <div class="container text-center">
+              <img src="{% static 'app/images/loading.gif' %}">
+              <h3>Cell S is processing...</h3>
+            </div>
+        </div>
+    </div>
+
+
+
+
+{% endblock %}
+{% block content %}
+    <section id="result">
+      <h1> Grading reuslt </h1>
+      
+      <h3>File Name: {{ user_filename }}</h3>
+      <h3>Mother Name: </h3>
+      <h3>Descriptions: </h3>
+      <img class="img-rounded" src="{{ result_img }}" width="100%">
+
+      <br>
+
+
+      <table class="table table-condensed" >
+        <tr>
+          <th>Ovum num.</th>
+          <th>Photo</th>
+          <th>Grade</th>
+          <th>Descriptions</th>
+          <th>Feedback</th>
+        </tr>
+
+        {% for img in images %}
+        <tr>
+          <td> Ovum {{ forloop.counter }}</td>
+          <td><img width="100px" src="{{ img.path }}"></td>
+          <td><span>{{ img.grade }}</span></td>
+          <td></td>
+          <td></td>
+        </tr>
+        {% endfor %}
+      </table>
+
+    </section>
+
+
+    <script src="/static/app/scripts/jquery-1.10.2.js"></script>
+    <script>
+    $(document).ready(function () {
+      $('#result').hide();
+      var task_id = window.location.pathname.match(/\/([0-9a-zA-Z]+)\/?$/)[1];
+      function poll() {
+        $.ajax({
+          url: 'api/v1/tasks/status?id=' + task_id,
+          dataType: 'json',
+          type: 'GET',
+          traditional: true,
+          success: function success(data, status) {
+
+            if (data.data[0].result_status.toLowerCase() != "success") setTimeout(poll, 3000);else {
+              $('#result').fadeIn(1000);
+              $('#cover').fadeOut(1000);
+              }
+          }
+        });
+      };
+    poll();
+    });
+
+    </script>
+
+
+{% endblock %}
+{% block head-styles %}
+  <style type="text/css">
+    #cover {
+      position: absolute;
+      height: 100%;
+      width: 100%;
+    }
+  </style>
+  <style type="text/css">
+    #result {
+      margin: 30px;
+      display: none;
+    }
+    div.parent {
+      display: inline-block;
+      /*border: 4px dotted;*/
+    }
+    /*.panzoom > img {
+      width: 300px;
+      height: 300px;
+    }*/
+    .vertical-center {
+      height: 100%;
+      width: 100%;
+      text-align: center; /* align the inline(-block) elements horizontally */
+      font: 0/0 a; /* remove the gap between inline(-block) elements */
+    }
+
+    .vertical-center:before { /* create a full-height inline block pseudo=element */
+      content: ' ';
+      display: inline-block;
+      vertical-align: middle; /* vertical alignment of the inline element */
+      height: 100%;
+    }
+
+    .vertical-center > .container {
+      max-width: 100%;
+      display: inline-block;
+      vertical-align: middle; /* vertical alignment of the inline element */
+    }
+  </style>
+
+ 
+{% endblock %}
+
+
+
+
+

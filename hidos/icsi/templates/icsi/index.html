@@ -1,9 +1,30 @@
 {% extends "app/layout.html" %}
 {% load staticfiles %}
-{% block content-fluid %}
+{% block content-body %}
 
 
-<div class="div-right">
+<h1>Cell S: Selection<small>v0.1</small></h1>
+<img class="img-fluid center-block" src="/static/app/images/cells_preview.png" width="100%"></img>
+
+
+<br />
+<ul>
+    <li>Example 1
+        <ul>
+            <li><a href="/media/icsi/task/734d3f79240d5dba5ade7997c81ddee7/734d3f79240d5dba5ade7997c81ddee7_in.jpg">Download Input Image</a></li> 
+            <li><a href="/icsi/734d3f79240d5dba5ade7997c81ddee7">View Result Page</a></li>
+        </ul>
+    </li>
+    <li>Example 2
+        <ul>
+            <li><a href="/media/icsi/task/31d43c313421186b8c09ba87f774a9a8/31d43c313421186b8c09ba87f774a9a8_in.jpg">Download Input Image</a></li> 
+            <li><a href="/icsi/31d43c313421186b8c09ba87f774a9a8">View Result Page</a></li>
+        </ul>
+    </li>
+</ul>
+
+
+<div class="container">
 <div class="panel panel-success">
 <div class="panel-heading">File upload</div>
 <div class="panel-body">
@@ -17,13 +38,12 @@
 </form>
 </div>
 </div>
-</div>
 
-<div class="div-left">
-<div class="panel panel-primary">
-<div class="panel-heading">Task List</div>
+
 
   {% if user.is_authenticated %}
+<div class="panel panel-primary">
+<div class="panel-heading">Task List</div>
   <div class="panel-body">
   <table id="result-list" class="display"  cellspacing="0" width="100%">
     <thead>
@@ -37,6 +57,7 @@
         <th>D</th>
         <th>E</th>
         <th>Created</th>
+        <th>Report</th>
       </tr>
     </thead>
     <tbody>
@@ -147,6 +168,11 @@
     <img class="cellq-icon" src="{% static 'app/images/celle-icon.png' %}"> <%= name %>
   </script>
 
+ <!-- Report template -->
+ <script type="text/template" id="report-template">
+    <a class="btn btn-danger"><span class="glyphicon glyphicon-send"></span> Report</a>
+  </script>
+
   <!-- fetch the result from database -->
   <script>
     $(document).ready(function () {
@@ -155,6 +181,7 @@
         var view_btn_compiled = _.template($('#viewer-btn-template').html());
         var cellq_name_compiled = _.template($('#cellq-name-template').html());
         var date_now = (new Date()).toLocaleDateString();
+        var report_template = $('#report-template').html();
         var result_table;
         result_table = $('#result-list').DataTable({
           ajax: 'api/v1/tasks',
@@ -164,7 +191,7 @@
           order: [[7, 'desc']],
           columns: [
             {
-              name: 'viewer', data: 'url', width: '50px', orderable: false,
+              name: 'viewer', data: 'url', width: '50px', orderable: false,className:'dt-center',
               render: function (data, type, row, meta) {
                 if (type === 'display')
                   return view_btn_compiled({
@@ -185,25 +212,25 @@
               }
             },
             {
-              name: 'mother-name', data: 'mother_name', width:'50px',
+              name: 'mother-name', data: 'mother_name', width:'100px', className:'dt-center',
             },
             {
-              name: 'ovum-A', type: 'num', data: 'number_of_A', defaultContent: running_template, width:'10px',
+              name: 'ovum-A', type: 'num', data: 'number_of_A', defaultContent: running_template, width:'10px',className:'dt-center',
             },
             {
-              name: 'ovum-B', type: 'num', data: 'number_of_B', defaultContent: running_template, width:'10px',
+              name: 'ovum-B', type: 'num', data: 'number_of_B', defaultContent: running_template, width:'10px',className:'dt-center',
             },
             {
-              name: 'ovum-C', type: 'num', data: 'number_of_C', defaultContent: running_template, width:'10px',
+              name: 'ovum-C', type: 'num', data: 'number_of_C', defaultContent: running_template, width:'10px',className:'dt-center',
             },
             {
-              name: 'ovum-D', type: 'num', data: 'number_of_D', defaultContent: running_template, width:'10px',
+              name: 'ovum-D', type: 'num', data: 'number_of_D', defaultContent: running_template, width:'10px',className:'dt-center',
             },
             {
-              name: 'ovum-E', type: 'num', data: 'number_of_E', defaultContent: running_template, width:'10px',
+              name: 'ovum-E', type: 'num', data: 'number_of_E', defaultContent: running_template, width:'10px',className:'dt-center',
             },
             {
-              name: 'created', type: 'date', data: 'created', width: '200px',
+              name: 'created', type: 'date', data: 'created', width: '200px',className:'dt-center',
               render: function (data, type, row, meta) {
                 var date = (new Date(data));
                 if (type === 'display') {
@@ -216,7 +243,10 @@
                 else
                   return date;
               }
-            }
+            },
+            {
+              name: 'report', defaultContent: report_template,className:'dt-center',
+            },
           ],
           createdRow: function (row, data, index) {
             // initialize bootstrap tooltip

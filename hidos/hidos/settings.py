@@ -1,4 +1,4 @@
-﻿"""
+"""
 Django settings for hidos project.
 """
 

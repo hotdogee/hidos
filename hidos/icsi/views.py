@@ -1,3 +1,4 @@
+# coding=utf-8
 from django.shortcuts import render
 from django.shortcuts import redirect
 from django.http import HttpRequest
@@ -93,7 +94,7 @@ def retrieve(request, task_id='1'):
             request,
             'icsi/result.html',
             {
-                'title': u'Cell E - {0}'.format(record.user_filename),
+                'title': u'Cell S - {0}'.format(record.user_filename),
                 'year': datetime.now().year,
                 'version': record.version,
                 'user_filename': record.user_filename,
@@ -110,7 +111,7 @@ def retrieve(request, task_id='1'):
             request,
             'app/error.html',
             {
-                'title': 'CellQ Error',
+                'title': 'CellS Error',
                 'year': datetime.now().year,
                 'version': version,
                 'message': message,
@@ -122,7 +123,7 @@ def retrieve(request, task_id='1'):
             request,
             'app/error.html',
             {
-                'title': 'CellQ Error',
+                'title': 'CellS Error',
                 'year': datetime.now().year,
                 'version': version,
                 'message': message,
@@ -190,9 +191,16 @@ def upload(request):
             ]
 
             print(args_list)
-           
+          
+
             # insert entry into database
             record = ICSIImageAnalysis()
+            
+            # mother_name for demo
+            mothers = [u'佩岑', u'志玲',u'熙娣',u'隋棠', u'心如']
+            import random 
+            record.mother_name = mothers[random.randint(0,4)]
+
             record.task_id = task_id
             record.version = version
             record.user_filename = uploaded_file.name
@@ -203,9 +211,5 @@ def upload(request):
 
             run_image_analysis_task.delay(task_id, args_list, path_prefix)
 
-        else:
-            print("This file is already uploaded.")
-        # debug
-        #run_image_analysis_task.delay(task_id, args_list, path_prefix).get()
-        return HttpResponse('icsi')
+        return HttpResponse('icsi/'+ task_id)
 
