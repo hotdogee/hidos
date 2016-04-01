@@ -65,3 +65,6 @@ target/
 # ImageJ path
 imagej/
 
+# venv 
+venv/
+

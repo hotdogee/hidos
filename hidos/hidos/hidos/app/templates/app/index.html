@@ -1,0 +1,134 @@
+{% extends "app/layout.html" %}
+{% load staticfiles %}
+{% block content %}
+  <h1>Cell A: Angiogenesis <small>v{{ version }}</small></h1>
+  <img src="{% static 'app/images/cellqt-diagram.png' %}" class="img-fluid center-block" width="100%">
+
+  <form id="add-photos" action="{% url 'home' %}" class="dropzone">
+    {% csrf_token %}
+  </form>
+
+  <br />
+  <ul>
+    <li>Example 1
+      <ul>
+        <li><a href="/media/image_analysis/task/0b5e2006feeffe25b11fd800a4befdb8/0b5e2006feeffe25b11fd800a4befdb8_in.jpg">Download Input Image</a></li>
+        <li><a href="/0b5e2006feeffe25b11fd800a4befdb8">View Result Page</a></li>
+      </ul>
+    </li>
+    <li>Example 2
+      <ul>
+        <li><a href="/media/image_analysis/task/3389983ce712a643a5243efdc50c8f59/3389983ce712a643a5243efdc50c8f59_in.jpg">Download Input Image</a></li>
+        <li><a href="/3389983ce712a643a5243efdc50c8f59">View Result Page</a></li>
+      </ul>
+    </li>
+  </ul>
+
+  <hr />
+  <div>
+    <h1>Results</h1>
+    {% if user.is_authenticated %}
+
+    <table id="result-list" class="display" cellspacing="0" width="100%">
+      <thead>
+        <tr>
+          <th>Viewer</th>
+          <th>File Name</th>
+          <th>Number of Regions</th>
+          <th>Created</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+
+    {% else %}
+
+    <div>Log in to save your results</div>
+
+    {% endif %}
+  </div>
+
+{% endblock %}
+{% block head-styles %}
+  <link rel="stylesheet" type="text/css" href="{% static 'app/content/basic.css' %}" />
+  <link rel="stylesheet" type="text/css" href="{% static 'app/content/dropzone.css' %}" />
+  <!--
+  <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.10/css/dataTables.bootstrap.css"/>
+  <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/scroller/1.4.0/css/scroller.bootstrap.css"/>
+  -->
+  <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.10/css/jquery.dataTables.min.css"/>
+  <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/scroller/1.4.0/css/scroller.dataTables.min.css"/>
+  <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/buttons/1.1.2/css/buttons.bootstrap.min.css"/>
+  <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css"/>
+  <link rel="stylesheet" type="text/css" href="{% static 'app/content/spinkit.css' %}" />
+
+  <style type="text/css">
+    #icon {
+      display: inline-block;
+      width: 64px;
+      height: 64px;
+    }
+    .dropzone .dz-message {
+      font-size: large;
+    }
+    div.DTS div.dataTables_scrollBody {
+      background: white;
+    }
+    .cellq-icon {
+      display: inline-block;
+      width: 22px;
+      height: 22px;
+    }
+    .preview-img {
+      padding: 10px;
+    }
+    .preview-img img {
+      padding: 10px 0px 0px;
+    }
+  </style>
+{% endblock %}
+{% block scripts %}
+  <script src="{% static 'app/scripts/dropzone.js' %}"></script>
+  <script src="{% static 'app/scripts/underscore-min.js' %}"></script>
+  <!--
+  <script type="text/javascript" src="//cdn.datatables.net/1.10.10/js/dataTables.bootstrap.js"></script>
+  -->
+  <script type="text/javascript" src="//cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
+  <script type="text/javascript" src="//cdn.datatables.net/scroller/1.4.0/js/dataTables.scroller.min.js"></script>
+  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+  <script type="text/javascript" src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
+  <script type="text/javascript" src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+  <script type="text/javascript" src="//cdn.datatables.net/buttons/1.1.2/js/dataTables.buttons.min.js"></script>
+  <script type="text/javascript" src="//cdn.datatables.net/buttons/1.1.2/js/buttons.bootstrap.min.js"></script>
+  <script type="text/javascript" src="//cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
+  <script type="text/javascript" src="//cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
+  <script type="text/template" id="loading-template">
+    <div class="sk-fading-circle">
+      <div class="sk-circle1 sk-circle"></div>
+      <div class="sk-circle2 sk-circle"></div>
+      <div class="sk-circle3 sk-circle"></div>
+      <div class="sk-circle4 sk-circle"></div>
+      <div class="sk-circle5 sk-circle"></div>
+      <div class="sk-circle6 sk-circle"></div>
+      <div class="sk-circle7 sk-circle"></div>
+      <div class="sk-circle8 sk-circle"></div>
+      <div class="sk-circle9 sk-circle"></div>
+      <div class="sk-circle10 sk-circle"></div>
+      <div class="sk-circle11 sk-circle"></div>
+      <div class="sk-circle12 sk-circle"></div>
+    </div>
+  </script>
+  <script type="text/template" id="viewer-btn-template">
+    <a class="btn btn-default btn-xs viewer-btn" data-toggle="tooltip" data-placement="right"
+       data-container="body" data-html="true" data-trigger="hover"
+       title="<div class='preview-img'>Result Image Preview <img src='<%= result_img %>' width='100%' height='100%'></div>"
+       target="_blank" href="<%= task_url %>" role="button">
+      <span class="glyphicon glyphicon-new-window"></span> Image
+    </a>
+  </script>
+  <script type="text/template" id="cellq-name-template">
+    <img class="cellq-icon" src="{% static 'app/images/cellqt_icon.jpg' %}"> <%= name %>
+  </script>
+  <script src="{% static 'app/bundles/cellc-index.js' %}"></script>
+{% endblock %}
