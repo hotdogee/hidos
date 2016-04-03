@@ -3,7 +3,7 @@ Django settings for hidos project.
 """
 
 from os import path
-PROJECT_ROOT = path.dirname(path.abspath(path.dirname(__file__)))
+PROJECT_ROOT = path.dirname(path.dirname(path.abspath(__file__)))
 
 DEBUG = True
 
@@ -21,7 +21,8 @@ APPEND_SLASH = False
 
 LOGIN_URL = '/login'
 
-SITE_ID = 1
+# Make this unique, and don't share it with anybody.
+SECRET_KEY = 'n(bd1f1c%e8=_xad02x53tfn%wgwpi492e$8_erx+d)!tpeoim'
 
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
@@ -120,9 +121,6 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
-
-# Make this unique, and don't share it with anybody.
-SECRET_KEY = 'n(bd1f1c%e8=_xad02x53tfn%wgwpi492e$8_erx+d)!tpeoim'
 
 # Application definition
 
