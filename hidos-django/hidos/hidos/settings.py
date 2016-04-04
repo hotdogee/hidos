@@ -9,6 +9,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = (
     'localhost',
+    '.hotdogee.com',
+    '.hidos.io',
 )
 
 ADMINS = (
