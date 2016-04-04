@@ -1,4 +1,7 @@
 """
 Package for the cellc2.
 """
-default_app_config = 'cellc2.apps.CellC2Config'
+
+app_name = __name__
+verbose_name = 'Cell C2'
+default_app_config = app_name + '.apps.CellC2Config'
