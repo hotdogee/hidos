@@ -154,6 +154,8 @@ INSTALLED_APPS = (
     'allauth.socialaccount.providers.facebook',
     'allauth.socialaccount.providers.google',
     'app.apps.AppConfig',
+    'cellbase.apps.CellbaseConfig',
+    'cellc2.apps.CellC2Config',
     # Uncomment the next line to enable the admin:
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
@@ -295,7 +297,7 @@ CELERY_DEFAULT_QUEUE = 'app'
 CELERY_DEFAULT_EXCHANGE = 'hidos'
 CELERY_DEFAULT_EXCHANGE_TYPE = 'direct'
 CELERY_DEFAULT_ROUTING_KEY = 'cellc2.task'
-CELERY_QUEUES = ( 
+CELERY_QUEUES = (
     Queue('app', Exchange('hidos'), routing_key='cellc2.task'),
 )
 CELERY_ROUTES = {

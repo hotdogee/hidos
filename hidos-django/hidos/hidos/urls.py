@@ -15,10 +15,12 @@ Including another URLconf
 """
 
 from datetime import datetime
+
 from django.conf.urls import include, url
-from app.forms import BootstrapAuthenticationForm
 from django.contrib.auth import views as auth_views
+
 from app import views as app_views
+from app.forms import BootstrapAuthenticationForm
 
 # Uncomment the next lines to enable the admin:
 # from django.conf.urls import include
