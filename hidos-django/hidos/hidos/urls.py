@@ -29,8 +29,8 @@ from app.forms import BootstrapAuthenticationForm
 
 urlpatterns = [
     url(r'^$', app_views.home, name='home'),
-    url(r'^api/v1/tasks$', app_views.tasks, name='tasks'),
-    url(r'^api/v1/tasks/status$', app_views.status, name='status'),
+    #url(r'^api/v1/tasks$', app_views.tasks, name='tasks'),
+    #url(r'^api/v1/tasks/status$', app_views.status, name='status'),
     url(r'^login/$',
         auth_views.login,
         {
@@ -50,6 +50,7 @@ urlpatterns = [
         },
         name='logout'),
     url(r'^accounts/', include('allauth.urls')),
+    url(r'^cellc2/', include('cellc2.urls')),
     url(r'^(?P<task_id>[0-9a-zA-Z]+)$', app_views.retrieve, name='retrieve'),
 
     # Uncomment the admin/doc line below to enable admin documentation:
