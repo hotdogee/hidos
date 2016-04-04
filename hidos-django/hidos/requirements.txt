@@ -5,3 +5,6 @@ django-allauth>=0.24.1
 Pillow>=3.1.1
 django-model-utils>=2.4
 django-vanilla-views>=1.0.4
+djangorestframework>=3.3.3
+Markdown>=2.6.6
+django-filter>=0.13.0
