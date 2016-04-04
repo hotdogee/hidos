@@ -45,14 +45,4 @@ class CellTaskModel(TaskModel):
     class Meta(TaskModel.Meta):
         abstract = True
 
-class CellC2Task(CellTaskModel):
-    #cell_ratio = models.FloatField()
-
-
-    def get_absolute_url(self):
-        return reverse('cellc2:detail', args=[str(self.task_id)])
-
-    class Meta(CellTaskModel.Meta):
-        verbose_name = 'Cell C2 Task'
-
 # TODO: Permissions class for sharing
