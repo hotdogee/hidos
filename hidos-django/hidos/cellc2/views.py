@@ -5,6 +5,9 @@ from django.http import Http404
 
 from vanilla import TemplateView
 from vanilla import GenericModelView
+from rest_framework import filters
+from rest_framework import generics
+from rest_framework import serializers
 
 from . import app_name, verbose_name
 from .models import CellC2Task
@@ -57,3 +60,9 @@ class DetailView(GenericModelView):
                 'version': version,
                 'message': message,
             })
+
+class TaskListCreateView(generics.ListAPIView):
+    queryset = CellC2Task.objects.all()
+    serializer_class = CellC2TaskSerializer
+    filter_backends = (filters.DjangoFilterBackend,)
+    filter_fields = ('task_id', )
