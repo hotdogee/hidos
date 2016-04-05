@@ -4,7 +4,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 
-from django_extensions.db.fields import TimeStampedModel
+from django_extensions.db.models import TimeStampedModel
 
 class Folder(TimeStampedModel):
     folder_id = models.CharField(max_length=32, primary_key=True)
