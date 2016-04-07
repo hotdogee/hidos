@@ -68,3 +68,6 @@ venv/
 # Ovum photos
 Ovums/
 
+# ipython notebook
+.ipynb
+
