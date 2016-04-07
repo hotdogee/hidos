@@ -71,3 +71,6 @@ Ovums/
 # ipython notebook
 .ipynb
 
+# mxnet
+mxnet/
+
