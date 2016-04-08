@@ -9,11 +9,11 @@ from rest_framework import filters
 from rest_framework import generics
 from rest_framework import serializers
 
-from . import app_name, verbose_name
+from . import app_name, verbose_name, version
 from .models import CellC2Task
 
-version = '0.8'
 logger = logging.getLogger(__name__) # __name__ == app.views
+
 
 class IndexView(TemplateView):
     template_name = 'cellbase/index.html'
@@ -60,6 +60,7 @@ class DetailView(GenericModelView):
                 'version': version,
                 'message': message,
             })
+
 
 class TaskListCreateView(generics.ListAPIView):
     queryset = CellC2Task.objects.all()

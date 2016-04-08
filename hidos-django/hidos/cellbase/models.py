@@ -6,6 +6,7 @@ from django.core.urlresolvers import reverse
 
 from django_extensions.db.models import TimeStampedModel
 
+
 class Folder(TimeStampedModel):
     folder_id = models.CharField(max_length=32, primary_key=True)
     name = models.CharField(max_length=255) # display name
@@ -31,6 +32,7 @@ class TaskModel(TimeStampedModel):
 
     class Meta(TimeStampedModel.Meta):
         abstract = True
+
 
 # CellQ result model
 class CellTaskModel(TaskModel):
