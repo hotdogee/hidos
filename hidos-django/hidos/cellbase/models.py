@@ -17,11 +17,9 @@ class Folder(TimeStampedModel):
 # Abstract model for a user submitted task
 class TaskModel(TimeStampedModel):
     task_id = models.CharField(max_length=32, primary_key=True) # ex. 128c8661c25d45b8-9ca7809a09619db9
+    status = models.CharField(max_length=32, default='queued') # queued, running, success, failed
     dequeued = models.DateTimeField(null=True)
     finished = models.DateTimeField(null=True)
-    result = models.TextField(blank=True)
-    result_outerr = models.TextField(blank=True)
-    result_status = models.CharField(max_length=32, default='queued') # queued, running, success, failed
     user = models.ForeignKey(User, null=True)
     parent_folder = models.ForeignKey(Folder, models.SET_NULL, null=True)
     version = models.CharField(max_length=32)
@@ -40,6 +38,8 @@ class CellTaskModel(TaskModel):
     user_filename = models.CharField(max_length=255) # ext3 max filename = 255
     # uploaded image file type
     uploaded_type = models.CharField(max_length=10)
+    stdout = models.TextField(blank=True)
+    stderr = models.TextField(blank=True)
 
     def __unicode__(self):
         return '{0} ({1})'.format(self.user_filename, self.task_id[:6])
