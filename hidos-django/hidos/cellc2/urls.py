@@ -1,7 +1,7 @@
 ﻿from django.conf.urls import url
 
 from . import views
-from . import app_name
+from . import app_name # application namespace
 
 urlpatterns = [
     url(r'^$', views.IndexView.as_view(), name='index'),
