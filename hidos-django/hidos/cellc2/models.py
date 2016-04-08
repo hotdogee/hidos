@@ -7,7 +7,7 @@ from cellbase.models import CellTaskModel
 
 
 class CellC2Task(CellTaskModel):
-    cell_ratio = models.FloatField(blank=True)
+    cell_ratio = models.FloatField(null=True, blank=True)
 
     def get_absolute_url(self):
         return reverse('detail', kwargs={'task_id': self.task_id}, current_app=app_name)
