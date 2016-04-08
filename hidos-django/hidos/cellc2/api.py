@@ -15,3 +15,16 @@ class TaskListCreateAPIView(generics.ListCreateAPIView):
     filter_backends = (filters.DjangoFilterBackend,)
     filter_fields = ('task_id', )
     pagination_class = None
+
+    # built-in
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+        # ExampleModel.objects.create(**validated_data)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
