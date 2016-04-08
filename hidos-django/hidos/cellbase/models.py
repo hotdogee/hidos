@@ -18,10 +18,10 @@ class Folder(TimeStampedModel):
 class TaskModel(TimeStampedModel):
     task_id = models.CharField(max_length=32, primary_key=True) # ex. 128c8661c25d45b8-9ca7809a09619db9
     status = models.CharField(max_length=32, default='queued') # queued, running, success, failed
-    dequeued = models.DateTimeField(null=True)
-    finished = models.DateTimeField(null=True)
-    user = models.ForeignKey(User, null=True)
-    parent_folder = models.ForeignKey(Folder, models.SET_NULL, null=True)
+    dequeued = models.DateTimeField(null=True, blank=True)
+    finished = models.DateTimeField(null=True, blank=True)
+    user = models.ForeignKey(User, null=True, blank=True)
+    parent_folder = models.ForeignKey(Folder, models.SET_NULL, null=True, blank=True)
     version = models.CharField(max_length=32)
     #cell_ratio = models.FloatField()
 
