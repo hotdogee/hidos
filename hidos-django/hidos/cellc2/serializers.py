@@ -15,39 +15,105 @@ class CellC2TaskSerializer(serializers.ModelSerializer):
         fields = read_only_fields + ['file']
 
     # built-in
+    def __init__(self, instance=None, data=empty, **kwargs): # BaseSerializer
+        self.instance = instance
+        if data is not empty:
+            self.initial_data = data
+        self.partial = kwargs.pop('partial', False)
+        self._context = kwargs.pop('context', {})
+        kwargs.pop('many', None)
+        super(BaseSerializer, self).__init__(**kwargs)
+
+    def is_valid(self, raise_exception=False): # BaseSerializer
+        self._validated_data = self.run_validation(self.initial_data)
+
+        return not bool(self._errors)
+
+    def run_validation(self, data=empty): # Serializer
+        """
+        We override the default `run_validation`, because the validation
+        performed by validators and the `.validate()` method should
+        be coerced into an error dictionary with a 'non_fields_error' key.
+        """
+        (is_empty_value, data) = self.validate_empty_values(data)
+        if is_empty_value:
+            return data
+
+        value = self.to_internal_value(data)
+        try:
+            self.run_validators(value)
+            value = self.validate(value)
+            assert value is not None, '.validate() should return the validated data'
+        except (ValidationError, DjangoValidationError) as exc:
+            raise ValidationError(detail=get_validation_error_detail(exc))
+
+        return value
+
+    def validate_empty_values(self, data): # Field
+        """
+        Validate empty values, and either:
+        * Raise `ValidationError`, indicating invalid data.
+        * Raise `SkipField`, indicating that the field should be ignored.
+        * Return (True, data), indicating an empty value that should be
+          returned without any further validation being applied.
+        * Return (False, data), indicating a non-empty value, that should
+          have validation applied as normal.
+        """
+        if self.read_only:
+            return (True, self.get_default())
+
+        if data is empty:
+            if getattr(self.root, 'partial', False):
+                raise SkipField()
+            if self.required:
+                self.fail('required')
+            return (True, self.get_default())
+
+        if data is None:
+            if not self.allow_null:
+                self.fail('null')
+            return (True, None)
+
+        return (False, data)
+
+    def to_internal_value(self, data):
+        """
+        Dict of native values <- Dict of primitive datatypes.
+        """
+        if not isinstance(data, dict):
+            message = self.error_messages['invalid'].format(
+                datatype=type(data).__name__
+            )
+            raise ValidationError({
+                api_settings.NON_FIELD_ERRORS_KEY: [message]
+            })
+
+        ret = OrderedDict()
+        errors = OrderedDict()
+        fields = self._writable_fields
+
+        for field in fields:
+            validate_method = getattr(self, 'validate_' + field.field_name, None)
+            primitive_value = field.get_value(data)
+            try:
+                validated_value = field.run_validation(primitive_value)
+                if validate_method is not None:
+                    validated_value = validate_method(validated_value)
+            except ValidationError as exc:
+                errors[field.field_name] = exc.detail
+            except DjangoValidationError as exc:
+                errors[field.field_name] = list(exc.messages)
+            except SkipField:
+                pass
+            else:
+                set_value(ret, field.source_attrs, validated_value)
+
+        if errors:
+            raise ValidationError(errors)
+
+        return ret
 
     def save(self, **kwargs):
-        assert not hasattr(self, 'save_object'), (
-            'Serializer `%s.%s` has old-style version 2 `.save_object()` '
-            'that is no longer compatible with REST framework 3. '
-            'Use the new-style `.create()` and `.update()` methods instead.' %
-            (self.__class__.__module__, self.__class__.__name__)
-        )
-
-        assert hasattr(self, '_errors'), (
-            'You must call `.is_valid()` before calling `.save()`.'
-        )
-
-        assert not self.errors, (
-            'You cannot call `.save()` on a serializer with invalid data.'
-        )
-
-        # Guard against incorrect use of `serializer.save(commit=False)`
-        assert 'commit' not in kwargs, (
-            "'commit' is not a valid keyword argument to the 'save()' method. "
-            "If you need to access data before committing to the database then "
-            "inspect 'serializer.validated_data' instead. "
-            "You can also pass additional keyword arguments to 'save()' if you "
-            "need to set extra attributes on the saved model instance. "
-            "For example: 'serializer.save(owner=request.user)'.'"
-        )
-
-        assert not hasattr(self, '_data'), (
-            "You cannot call `.save()` after accessing `serializer.data`."
-            "If you need to access data before committing to the database then "
-            "inspect 'serializer.validated_data' instead. "
-        )
-
         validated_data = dict(
             list(self.validated_data.items()) +
             list(kwargs.items())

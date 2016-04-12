@@ -10,8 +10,9 @@ class ViewableQuerySet(models.query.QuerySet):
     def viewable_by(self, user):
         return self.filter(user=user)
 
+class SingleImageUploadManager(models.Manager):
     # built-in
-    def create(self, **kwargs):
+    def create(self, **kwargs): # QuerySet, file=file
         """
         Creates a new object with the given kwargs, saving it to the database
         and returning the created object.
@@ -21,17 +22,30 @@ class ViewableQuerySet(models.query.QuerySet):
         obj.save(force_insert=True, using=self.db)
         return obj
 
+    @classmethod
+    def from_queryset(cls, queryset_class, class_name=None): # BaseManager
+        if class_name is None:
+            class_name = '%sFrom%s' % (cls.__name__, queryset_class.__name__) # ManagerFromQuerySet
+        class_dict = {
+            '_queryset_class': queryset_class,
+        }
+        class_dict.update(cls._get_queryset_methods(queryset_class))
+        return type(class_name, (cls,), class_dict)
+
 
 class CellC2Task(CellTaskModel):
     cell_ratio = models.FloatField(null=True, blank=True)
 
-    objects = ViewableQuerySet.as_manager()
+    objects = SingleImageUploadManager.from_queryset(ViewableQuerySet)
 
     def get_absolute_url(self):
         return reverse('detail', kwargs={'task_id': self.task_id}, current_app=app_name)
 
     class Meta(CellTaskModel.Meta):
         verbose_name = '{0} {1}'.format(verbose_name, 'Task')
+
+    def queue_task(self, task_id, args_list, path_prefix):
+        run_image_analysis_task.delay(task_id, args_list, path_prefix)
 
     # def save(self, force_insert=False, force_update=False, using=None, update_fields=None)
     def save(self, *args, **kwargs):
