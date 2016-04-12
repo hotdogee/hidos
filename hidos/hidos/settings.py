@@ -3,6 +3,9 @@ Django settings for hidos project.
 """
 
 from os import path
+from django.contrib import messages 
+
+
 PROJECT_ROOT = path.dirname(path.abspath(path.dirname(__file__)))
 
 DEBUG = True
@@ -152,6 +155,7 @@ INSTALLED_APPS = (
     'allauth.socialaccount.providers.google',
     'app.apps.AppConfig',
     # Uncomment the next line to enable the admin:
+    'django_admin_bootstrapped',
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     'django.contrib.admindocs',
@@ -234,3 +238,13 @@ CELERY_ACCEPT_CONTENT=['json']
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_DISABLE_RATE_LIMITS = True
 #CELERY_ENABLE_UTC = True
+
+
+# bootstapped ADMINS
+DAB_FIELD_RENDERER = 'django_admin_bootstrapped.renderers.BootstrapFieldRenderer'
+
+MESSAGE_TAGS = {
+                    messages.SUCCESS: 'alert-success success',
+                    messages.WARNING: 'alert-warning warning',
+                    messages.ERROR: 'alert-danger error'
+                }
