@@ -14,7 +14,6 @@ from django.contrib import admin
 
 urlpatterns = [
     url(r'^$', app_views.home, name='home'),
-    url(r'^cellcount/', include('cellcount.urls')),
     url(r'^icsi/', include('icsi.urls')),
     url(r'^login/$',
         auth_views.login,
