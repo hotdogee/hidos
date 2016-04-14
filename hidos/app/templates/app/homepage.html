@@ -5,16 +5,54 @@
 
 <div class="jumbotron" id="home_jumbotron">
     <div class="container">
-    <h1 class="text-center" id="title">Cell S<small>election</small><h1>
-    <h2 class="text-center" id="subtitle">A better way to select proper embryos for ICSI implatations</h2> 
+    <h1 class="text-center" id="title">Cell S<small id='title_small'>election</small><h1>
+    <h2 class="text-center" id="subtitle">A better way to select proper embryos for ICSI implantations</h2>
+    <!-- <a class="btn btn-primary" role="button" href="{% url 'login' %}">Log in</a> -->
     </div>
 </div>
 
 
 <div class="row">
-
-
+    <div class="container">
+        <div class="col-md-12">
+            <h2 id="features" class="text-center">Features</h2>
+        </div>
+        <div class="col-md-4">
+            <div class="jumbotron feature_jumbotron text-center">
+               <div class="feature_icon">
+                <img class="center-block" src="{% static 'app/images/cloud.png' %}"></img>
+                </div>
+                <h3 class="feature">Cloud-Based</h3> 
+                <h4 class="feature">Cell S provides a user-friendly cloud plateform which makes doctors and technicians easier to control every embryos status instanly.</h4>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="jumbotron feature_jumbotron text-center">
+               <div class="feature_icon">
+               <img class="center-block" src="{% static 'app/images/android.png' %}"></img>
+               </div>
+               <h3 class="feature">Deep Learning</h3> 
+               <h4 class="feature"></h4>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="jumbotron feature_jumbotron text-center">
+               <div class="feature_icon">
+               <img class="center-block" src="{% static 'app/images/assignment.png' %}"></img>
+               </div>
+               <h3 class="feature">Automatic Report</h3> 
+               <h4 class="feature"></h4>
+            </div> 
+        </div>
+    </div>
 </div>
+
+
+<footer>
+    <div class="container text-center">
+        <img class="center-block" id="logo" src="{% static 'app/images/logo.png' %}"></img>
+    </div>
+</footer>
 
 
 {% endblock %}
@@ -29,6 +67,14 @@
     letter-spacing: 0.05px;
     text-shadow: 0px 2px 4px rgba(0,0,0,0.50);
     }
+
+#title_small{
+    font-size: 36px;
+    color: #FFFFFF;
+    
+    
+    }
+
 
 #subtitle {
     font-family: Helvetica;
@@ -50,5 +96,45 @@
     background:transparent;
 }
 
+
+#features{
+/* Features: */
+    font-family: AvenirNext-Bold;
+    font-size: 40px;
+    color: #007AB8;
+    letter-spacing: 0.03px;
+}
+
+.feature_jumbotron{
+   background-color: #fff;
+
+}
+
+.feature_icon{
+    height:140px;
+    width:100%;
+}
+
+.feature{
+/* Cloud-Based Copy: */
+    font-family: AvenirNext-Regular;
+    color: #9B9B9B;
+    letter-spacing: 0.03px;
+}
+
+
+footer {
+/* Rectangle 108: */
+    background: rgba(215,215,215,0.71);
+    width:100%;
+    height:45px;
+    position:absolute;
+}
+
+#logo{
+    margin-top:10px;
+    width:210px;
+    height:25px;
+}
 </style>
 {% endblock %}

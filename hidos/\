@@ -1,0 +1,77 @@
+{% extends "app/layout.html" %}
+{% load staticfiles %}
+
+{% block content-fluid %}
+
+<div class="jumbotron" id="home_jumbotron">
+    <div class="container">
+    <h1 class="text-center" id="title">Cell S<small>election</small><h1>
+    <h2 class="text-center" id="subtitle">A better way to select proper embryos for ICSI implatations</h2> 
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="container">
+        <div class="col-md-12">
+            <h2 id="features" class="text-center">Features</h2>
+        </div>
+        <div class="col-md-4">
+        
+        </div>
+        <div class="col-md-4">
+        
+        </div>
+        <div class="col-md-4">
+        
+        
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+
+
+{% block scripts %}
+<style>
+#title {
+    font-family: AvenirNext-Regular;
+    font-size: 64px;
+    color: #FFFFFF;
+    letter-spacing: 0.05px;
+    text-shadow: 0px 2px 4px rgba(0,0,0,0.50);
+    }
+
+#subtitle {
+    font-family: Helvetica;
+    font-size: 36px;
+    color: #FFFFFF;
+    letter-spacing: 0.03px;
+    text-shadow: 0px 2px 4px rgba(0,0,0,0.50);
+}
+
+#home_jumbotron {
+ background-image: url("{% static 'app/images/jumbotron.jpg' %}");
+ background-size: cover;
+ height: 800px;
+ align-items:center;
+ display:flex;
+}
+
+.container{
+    background:transparent;
+}
+
+
+#features{
+/* Features: */
+    font-family: AvenirNext-Bold;
+    font-size: 40px;
+    color: #007AB8;
+    letter-spacing: 0.03px;
+}
+
+
+</style>
+{% endblock %}
