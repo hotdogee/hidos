@@ -11,7 +11,21 @@ class ViewableQuerySet(models.query.QuerySet):
         return self.filter(user=user)
 
 class SingleImageUploadManager(models.Manager):
+    def create(self, **kwargs): # QuerySet, file=file
+        """
+        Needs: task_id, version, user_filename, result_status, user
+        """
+        data = {
+            task_id: task_id,
+            version: version,
+            user_filename: uploaded_file.name,
+            result_status: 'queued',
+            user: user
+        }
+        return super(SingleImageUploadManager, self).create(**data)
+
     # built-in
+    # run create(file=UploadedFile object)
     def create(self, **kwargs): # QuerySet, file=file
         """
         Creates a new object with the given kwargs, saving it to the database

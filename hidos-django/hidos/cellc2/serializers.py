@@ -14,6 +14,8 @@ class CellC2TaskSerializer(serializers.ModelSerializer):
         'task_id', 'status', 'dequeued', 'finished', 'user', 'parent_folder', 'version']
         fields = read_only_fields + ['file']
 
+    def validate_file
+
     # built-in
     def __init__(self, instance=None, data=empty, **kwargs): # BaseSerializer
         self.instance = instance
@@ -76,7 +78,28 @@ class CellC2TaskSerializer(serializers.ModelSerializer):
 
         return (False, data)
 
-    def to_internal_value(self, data):
+    @property
+    def fields(self):
+        """
+        A dictionary of {field_name: field_instance}.
+        """
+        # `fields` is evaluated lazily. We do this to ensure that we don't
+        # have issues importing modules that use ModelSerializers as fields,
+        # even if Django's app-loading stage has not yet run.
+        if not hasattr(self, '_fields'):
+            self._fields = BindingDict(self)
+            for key, value in self.get_fields().items():
+                self._fields[key] = value
+        return self._fields
+
+    @cached_property
+    def _writable_fields(self): # Serializer
+        return [
+            field for field in self.fields.values()
+            if (not field.read_only) or (field.default is not empty)
+        ]
+
+    def to_internal_value(self, data): # Serializer
         """
         Dict of native values <- Dict of primitive datatypes.
         """
@@ -90,13 +113,13 @@ class CellC2TaskSerializer(serializers.ModelSerializer):
 
         ret = OrderedDict()
         errors = OrderedDict()
-        fields = self._writable_fields
+        fields = self._writable_fields # list of Field objects
 
         for field in fields:
             validate_method = getattr(self, 'validate_' + field.field_name, None)
-            primitive_value = field.get_value(data)
+            primitive_value = field.get_value(data) # UploadedFile object
             try:
-                validated_value = field.run_validation(primitive_value)
+                validated_value = field.run_validation(primitive_value) # Unmodified UploadedFile object
                 if validate_method is not None:
                     validated_value = validate_method(validated_value)
             except ValidationError as exc:
@@ -113,7 +136,176 @@ class CellC2TaskSerializer(serializers.ModelSerializer):
 
         return ret
 
-    def save(self, **kwargs):
+    def run_validation(self, data=empty): # Field
+        """
+        Validate a simple representation and return the internal value.
+        The provided data may be `empty` if no representation was included
+        in the input.
+        May raise `SkipField` if the field should not be included in the
+        validated data.
+        """
+        (is_empty_value, data) = self.validate_empty_values(data)
+        if is_empty_value:
+            return data
+        value = self.to_internal_value(data)
+        self.run_validators(value)
+        return value
+
+    def to_internal_value(self, data): # ImageField
+        # Image validation is a bit grungy, so we'll just outright
+        # defer to Django's implementation so we don't need to
+        # consider it, or treat PIL as a test dependency.
+        file_object = super(ImageField, self).to_internal_value(data)
+        django_field = self._DjangoImageField()
+        django_field.error_messages = self.error_messages
+        # returns a new file object with
+        # f.image = image (Image.open(file))
+        # f.content_type = Image.MIME.get(image.format)
+        # but DRF doesn't use it
+        django_field.to_python(file_object)
+        return file_object
+
+    class ImageField(FileField): # form field
+        default_error_messages = {
+            'invalid_image': _(
+                "Upload a valid image. The file you uploaded was either not an "
+                "image or a corrupted image."
+            ),
+        }
+
+        def to_python(self, data): # FileField
+            if data in self.empty_values:
+                return None
+
+            # UploadedFile objects should have name and size attributes.
+            try:
+                file_name = data.name
+                file_size = data.size
+            except AttributeError:
+                raise ValidationError(self.error_messages['invalid'], code='invalid')
+
+            if self.max_length is not None and len(file_name) > self.max_length:
+                params = {'max': self.max_length, 'length': len(file_name)}
+                raise ValidationError(self.error_messages['max_length'], code='max_length', params=params)
+            if not file_name:
+                raise ValidationError(self.error_messages['invalid'], code='invalid')
+            if not self.allow_empty_file and not file_size:
+                raise ValidationError(self.error_messages['empty'], code='empty')
+
+            return data  # UploadedFile object
+
+        def to_python(self, data): # ImageField
+            """
+            Checks that the file-upload field data contains a valid image (GIF, JPG,
+            PNG, possibly others -- whatever the Python Imaging Library supports).
+            """
+            f = super(ImageField, self).to_python(data)  # UploadedFile object
+            if f is None:
+                return None
+
+            from PIL import Image
+
+            # We need to get a file object for Pillow. We might have a path or we might
+            # have to read the data into memory.
+            if hasattr(data, 'temporary_file_path'):
+                file = data.temporary_file_path()
+            else:
+                if hasattr(data, 'read'):
+                    file = BytesIO(data.read())
+                else:
+                    file = BytesIO(data['content'])
+
+            try:
+                # load() could spot a truncated JPEG, but it loads the entire
+                # image in memory, which is a DoS vector. See #3848 and #18520.
+                image = Image.open(file)
+                # verify() must be called immediately after the constructor.
+                image.verify()
+
+                # Annotating so subclasses can reuse it for their own validation
+                f.image = image
+                # Pillow doesn't detect the MIME type of all formats. In those
+                # cases, content_type will be None.
+                f.content_type = Image.MIME.get(image.format)
+            except Exception:
+                # Pillow doesn't recognize it as an image.
+                six.reraise(ValidationError, ValidationError(
+                    self.error_messages['invalid_image'],
+                    code='invalid_image',
+                ), sys.exc_info()[2])
+            if hasattr(f, 'seek') and callable(f.seek):
+                f.seek(0)
+            return f
+
+    def to_internal_value(self, data): # FileField
+        try:
+            # `UploadedFile` objects should have name and size attributes.
+            file_name = data.name
+            file_size = data.size
+        except AttributeError:
+            self.fail('invalid')
+
+        if not file_name:
+            self.fail('no_name')
+        if not self.allow_empty_file and not file_size:
+            self.fail('empty')
+        if self.max_length and len(file_name) > self.max_length:
+            self.fail('max_length', max_length=self.max_length, length=len(file_name))
+
+        return data
+
+    def run_validators(self, value):
+        """
+        Test the given value against all the validators on the field,
+        and either raise a `ValidationError` or simply return.
+        """
+        errors = []
+        for validator in self.validators: # empty
+            if hasattr(validator, 'set_context'):
+                validator.set_context(self)
+
+            try:
+                validator(value)
+            except ValidationError as exc:
+                # If the validation error contains a mapping of fields to
+                # errors then simply raise it immediately rather than
+                # attempting to accumulate a list of errors.
+                if isinstance(exc.detail, dict):
+                    raise
+                errors.extend(exc.detail)
+            except DjangoValidationError as exc:
+                errors.extend(exc.messages)
+        if errors:
+            raise ValidationError(errors)
+
+    # uploaded_file = request.FILES['file']
+    # During file uploads, the actual file data is stored in request.FILES.
+    # Each entry in this dictionary is an UploadedFile object
+    def get_value(self, dictionary): # Field
+        """
+        Given the *incoming* primitive data, return the value for this field
+        that should be validated and transformed to a native value.
+        """
+        if html.is_html_input(dictionary):
+            # HTML forms will represent empty fields as '', and cannot
+            # represent None or False values directly.
+            if self.field_name not in dictionary:
+                if getattr(self.root, 'partial', False):
+                    return empty
+                return self.default_empty_html
+            ret = dictionary[self.field_name]
+            if ret == '' and self.allow_null:
+                # If the field is blank, and null is a valid value then
+                # determine if we should use null instead.
+                return '' if getattr(self, 'allow_blank', False) else None
+            elif ret == '' and not self.required:
+                # If the field is blank, and emptyness is valid then
+                # determine if we should use emptyness instead.
+                return '' if getattr(self, 'allow_blank', False) else empty
+            return ret
+        return dictionary.get(self.field_name, empty)
+
+    def save(self, **kwargs): # BaseSerializer
         validated_data = dict(
             list(self.validated_data.items()) +
             list(kwargs.items())
@@ -121,18 +313,22 @@ class CellC2TaskSerializer(serializers.ModelSerializer):
 
         if self.instance is not None:
             self.instance = self.update(self.instance, validated_data)
-            assert self.instance is not None, (
-                '`update()` did not return an object instance.'
-            )
         else:
             self.instance = self.create(validated_data)
-            assert self.instance is not None, (
-                '`create()` did not return an object instance.'
-            )
 
         return self.instance
 
-    def create(self, validated_data):
+    @property
+    def validated_data(self):
+        if not hasattr(self, '_validated_data'):
+            msg = 'You must call `.is_valid()` before accessing `.validated_data`.'
+            raise AssertionError(msg)
+        return self._validated_data
+
+    # validated_data = {
+    #     file: UploadedFile object
+    # }
+    def create(self, validated_data): # ModelSerializer
         """
         We have a bit of extra checking around this in order to provide
         descriptive messages when something goes wrong, but this method is

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Definition of views.
 """
 
@@ -86,7 +86,7 @@ def home(request):
             return HttpResponse('Invalid file')
         uploaded_file = request.FILES['file']
         uploaded_file_data = uploaded_file.read()
-        
+
         # check if file is image
         image_type = imghdr.what('', uploaded_file_data)
         if not image_type:
@@ -94,7 +94,7 @@ def home(request):
             return HttpResponse('Uploaded image type is unsupported')
         else:
             logger.info('Uploaded image type: {0}, filename: {1}'.format(image_type, uploaded_file.name))
-            
+
         # calculate file hash
         m = hashlib.md5()
         m.update(version)
@@ -117,12 +117,12 @@ def home(request):
             if not path.exists(path.dirname(input_image_path)):
                 makedirs(path.dirname(input_image_path))
             chmod(path.dirname(input_image_path), Perm.S_IRWXU | Perm.S_IRWXG | Perm.S_IRWXO) # ensure the standalone dequeuing process can open files in the directory
-        
+
             # write original image data to file
             with open(original_image_path, 'wb') as original_image_f:
                 original_image_f.write(uploaded_file_data)
             chmod(original_image_path, Perm.S_IRWXU | Perm.S_IRWXG | Perm.S_IRWXO) # ensure the standalone dequeuing process can access the file
-                  
+
             # convert to jpeg for web display
             Image.open(original_image_path).save(input_image_path)
             chmod(input_image_path, Perm.S_IRWXU | Perm.S_IRWXG | Perm.S_IRWXO) # ensure the standalone dequeuing process can access the file
@@ -132,7 +132,7 @@ def home(request):
             # %R_Script% 1_6_obj_area_cal_cmd.R IMG_0159.JPG IMG_0159_out.JPG IMG_0159_out.csv
             script_path = path.join(settings.PROJECT_ROOT, 'app', 'bin', '1_6_obj_area_cal_cmd.R')
             args_list = [[settings.R_SCRIPT, script_path, original_image_path, output_image_path, output_json_path]]
-        
+
             # insert entry into database
             record = ImageAnalysis()
             record.task_id = task_id
