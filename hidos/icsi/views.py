@@ -4,7 +4,7 @@ from django.shortcuts import redirect
 from django.http import HttpRequest
 from django.http import JsonResponse
 from datetime import datetime
-from .models import ICSIImageAnalysis, OvumGrade
+from .models import Task, Ovum
 from django.http.response import HttpResponse
 from django.conf import settings
 from uuid import uuid4
@@ -41,7 +41,7 @@ def tasks(request):
                 'number_of_E': t.number_of_E,
                 'status': t.result_status,
                 'created': current_tz.normalize(t.enqueue_date.astimezone(current_tz)).isoformat(),
-                } for t in ICSIImageAnalysis.objects.filter(user=request.user)]
+                } for t in Task.objects.filter(user=request.user)]
             })
 
         return tmp
@@ -64,7 +64,7 @@ def status(request):
             'id': t.task_id,
             'result_status': t.result_status,
             'created': current_tz.normalize(t.enqueue_date.astimezone(current_tz)).isoformat(),
-            } for t in ICSIImageAnalysis.objects.filter(task_id__in=task_ids)]
+            } for t in Task.objects.filter(task_id__in=task_ids)]
         })
 
 
@@ -73,7 +73,7 @@ def status(request):
 def retrieve(request, task_id='1'):
     # return HttpResponse("retrieve = %s." % (task_id))
     try:
-        record = ICSIImageAnalysis.objects.get(task_id=task_id)
+        record = Task.objects.get(task_id=task_id)
 
         images = []
         paths = []
@@ -158,7 +158,7 @@ def upload(request):
             m.update(chunk)
         task_id = m.hexdigest()
         # check database for duplicate
-        if not ICSIImageAnalysis.objects.filter(task_id=task_id).exists():
+        if not Task.objects.filter(task_id=task_id).exists():
             # setup file paths
             #task_id = uuid4().hex # TODO: Create from hash of input to check for duplicate inputs
             path_prefix = path.join(settings.MEDIA_ROOT, 'icsi', 'task', task_id, task_id)
@@ -194,7 +194,7 @@ def upload(request):
           
 
             # insert entry into database
-            record = ICSIImageAnalysis()
+            record = Task()
             
             # mother_name for demo
             mothers = [u'佩岑', u'志玲',u'熙娣',u'隋棠', u'心如']

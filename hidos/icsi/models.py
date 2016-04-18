@@ -4,10 +4,8 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from app.models import Folder, ImageAnalysis
 
-class ICSIFolder(Folder):
-    method = models.CharField(max_length=32,default='ICSI')
 
-class ICSIImageAnalysis(ImageAnalysis):
+class Task(ImageAnalysis):
     number_of_ovum = models.IntegerField(null=True)
     number_of_A = models.IntegerField(null=True)
     number_of_B = models.IntegerField(null=True)
@@ -26,10 +24,10 @@ class ICSIImageAnalysis(ImageAnalysis):
     class Meta:
         verbose_name = 'Image Analysis'
 
-class OvumGrade(models.Model):
+class Ovum(models.Model):
     ovum_id = models.CharField(max_length=32, primary_key=True)
     ovum_number = models.IntegerField(null=True)
-    parent_imageanalysis = models.ForeignKey('ICSIImageAnalysis',related_name = 'ovums', null = True)
+    parent_imageanalysis = models.ForeignKey('Task',related_name = 'ovums', null = True)
     grade = models.CharField(max_length=32, default='A')
     graded_time = models.DateTimeField(null=True)
 

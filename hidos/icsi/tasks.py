@@ -14,7 +14,7 @@ from celery.task.schedules import crontab
 from celery.decorators import periodic_task
 from subprocess import Popen, PIPE
 from datetime import datetime, timedelta
-from .models import ICSIImageAnalysis, OvumGrade
+from .models import Task, Ovum
 from os import path, stat
 from pytz import utc
 from itertools import groupby
@@ -43,7 +43,7 @@ def run_image_analysis_task(task_id, args_list, path_prefix):
     logger.info("icsi_analysis task_id: %s" % (task_id,))
 
     # update dequeue time
-    record = ICSIImageAnalysis.objects.get(task_id__exact=task_id)
+    record = Task.objects.get(task_id__exact=task_id)
     record.dequeue_date = datetime.utcnow().replace(tzinfo=utc)
     record.result_status = 'running'
     record.save()
@@ -53,8 +53,6 @@ def run_image_analysis_task(task_id, args_list, path_prefix):
         logger.info(args)
 	Popen(args, stdin=PIPE, stdout=PIPE).wait()
 
-    
-		
     # update result state
     result_status = ''
     with open('/'.join(path_prefix.split('/')[:-1]) + '/predict_result.json') as data_file:
@@ -82,26 +80,26 @@ def run_image_analysis_task(task_id, args_list, path_prefix):
             file_name = crop.split('/')[-1]
             predict_score = float(predict_result[file_name])
             logger.info(predict_score) 
-            Ovum = OvumGrade()
+            ovum = Ovum()
             if predict_score < 0.5:
-                Ovum.grade = "A"
+                ovum.grade = "A"
                 ovum_A +=1
             else:
-                Ovum.grade = "E"
+                ovum.grade = "E"
                 ovum_E +=1
 
 
             logger.info("cropping")
-            Ovum.ovum_id = task_id + '_' + str(ovum_count)
-            Ovum.ovum_number = ovum_count
+            ovum.ovum_id = task_id + '_' + str(ovum_count)
+            ovum.ovum_number = ovum_count
             ovum_count += 1
-            Ovum.parent_imageanalysis = ICSIImageAnalysis(task_id = task_id)
-            Ovum.status = 'success'
+            ovum.parent_imageanalysis = Task(task_id = task_id)
+            ovum.status = 'success'
 
 
 
-            Ovum.graded_time = datetime.utcnow().replace(tzinfo=utc)
-            Ovum.save()
+            ovum.graded_time = datetime.utcnow().replace(tzinfo=utc)
+            ovum.save()
 
         record.number_of_A = ovum_A
         record.number_of_B = ovum_B
