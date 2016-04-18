@@ -160,6 +160,7 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     'django.contrib.admindocs',
     'icsi',
+    'label',
     'debug_toolbar.apps.DebugToolbarConfig',
 )
 

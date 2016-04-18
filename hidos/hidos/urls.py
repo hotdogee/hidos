@@ -15,6 +15,7 @@ from django.contrib import admin
 urlpatterns = [
     url(r'^$', app_views.home, name='home'),
     url(r'^icsi/', include('icsi.urls')),
+    url(r'^label/', include('label.urls')),
     url(r'^login/$',
         auth_views.login,
         {

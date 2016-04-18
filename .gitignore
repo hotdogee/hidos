@@ -74,3 +74,9 @@ Ovums/
 # mxnet
 mxnet/
 
+# 
+history_yank
+
+# django migrations
+migrations
+
