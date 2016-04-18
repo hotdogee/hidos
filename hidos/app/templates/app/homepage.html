@@ -4,10 +4,10 @@
 {% block content-fluid %}
 
 <div class="jumbotron" id="home_jumbotron">
-    <div class="container">
-    <h1 class="text-center" id="title">Cell S<small id='title_small'>election</small><h1>
-    <h2 class="text-center" id="subtitle">A better way to select proper embryos for ICSI implantations</h2>
-    <!-- <a class="btn btn-primary" role="button" href="{% url 'login' %}">Log in</a> -->
+    <div class="container text-center">
+    <h1 id="title">Cell S<small id='title_small'>election</small><h1>
+    <h2 id="subtitle">A better way to select proper embryos for ICSI implantations</h2>
+    <!-- <a class="btn btn-default btn-lg" role="button" href="{% url 'login' %}">Log in</a> -->
     </div>
 </div>
 
@@ -19,8 +19,8 @@
         </div>
         <div class="col-md-4">
             <div class="jumbotron feature_jumbotron text-center">
-               <div class="feature_icon">
-                <img class="center-block" src="{% static 'app/images/cloud.png' %}"></img>
+               <div class="feature">
+                   <i class="feature_icon mdi mdi-cloud"></i>
                 </div>
                 <h3 class="feature">Cloud-Based</h3> 
                 <h4 class="feature">Cell S provides a user-friendly cloud plateform which makes doctors and technicians easier to control every embryos status instanly.</h4>
@@ -28,22 +28,50 @@
         </div>
         <div class="col-md-4">
             <div class="jumbotron feature_jumbotron text-center">
-               <div class="feature_icon">
-               <img class="center-block" src="{% static 'app/images/android.png' %}"></img>
+               <div class="feature">
+                    <i class="feature_icon mdi mdi-memory"></i>
                </div>
                <h3 class="feature">Deep Learning</h3> 
-               <h4 class="feature"></h4>
+               <h4 class="feature">With the technology of machine learning, we </h4>
             </div>
         </div>
         <div class="col-md-4">
             <div class="jumbotron feature_jumbotron text-center">
-               <div class="feature_icon">
-               <img class="center-block" src="{% static 'app/images/assignment.png' %}"></img>
+               <div class="feature">
+                   <i class="feature_icon mdi mdi-clipboard-check"></i>
                </div>
                <h3 class="feature">Automatic Report</h3> 
                <h4 class="feature"></h4>
             </div> 
         </div>
+        <div class="col-md-4">
+            <div class="jumbotron feature_jumbotron text-center">
+               <div class="feature">
+                   <i class="feature_icon glyphicon glyphicon-eye-open"></i>
+                </div>
+                <h3 class="feature">Live View</h3> 
+                <h4 class="feature">Cell S provides a user-friendly cloud plateform which makes doctors and technicians easier to control every embryos status instanly.</h4>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="jumbotron feature_jumbotron text-center">
+               <div class="feature">
+                   <i class="feature_icon glyphicon glyphicon-thumbs-up"></i>
+                </div>
+                <h3 class="feature">Getting Perfect</h3> 
+                <h4 class="feature">Cell S provides a user-friendly cloud plateform which makes doctors and technicians easier to control every embryos status instanly.</h4>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="jumbotron feature_jumbotron text-center">
+               <div class="feature">
+                   <i class="feature_icon mdi mdi-cloud"></i>
+                </div>
+                <h3 class="feature">Expert Experience</h3> 
+                <h4 class="feature">Cell S provides a user-friendly cloud plateform which makes doctors and technicians easier to control every embryos status instanly.</h4>
+            </div>
+        </div>
+  
     </div>
 </div>
 
@@ -70,11 +98,8 @@
 
 #title_small{
     font-size: 36px;
-    color: #FFFFFF;
-    
-    
+    color: #FFFFFF; 
     }
-
 
 #subtitle {
     font-family: Helvetica;
@@ -110,6 +135,12 @@
 
 }
 
+.feature_icon {
+    font-size:130px; 
+    display:block;
+}
+
+
 .feature_icon{
     height:140px;
     width:100%;
@@ -136,5 +167,10 @@ footer {
     width:210px;
     height:25px;
 }
+
+.col-md-4{
+ height:400px;
+}
+
 </style>
 {% endblock %}
