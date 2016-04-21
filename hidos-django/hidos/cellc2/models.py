@@ -17,7 +17,7 @@ class SingleImageUploadManager(models.Manager):
 
     def create(self, **kwargs): # QuerySet, file=file, user=user
         """
-        Needs: task_id, version, user_filename, result_status, user
+        Create a CellTaskModel from a validated UploadedFile object
         """
         # Generate task id
         m = hashlib.md5()
@@ -39,25 +39,25 @@ class SingleImageUploadManager(models.Manager):
 
     # built-in
     # run create(file=UploadedFile object)
-    def create(self, **kwargs): # QuerySet, file=file
-        """
-        Creates a new object with the given kwargs, saving it to the database
-        and returning the created object.
-        """
-        obj = self.model(**kwargs)
-        self._for_write = True
-        obj.save(force_insert=True, using=self.db)
-        return obj
+    # def create(self, **kwargs): # QuerySet, file=file
+    #     """
+    #     Creates a new object with the given kwargs, saving it to the database
+    #     and returning the created object.
+    #     """
+    #     obj = self.model(**kwargs)
+    #     self._for_write = True
+    #     obj.save(force_insert=True, using=self.db)
+    #     return obj
 
-    @classmethod
-    def from_queryset(cls, queryset_class, class_name=None): # BaseManager
-        if class_name is None:
-            class_name = '%sFrom%s' % (cls.__name__, queryset_class.__name__) # ManagerFromQuerySet
-        class_dict = {
-            '_queryset_class': queryset_class,
-        }
-        class_dict.update(cls._get_queryset_methods(queryset_class))
-        return type(class_name, (cls,), class_dict)
+    # @classmethod
+    # def from_queryset(cls, queryset_class, class_name=None): # BaseManager
+    #     if class_name is None:
+    #         class_name = '%sFrom%s' % (cls.__name__, queryset_class.__name__) # ManagerFromQuerySet
+    #     class_dict = {
+    #         '_queryset_class': queryset_class,
+    #     }
+    #     class_dict.update(cls._get_queryset_methods(queryset_class))
+    #     return type(class_name, (cls,), class_dict)
 
 
 class CellC2Task(CellTaskModel):
@@ -71,12 +71,12 @@ class CellC2Task(CellTaskModel):
     class Meta(CellTaskModel.Meta):
         verbose_name = '{0} {1}'.format(verbose_name, 'Task')
 
-    def queue_task(self, task_id, args_list, path_prefix):
+    def run_delay(self):
         run_image_analysis_task.delay(task_id, args_list, path_prefix)
 
     # def save(self, force_insert=False, force_update=False, using=None, update_fields=None)
-    def save(self, *args, **kwargs):
-        if self.name == "Yoko Ono's blog":
-            return # Yoko shall never have her own blog!
-        else:
-            super(CellC2Task, self).save(*args, **kwargs) # Call the "real" save() method.
+    # def save(self, *args, **kwargs):
+    #     if self.name == "Yoko Ono's blog":
+    #         return # Yoko shall never have her own blog!
+    #     else:
+    #         super(CellC2Task, self).save(*args, **kwargs) # Call the "real" save() method.

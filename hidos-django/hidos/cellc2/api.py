@@ -16,36 +16,37 @@ class TaskListCreateAPIView(generics.ListCreateAPIView):
     filter_fields = ('task_id', )
     pagination_class = None
 
-    # built-in
-
     def perform_create(self, serializer):
         # If anonymous user will be django.contrib.auth.models.AnonymousUser
         # and username is a empty string.
-        serializer.save(user=self.request.user)
-        # ExampleModel.objects.create(**validated_data)
+        task = serializer.save(user=self.request.user) # returns create model instance
+        # put task in queue
+        task.run_delay()
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    # built-in
 
-    def get_serializer(self, *args, **kwargs):
-        """
-        Return the serializer instance that should be used for validating and
-        deserializing input, and for serializing output.
-        """
-        serializer_class = self.get_serializer_class()
-        kwargs['context'] = self.get_serializer_context()
-        return serializer_class(*args, **kwargs)
+    # def create(self, request, *args, **kwargs):
+    #     serializer = self.get_serializer(data=request.data)
+    #     serializer.is_valid(raise_exception=True)
+    #     self.perform_create(serializer)
+    #     headers = self.get_success_headers(serializer.data)
+    #     return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-    def get_serializer_context(self):
-        """
-        Extra context provided to the serializer class.
-        """
-        return {
-            'request': self.request,
-            'format': self.format_kwarg,
-            'view': self
-        }
+    # def get_serializer(self, *args, **kwargs):
+    #     """
+    #     Return the serializer instance that should be used for validating and
+    #     deserializing input, and for serializing output.
+    #     """
+    #     serializer_class = self.get_serializer_class()
+    #     kwargs['context'] = self.get_serializer_context()
+    #     return serializer_class(*args, **kwargs)
+
+    # def get_serializer_context(self):
+    #     """
+    #     Extra context provided to the serializer class.
+    #     """
+    #     return {
+    #         'request': self.request,
+    #         'format': self.format_kwarg,
+    #         'view': self
+    #     }
