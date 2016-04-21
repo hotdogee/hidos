@@ -2,7 +2,7 @@
 HiDOS bioinformatics platform
 
 
-## CellA
+## CellS
 A plateform automatically grade the IVF embryo status.
 
 please follow the requirement.txt to install proper packages.
