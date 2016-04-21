@@ -1,24 +1,37 @@
 from __future__ import unicode_literals
+import hashlib
 
 from django.db import models
 
-from . import app_name, verbose_name
+from . import app_name, verbose_name, version
 from cellbase.models import CellTaskModel
 
 
 class ViewableQuerySet(models.query.QuerySet):
+
     def viewable_by(self, user):
         return self.filter(user=user)
 
+
 class SingleImageUploadManager(models.Manager):
-    def create(self, **kwargs): # QuerySet, file=file
+
+    def create(self, **kwargs): # QuerySet, file=file, user=user
         """
         Needs: task_id, version, user_filename, result_status, user
         """
+        # Generate task id
+        m = hashlib.md5()
+        m.update(version)
+        m.update(user.username) # if anonymous, username is ''
+        for chunk in file.chunks():
+            m.update(chunk)
+        task_id = m.hexdigest()
+
+        # Build data dictionary
         data = {
             task_id: task_id,
             version: version,
-            user_filename: uploaded_file.name,
+            user_filename: file.name,
             result_status: 'queued',
             user: user
         }

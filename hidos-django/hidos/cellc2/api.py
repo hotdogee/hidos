@@ -19,6 +19,8 @@ class TaskListCreateAPIView(generics.ListCreateAPIView):
     # built-in
 
     def perform_create(self, serializer):
+        # If anonymous user will be django.contrib.auth.models.AnonymousUser
+        # and username is a empty string.
         serializer.save(user=self.request.user)
         # ExampleModel.objects.create(**validated_data)
 
