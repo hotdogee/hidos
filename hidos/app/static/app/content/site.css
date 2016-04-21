@@ -1,5 +1,4 @@
-﻿body {
-   /* padding-bottom: 20px; */
+body {
 }
 
 /* Set padding to keep content from hitting the edges */
@@ -38,4 +37,9 @@ input[type="checkbox"].input-validation-error {
 
 .validation-summary-valid {
     display: none;
+}
+
+
+.navbar-right{
+ margin-right:0px;
 }

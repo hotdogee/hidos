@@ -148,7 +148,7 @@ for props in regions:
             y2 = ori_img.shape[1]-1
 
         img_crop = ori_img[x1:x2,y1:y2]
-        img_crop = resize(img_crop, (64,64))
+        # img_crop = resize(img_crop, (64,64))
 
 
         for i in range(0,3):
@@ -165,6 +165,8 @@ for props in regions:
 
         img_crop_path = OUTPUT_IMAGE_PATH +'_Crop' + str(img_time)+'.jpg'
         imsave(img_crop_path, img_crop)
+        img_crop = resize(img_crop, (64,64))
+        
 
 ori_img_out_path = OUTPUT_IMAGE_PATH + '_out.jpg'
 imsave(ori_img_out_path, ori_img_for_out)

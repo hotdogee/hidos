@@ -6,43 +6,281 @@
 <head>
 <meta charset="utf-8" />
 {% load staticfiles %}
-  <link rel="stylesheet" type="text/css" href="{% static 'app/content/bootstrap.min.css' %}" />
+  <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
   <link rel="stylesheet" type="text/css" href="{% static 'app/content/site.css' %}" />
   <link rel="stylesheet" type="text/css" href="{% static 'app/content/materialdesignicons.min.css' %}" />
+  <script   src="https://code.jquery.com/jquery-2.2.3.min.js"   integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo="   crossorigin="anonymous"></script>
+  
+  <!-- chartjs --> 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js"></script>
+  
+  <!-- boostrap-slider -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/7.0.0/bootstrap-slider.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/7.0.0/css/bootstrap-slider.min.css" />
+  
+  <!--lightbox2 -->
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.8.2/css/lightbox.min.css" />
+
 
 <!-- modernizer should be include later-->
 
+<style> 
+.sidebar{
+ background: #ECECEC;
+ height:100vh;
+ float:left;
+ padding-right:0px;
+ width:200px;
+ display:block;
+ position:fixed;
+}
+
+.sidebar-bot{
+    width: inherit;
+    position:fixed;
+    bottom:10px;:
+}
+
+
+.sidebar-head{
+    padding: 10px 15px;
+    background: 
+}
+
+.sidebar-title{
+    padding:10px 15px;
+}
+
+
+.tabs{
+    overflow-y:scroll;
+    padding:30px 10px;
+    height:100%
+}
+
+
+.tab{
+ border-radius:4px;
+ box-shadow:  0px 2px 4px rgba(0,0,0,0.50);
+ width: 180px;
+ height: 330px;
+ background: #D8D8D8;
+ display:block
+}
+
+.tab-inner{
+  padding:30px 2px 10px 2px;
+  background: #FFF;
+}
+
+.slider-inner{
+    padding:13px 3px;
+    display:block;
+    border-radius:4px;
+}
+
+.plot-area{
+    display:block;
+
+}
+
+.label-area{
+    display:block;
+
+}
+
+
+
+.slider.slider-horizontal{
+ width:120px;
+}
+
+
+
+.page-wrapper{
+ margin-left:200px;
+ padding: 5px 30px 0px 30px;
+}
+
+
+
+.row-eq-height{
+ display:flex;
+}
+
+body{
+ margin-top:50px;
+}
+
+
+.navbar.navbar-fixed-top{
+ background-color: rgb(66, 133, 244);
+-webkit-box-shadow: 0px 4px 15px -2px rgba(0,0,0,0.75);
+-moz-box-shadow: 0px 4px 15px -2px rgba(0,0,0,0.75);
+box-shadow: 0px 4px 15px -2px rgba(0,0,0,0.75);
+}
+
+.navbar a{
+ color:#FFF;
+}
+
+</style>
 </head>
 
 
 
 <body>
-<div class="row">
-    <div class="col-md-2">
-        <ul class="nav nav-pills nav-stacked"> 
-            <li>Task list</li>
-            <li>Mother list</li>
+    {% include 'app/navbar.html' %}
+    <div class="sidebar">
+        <div class="sidebar-head sidebar_title">
+            <!-- <img src="{% static 'app/images/celle-icon.png' %}" style="display:inline-block; width:10%"/> -->
+            <h3 style="display:inline-block">Cell Selection</h3>
+        </div>
+
+       <ul class="nav nav-pills nav-stacked nav-revsered">  
+           <li role="presentation"><h4 class="sidebar-title">DashBoard</h4></a></li>
+           <li role="presentation"><a href="#"><i class="glyphicon glyphicon-th-list"></i>&nbsp;&nbsp;&nbsp;Task list</a></li>
+           <li role="presentation"><a href="#"><i class="glyphicon glyphicon-user"></i>&nbsp;&nbsp;&nbsp;Mother list</a></li>
+           <li role="presentation"><a href="#"><i class="glyphicon glyphicon-ok"></i>&nbsp;&nbsp;&nbsp;Lableing System</a></li>
         </ul>
 
+
+        {% if user.is_authenticated %}
+        <div class="sidebar-bot text-center">
+            <h4>{{ user.username  }}</h4>
+        </div>
+        {% endif %}
     </div>
 
-    <div class="col-md-5">
+    
+    <div class="page-wrapper"> 
+    <!-- plot page -->
 
-    </div>>
+        <div class="col-md-12">
+            <div class="page-header">
+                <h3>Database Summary</h3>
+            </div>
+            <div class="plot-area">
+                <div class="col-md-3 text-center">
+                    <canvas id="myChart" width="100" height="100"></canvas>
+                </div>
+                <div class="col-md-3 text-center">
+                    <canvas id="myChart-2" width="100" height="100"></canvas>
+                </div>
+                <div class="col-md-3 text-center">
+                    <canvas id="myChart-3" width="100" height="100"></canvas>
+                </div>
+                <div class="col-md-3 text-center">
+                    <canvas id="myChart-4" width="100" height="100"></canvas>
+                </div>
+            </div>
+        </div>
 
-    <div class="col-md-5">
+    <!-- label page -->
+    
+    <div class="col-md-12">
+        <div class="page-header">
+            <h3>Ovums</h3>
+        </div>
+        <div class="label-area">
+           {% for ovum in ovums_list %}
+           <div class="col-md-4 col-sm-6 col-xs-12">
+                <div class="panel panel-default"> 
+                    <div class="panel-heading">
+                        <div class="row row-eq-height"> 
+                            <div class="col-md-6 text-left">
+                                <span>Image {{ forloop.counter }}<br><small>20161017</small></span>
+                            </div>
+                            <div class="col-md-6 text-right">
+                                <button type="button" class="btn btn-danger">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="row-eq-height">
+                        <div class="col-md-4">
+                            <a href="{{ ovum.path }}" data-lightbox="image-ovum">
+                                <img class="img-thumbnail center-block" src="{{ ovum.path }}" style="width: 100px; height: 100px"></img>
+                            </a>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="col-md-12 text-left">
+                                <p><i class="glyphicon glyphicon-ok" ></i>&nbsp;&nbsp;&nbsp;Labeled</p>
+                            </div>
+                            
+                            <div class="col-md-12 text-left" style="position:absolute; bottom:0px;">
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-default">A</button>
+                                    <button type="button" class="btn btn-default">A-</button>
+                                    <button type="button" class="btn btn-default">B</button>
+                                    <button type="button" class="btn btn-default">C</button>
+                                    <button type="button" class="btn btn-default">D</button>
+                                    <button type="button" class="btn btn-default">E</button>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %} 
+        </div>
+   </div> 
+
+   </div>
 
 
 
 
-    </div>
-</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.8.2/js/lightbox.min.js"></script>
+<script>
+
+var data = [
+    {
+            value: 300,
+            color:"#F7464A",
+            highlight: "#FF5A5E",
+            label: "Red"
+        },
+            {
+                    value: 50,
+                    color: "#46BFBD",
+                    highlight: "#5AD3D1",
+                    label: "Green"
+                },
+                    {
+                            value: 100,
+                            color: "#FDB45C",
+                            highlight: "#FFC870",
+                            label: "Yellow"
+                        }
+]
+
+var pieOptions = {
+    segmentShowStroke : false,
+    animateScale : true
+}
+
+
+var ctx = document.getElementById("myChart").getContext("2d")
+new Chart(ctx).Doughnut(data, pieOptions);
+var ctx = document.getElementById("myChart-2").getContext("2d")
+new Chart(ctx).Doughnut(data, pieOptions);
+var ctx = document.getElementById("myChart-3").getContext("2d")
+new Chart(ctx).Doughnut(data, pieOptions);
+var ctx = document.getElementById("myChart-4").getContext("2d")
+new Chart(ctx).Doughnut(data, pieOptions);
+
+
+
+
+
+</script>
 
 
 
 
 </body>
-
 
 
 </html>

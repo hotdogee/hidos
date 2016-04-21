@@ -14,6 +14,7 @@ import argparse
 import json
 csize = 64
 
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--input')
 parser.add_argument('--output')

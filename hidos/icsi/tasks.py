@@ -90,11 +90,12 @@ def run_image_analysis_task(task_id, args_list, path_prefix):
 
 
             logger.info("cropping")
-            ovum.ovum_id = task_id + '_' + str(ovum_count)
+            ovum.ovum_id = task_id + '_Crop' + str(ovum_count)
             ovum.ovum_number = ovum_count
             ovum_count += 1
             ovum.parent_imageanalysis = Task(task_id = task_id)
             ovum.status = 'success'
+            ovum.archived = False
 
 
 

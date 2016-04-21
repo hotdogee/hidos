@@ -227,10 +227,20 @@ from kombu import Exchange, Queue
 CELERY_DEFAULT_QUEUE = 'hidos'
 CELERY_DEFAULT_EXCHANGE = 'hidos'
 CELERY_DEFAULT_EXCHANGE_TYPE = 'direct'
-CELERY_DEFAULT_ROUTING_KEY = 'hidos'
+CELERY_DEFAULT_ROUTING_KEY = 'cells_dev.task'
 CELERY_QUEUES = (
-    Queue('hidos', Exchange('hidos'), routing_key='hidos'),
+    Queue('hidos', Exchange('hidos'), routing_key='cells_dev.task'),
 )
+
+CELERY_ROUTES = {
+    'icsi.tasks.run_image_analysis_task': {
+    'queue': 'icsi',
+    'routing_key': 'cells_dev.task',
+    },
+}
+
+
+
 BROKER_URL = 'amqp://'
 CELERY_RESULT_BACKEND = 'amqp://'
 CELERY_TASK_SERIALIZER = 'json'
@@ -249,3 +259,12 @@ MESSAGE_TAGS = {
                     messages.WARNING: 'alert-warning warning',
                     messages.ERROR: 'alert-danger error'
                 }
+
+# Jupyter settings
+NOTEBOOK_ARGUMENTS = [
+    '--ip=0.0.0.0',
+    '--port=8888',
+]
+
+
+

@@ -30,6 +30,8 @@ class Ovum(models.Model):
     parent_imageanalysis = models.ForeignKey('Task',related_name = 'ovums', null = True)
     grade = models.CharField(max_length=32, default='A')
     graded_time = models.DateTimeField(null=True)
+    label_grade = models.CharField(max_length=32, null=True)
+    archived = models.BooleanField()
 
 
 
