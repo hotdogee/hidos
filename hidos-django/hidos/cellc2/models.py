@@ -27,6 +27,9 @@ class SingleImageUploadManager(models.Manager):
             m.update(chunk)
         task_id = m.hexdigest()
 
+        # Make input jpg
+        # Make thumbnail
+
         # Build data dictionary
         data = {
             task_id: task_id,
@@ -72,6 +75,7 @@ class CellC2Task(CellTaskModel):
         verbose_name = '{0} {1}'.format(verbose_name, 'Task')
 
     def run_delay(self):
+        # Generate args_list and path_prefix
         run_image_analysis_task.delay(task_id, args_list, path_prefix)
 
     # def save(self, force_insert=False, force_update=False, using=None, update_fields=None)
