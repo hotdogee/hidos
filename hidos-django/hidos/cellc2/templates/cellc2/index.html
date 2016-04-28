@@ -2,7 +2,7 @@
 {% load staticfiles %}
 {% block content %}
   <h1>Cell C2: Confluency <small>v{{ version }}</small></h1>
-  <img src="{% static 'app/images/cellc2-diagram.png' %}">
+  <img src="{% static 'cellc2/images/cellc2-diagram.png' %}">
 
   <form id="add-photos" action="{% url 'home' %}" class="dropzone">
     {% csrf_token %}
@@ -12,13 +12,13 @@
   <ul>
     <li>Example 1
       <ul>
-        <li><a href="/media/image_analysis/task/12a174a4100803cf9bc72081e23664fe/12a174a4100803cf9bc72081e23664fe_in.jpg" download>Download Input Image 2592x1944 (1.28 MB)</a></li>
+        <li><a href="/media/cellc2/task/12a174a4100803cf9bc72081e23664fe/12a174a4100803cf9bc72081e23664fe_in.jpg" download>Download Input Image 2592x1944 (1.28 MB)</a></li>
         <li><a href="/12a174a4100803cf9bc72081e23664fe">View Result Page</a></li>
       </ul>
     </li>
     <li>Example 2
       <ul>
-        <li><a href="/media/image_analysis/task/33ec5a1d0cf411e1f7a4abcee3a53f13/33ec5a1d0cf411e1f7a4abcee3a53f13_in.jpg" download>Download Input Image 3648x2432 (4.08 MB)</a></li>
+        <li><a href="/media/cellc2/task/33ec5a1d0cf411e1f7a4abcee3a53f13/33ec5a1d0cf411e1f7a4abcee3a53f13_in.jpg" download>Download Input Image 3648x2432 (4.08 MB)</a></li>
         <li><a href="/33ec5a1d0cf411e1f7a4abcee3a53f13">View Result Page</a></li>
       </ul>
     </li>
@@ -62,7 +62,7 @@
   <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/buttons/1.1.2/css/buttons.bootstrap.min.css"/>
   <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css"/>
   <link rel="stylesheet" type="text/css" href="{% static 'app/content/spinkit.css' %}" />
- 
+
   <style type="text/css">
     #icon {
       display: inline-block;
@@ -120,7 +120,7 @@
     </div>
   </script>
   <script type="text/template" id="viewer-btn-template">
-    <a class="btn btn-default btn-xs viewer-btn" data-toggle="tooltip" data-placement="right" 
+    <a class="btn btn-default btn-xs viewer-btn" data-toggle="tooltip" data-placement="right"
        data-container="body" data-html="true" data-trigger="hover"
        title="<div class='preview-img'>Result Image Preview <img src='<%= result_img %>' width='100%' height='100%'></div>"
        target="_blank" href="<%= task_url %>" role="button">
@@ -130,5 +130,5 @@
   <script type="text/template" id="cellq-name-template">
     <img class="cellq-icon" src="{% static 'app/images/cellq_icon.png' %}"> <%= name %>
   </script>
-  <script src="{% static 'app/bundles/index.js' %}"></script>
+  <script src="{% static 'cellc2/bundles/index.js' %}"></script>
 {% endblock %}
