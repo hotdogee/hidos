@@ -14,7 +14,7 @@ class CellC2TaskSerializer(serializers.ModelSerializer):
         'task_id', 'status', 'dequeued', 'finished', 'user', 'parent_folder', 'version']
         fields = read_only_fields + ['file']
 
-    def validate_file
+    # def validate_file
 
     # built-in
     # def __init__(self, instance=None, data=empty, **kwargs): # BaseSerializer
