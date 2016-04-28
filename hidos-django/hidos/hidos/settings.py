@@ -155,7 +155,7 @@ INSTALLED_APPS = (
     'allauth.socialaccount.providers.google',
     'rest_framework',
     'app.apps.AppConfig',
-    'cellbase.apps.CellbaseConfig',
+    'cell.apps.CellConfig',
     'cellc2.apps.CellC2Config',
     # Uncomment the next line to enable the admin:
     # 'django.contrib.admin',
@@ -294,17 +294,17 @@ USE_CACHE = False
 
 # Celery Settings
 from kombu import Exchange, Queue
-CELERY_DEFAULT_QUEUE = 'app'
+CELERY_DEFAULT_QUEUE = 'cell'
 CELERY_DEFAULT_EXCHANGE = 'hidos'
 CELERY_DEFAULT_EXCHANGE_TYPE = 'direct'
-CELERY_DEFAULT_ROUTING_KEY = 'cellc2.task'
+CELERY_DEFAULT_ROUTING_KEY = 'cell'
 CELERY_QUEUES = (
-    Queue('app', Exchange('hidos'), routing_key='cellc2.task'),
+    Queue('cell', Exchange('hidos'), routing_key='cell'),
 )
 CELERY_ROUTES = {
-    'app.tasks.run_image_analysis_task': {
-        'queue': 'app',
-        'routing_key': 'cellc2.task',
+    'cellc2.tasks.run_cell_c2_task': {
+        'queue': 'cell',
+        'routing_key': 'cell',
     },
 }
 BROKER_URL = 'amqp://'

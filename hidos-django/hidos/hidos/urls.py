@@ -19,7 +19,6 @@ from datetime import datetime
 from django.conf.urls import include, url
 from django.contrib.auth import views as auth_views
 
-from app import views as app_views
 from app.forms import BootstrapAuthenticationForm
 
 # Uncomment the next lines to enable the admin:
@@ -28,7 +27,6 @@ from app.forms import BootstrapAuthenticationForm
 # admin.autodiscover()
 
 urlpatterns = [
-    url(r'^$', app_views.home, name='home'),
     #url(r'^api/v1/tasks$', app_views.tasks, name='tasks'),
     #url(r'^api/v1/tasks/status$', app_views.status, name='status'),
     url(r'^login/$',
@@ -50,8 +48,7 @@ urlpatterns = [
         },
         name='logout'),
     url(r'^accounts/', include('allauth.urls')),
-    url(r'^cellc2/', include('cellc2.urls')),
-    url(r'^(?P<task_id>[0-9a-zA-Z]+)$', app_views.retrieve, name='retrieve'),
+    url(r'^', include('cell.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),

@@ -21,16 +21,16 @@ class TaskViewSet(viewsets.ModelViewSet):
         # and username is a empty string.
         task = serializer.save(user=self.request.user) # returns create model instance
         # put task in queue
-        task.run_delay()
+        task.enqueue()
 
     # built-in
 
-    # def create(self, request, *args, **kwargs):
-    #     serializer = self.get_serializer(data=request.data)
-    #     serializer.is_valid(raise_exception=True)
-    #     self.perform_create(serializer)
-    #     headers = self.get_success_headers(serializer.data)
-    #     return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     # def get_serializer(self, *args, **kwargs):
     #     """

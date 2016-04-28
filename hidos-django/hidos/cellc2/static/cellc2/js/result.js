@@ -2,31 +2,29 @@ $(function () {
   $('#result').hide();
   // get task-id from url
   var task_id = window.location.pathname.match(/\/([0-9a-zA-Z]+)\/?$/)[1];
-  var path_prefix = '/media/image_analysis/task/' + task_id + '/' + task_id;
+  var path_prefix = '/media/cellc2/task/' + task_id + '/' + task_id;
   // check status
   var poll = function () {
     $.ajax({
-      url: '/api/v1/tasks/status?id=' + task_id,
+      url: 'api/v1/tasks/' + task_id,
       dataType: 'json',
       type: 'GET',
       traditional: true,
       success: function (data, status) {
         console.log(data);
 
-        if (data.data[0].result_status.toLowerCase() != "success")
+        if (data.status.toLowerCase() != "success")
           setTimeout(poll, 3000);
         else {
           // get result json data
-          $.getJSON(path_prefix + '_out.json', function (result) {
-            $('#ratio').text(Math.round(result['ratio'] * 10000) / 100 + '%');
-            $('#count').text(result['count_min']);
-          });
+          $('#ratio').text(Math.round(data.cell_ratio * 10000) / 100 + '%');
+          $('#count').text(data['count_min']);
           // display image
           // /media/image_analysis/task/7ef4f4782fc840738f67a43edafc9683/7ef4f4782fc840738f67a43edafc9683_in.jpg
-          $('#input-img').attr('src', '/media/image_analysis/task/' + task_id + '/' + task_id + '_in.jpg');
-          $('#input-download').attr('href', '/media/image_analysis/task/' + task_id + '/' + task_id + '_in.jpg');
-          $('#result-img').attr('src', '/media/image_analysis/task/' + task_id + '/' + task_id + '_out.jpg');
-          $('#result-download').attr('href', '/media/image_analysis/task/' + task_id + '/' + task_id + '_out.jpg');
+          $('#input-img').attr('src', '/media/cellc2/task/' + task_id + '/' + task_id + '_in.jpg');
+          $('#input-download').attr('href', '/media/cellc2/task/' + task_id + '/' + task_id + '_in.jpg');
+          $('#result-img').attr('src', '/media/cellc2/task/' + task_id + '/' + task_id + '_out.jpg');
+          $('#result-download').attr('href', '/media/cellc2/task/' + task_id + '/' + task_id + '_out.jpg');
 
           // get image size
           $("<img/>") // Make in memory copy of image to avoid css issues
@@ -36,7 +34,10 @@ $(function () {
               var img_h = this.height; // work for in memory images.
 
               // window resize
-              var frame_w = ($(window).width() - 100) / 2;
+              var frame_w = ($('#result').width() - 100) / 2;
+              if ($(window).width() <= 600) {
+                  frame_w = ($('#result').width() - 100);
+              }
               $('div.parent').width(frame_w);
               $('div.parent').height(frame_w / img_w * img_h);
               //console.log(img_w, img_h, frame_w, frame_w / img_w * img_h, $('#input-img').attr("src"))
@@ -69,7 +70,10 @@ $(function () {
                     var img_h = this.height; // work for in memory images.
 
                     // window resize
-                    var frame_w = ($(window).width() - 100) / 2;
+                    var frame_w = ($('#result').width() - 100) / 2;
+                    if ($(window).width() <= 600) {
+                        frame_w = ($('#result').width() - 100);
+                    }
                     $('div.parent').width(frame_w);
                     $('div.parent').height(frame_w / img_w * img_h);
                     //console.log(img_w, img_h, frame_w, frame_w / img_w * img_h, $('#input-img').attr("src"))

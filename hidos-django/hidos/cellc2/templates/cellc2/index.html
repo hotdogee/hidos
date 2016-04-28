@@ -1,10 +1,12 @@
 {% extends "app/layout.html" %}
 {% load staticfiles %}
 {% block content %}
-  <h1>Cell C2: Confluency <small>v{{ version }}</small></h1>
-  <img src="{% static 'cellc2/images/cellc2-diagram.png' %}">
+  <h3>Cell C2: Confluency <small>v{{ version }}</small></h3>
+  <div class="row center valign">
+    <img src="{% static 'cellc2/images/cellc2-diagram.png' %}">
+  </div>
 
-  <form id="add-photos" action="{% url 'home' %}" class="dropzone">
+  <form id="add-photos" action="{% url 'c2:task-list' %}" class="dropzone">
     {% csrf_token %}
   </form>
 
@@ -26,7 +28,7 @@
 
   <hr />
   <div>
-    <h1>Results</h1>
+    <h3>Results</h3>
     {% if user.is_authenticated %}
 
     <table id="result-list" class="display" cellspacing="0" width="100%">
@@ -130,5 +132,5 @@
   <script type="text/template" id="cellq-name-template">
     <img class="cellq-icon" src="{% static 'app/images/cellq_icon.png' %}"> <%= name %>
   </script>
-  <script src="{% static 'cellc2/bundles/index.js' %}"></script>
+  <script src="{% static 'cellc2/js/index.js' %}"></script>
 {% endblock %}

@@ -7,7 +7,7 @@ from . import app_name # application namespace
 
 urlpatterns = [
     url(r'^$', views.IndexView.as_view(), name='index'),
-    url(r'^(?P<task_id>[0-9a-zA-Z]+)/$', views.DetailView.as_view(), name='detail'),
+    url(r'^(?P<task_id>[0-9a-zA-Z]+)$', views.DetailView2.as_view(), name='detail'),
     # {% url "cellc2:tasks" %}
     url(r'^api/v1/tasks$', api.TaskViewSet.as_view({
         'get': 'list',

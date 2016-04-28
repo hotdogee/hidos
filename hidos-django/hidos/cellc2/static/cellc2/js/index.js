@@ -6,7 +6,7 @@ $(document).ready(function () {
     var date_now = (new Date()).toLocaleDateString();
     var result_table;
     result_table = $('#result-list').DataTable({
-      ajax: '/api/v1/tasks',
+      ajax: 'api/v1/tasks',
       deferRender: true,
       scroller: true,
       scrollY: 500,
@@ -157,7 +157,7 @@ $(document).ready(function () {
       init: function () {
         this.on('success', function (file, response) {
           //console.log(file, response);
-          window.location = '/' + response;
+          window.location = window.location + response.task_id;
         });
       }
     };

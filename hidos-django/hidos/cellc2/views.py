@@ -1,4 +1,5 @@
 from datetime import datetime
+import logging
 
 from django.shortcuts import render
 from django.http import Http404
@@ -9,11 +10,11 @@ from vanilla import GenericModelView
 from . import app_name, verbose_name, version
 from .models import CellC2Task
 
-logger = logging.getLogger(__name__) # __name__ == app.views
+logger = logging.getLogger(__name__) # __name__ == cellc2.views
 
 
 class IndexView(TemplateView):
-    template_name = 'cellbase/index.html'
+    template_name = 'cellc2/index.html'
 
     def get_context_data(self, **context):
         context['title'] = verbose_name
@@ -22,16 +23,16 @@ class IndexView(TemplateView):
         return context
 
 
-class DetailView(GenericModelView):
-    template_name = 'cellbase/result.html'
+class DetailView2(GenericModelView):
+    template_name = 'cellc2/result.html'
     model = CellC2Task
     lookup_field = 'task_id'
 
     def get_context_data(self, **context):
-        context['title'] = '{0} - {1}'.format(verbose_name, self.object.user_filename)
+        context['title'] = '{0} - {1}'.format(verbose_name, self.object.uploaded_filename)
         context['year'] = datetime.now().year
         context['version'] = version
-        context['user_filename'] = self.object.user_filename
+        context['user_filename'] = self.object.uploaded_filename
         return context
 
     def get(self, request, *args, **kwargs):

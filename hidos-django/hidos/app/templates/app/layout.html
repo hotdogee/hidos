@@ -2,53 +2,64 @@
 <html>
 <head>
   <meta charset="utf-8" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="description" content="">
+  <!--Let browser know website is optimized for mobile-->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ title }} - HiDOS</title>
   {% load staticfiles %}
-  <link rel="stylesheet" type="text/css" href="{% static 'app/content/bootstrap.min.css' %}" />
-  <link rel="stylesheet" type="text/css" href="{% static 'app/content/site.css' %}" />
+  <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.5/css/materialize.min.css"  media="screen,projection"/>
+
+  <style type="text/css">
+    nav .brand-logo {
+      position: relative;
+    }
+    footer.page-footer {
+      padding-top: 0px;
+    }
+  </style>
   {% block head-styles %}{% endblock %}
-  <script src="{% static 'app/scripts/modernizr-2.6.2.js' %}"></script>
 </head>
 
 <body>
-  <div class="navbar navbar-inverse navbar-fixed-top">
-    <div class="container">
-      <div class="navbar-header">
-        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
-        <a href="/" class="navbar-brand">HiDOS</a>
-      </div>
-      <div class="navbar-collapse collapse">
-        <ul class="nav navbar-nav">
-          <li><a href="{% url 'home' %}">Home</a></li>
-          <li><a href="{% url 'home' %}">About</a></li>
-          <li><a href="{% url 'home' %}">Contact</a></li>
+  <!-- Fixed navbar -->
+  <div class="navbar-fixed">
+    <nav class="grey darken-4">
+      <div class="nav-wrapper container">
+        <a href="#" data-activates="mobile-nav" class="button-collapse"><i class="material-icons">menu</i></a>
+        <ul class="hide-on-med-and-down">
+          <li><a href="/" class="brand-logo">HiDOS</a></li>
+          <li><a href="#!">Cell Cloud</a></li>
+        </ul>
+        <ul class="side-nav" id="mobile-nav">
+          <li><a href="#!">Cell Cloud</a></li>
         </ul>
         {% include 'app/loginpartial.html' %}
       </div>
-    </div>
-  </div>
-  
-{% block content-body %}{% endblock %}
-  <div class="container-fluid">
-{% block content-fluid %}
-    <div class="container body-content">
-{% block content %}{% endblock %}
-      <hr/>
-      <footer>
-        <p>{{ year|default:"2015" }} - Meridigen</p>
-      </footer>
-    </div>
-{% endblock %}
+    </nav>
   </div>
 
-  <script src="{% static 'app/scripts/jquery-1.10.2.js' %}"></script>
-  <script src="{% static 'app/scripts/bootstrap.js' %}"></script>
-  <script src="{% static 'app/scripts/respond.js' %}"></script>
+{% block content-body %}
+  <div class="container">
+{% block content %}{% endblock %}
+  </div>
+{% endblock %}
+{% block footer %}
+  <div class="footer-copyright">
+    <div class="container">
+      {{ year|default:"2016" }} - Meridigen
+    </div>
+  </div>
+{% endblock %}
+
+  <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.5/js/materialize.min.js"></script>
+  <script>
+    $(document).ready(function(){
+      $(".button-collapse").sideNav();
+    });
+  </script>
 {% block scripts %}{% endblock %}
 
 </body>
