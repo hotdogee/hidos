@@ -6,13 +6,15 @@ from .models import CellC2Task
 
 class CellC2TaskSerializer(serializers.ModelSerializer):
     file = serializers.ImageField(write_only=True, max_length=None, allow_empty_file=False, use_url=False)
+    url = serializers.URLField(source='get_absolute_url', read_only=True)
 
     class Meta:
         model = CellC2Task
-        read_only_fields = ['cell_ratio', 'count_min', 'count_max',
-        'uploaded_filename', 'uploaded_filetype', 'stdout', 'stderr',
-        'task_id', 'status', 'dequeued', 'finished', 'user', 'parent_folder', 'version',
-        'created', 'modified']
+        read_only_fields = ['url',
+            'cell_ratio', 'count_min', 'count_max',
+            'uploaded_filename', 'uploaded_filetype', 'stdout', 'stderr',
+            'task_id', 'status', 'dequeued', 'finished', 'user', 'parent_folder', 'version',
+            'created', 'modified']
         fields = read_only_fields + ['file']
 
     #def create(self, validated_data):
