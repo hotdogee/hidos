@@ -3,7 +3,10 @@ from rest_framework import filters
 from rest_framework import generics
 from rest_framework import serializers
 from rest_framework import viewsets
+from rest_framework import exceptions, status
 from rest_framework.response import Response
+from rest_framework.decorators import list_route
+
 
 from .models import CellC2Task
 from .serializers import CellC2TaskSerializer
@@ -15,6 +18,12 @@ class TaskViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.DjangoFilterBackend,)
     filter_fields = ('task_id', )
     pagination_class = None
+
+    @list_route()
+    def running(self, request, *args, **kwargs):
+        running_tasks = CellC2Task.objects.filter(user=request.user, status__in=['queued', 'running'])
+        serializer = self.get_serializer(running_tasks, many=True)
+        return Response(serializer.data)
 
     def perform_create(self, serializer):
         # If anonymous user will be django.contrib.auth.models.AnonymousUser
