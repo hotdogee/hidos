@@ -8,6 +8,7 @@ from PIL import Image
 
 from django.db import models
 from django.conf import settings
+from django.core.urlresolvers import reverse
 
 from cell.models import CellTaskModel, ViewableQuerySet
 from .tasks import run_cell_c2_task
@@ -28,6 +29,7 @@ class SingleImageUploadManager(models.Manager):
         m.update(user.username) # if anonymous, username is ''
         m.update(uploaded_file_data)
         task_id = m.hexdigest()
+
         existing_queryset = self.filter(task_id=task_id)
         if existing_queryset.exists():
             return existing_queryset[0]
@@ -68,7 +70,7 @@ class SingleImageUploadManager(models.Manager):
             'status': 'queued',
         }
         if user.username:
-            data.user = user
+            data['user'] = user
         return super(SingleImageUploadManager, self).create(**data)
 
     # built-in
@@ -101,7 +103,7 @@ class CellC2Task(CellTaskModel):
     objects = SingleImageUploadManager.from_queryset(ViewableQuerySet)()
 
     def get_absolute_url(self):
-        return reverse('task-detail', kwargs={'task_id': self.task_id}, current_app=app_name)
+        return reverse('c2:detail', kwargs={'task_id': self.task_id}, current_app=app_name)
 
     class Meta(CellTaskModel.Meta):
         verbose_name = '{0} {1}'.format(verbose_name, 'Task')
