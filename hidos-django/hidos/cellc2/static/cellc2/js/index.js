@@ -6,7 +6,10 @@ $(document).ready(function () {
     var date_now = (new Date()).toLocaleDateString();
     var result_table;
     result_table = $('#result-list').DataTable({
-      ajax: 'api/v1/tasks',
+      ajax: {
+        'url': 'api/v1/tasks',
+        'dataSrc': ''
+      },
       deferRender: true,
       scroller: true,
       scrollY: 500,
@@ -26,7 +29,7 @@ $(document).ready(function () {
           }
         },
         {
-          name: 'file-name', data: 'name',
+          name: 'file-name', data: 'uploaded_filename',
           render: function (data, type, row, meta) {
             if (type === 'display')
               return cellq_name_compiled({ name: data });
@@ -35,7 +38,7 @@ $(document).ready(function () {
           }
         },
         {
-          name: 'area', type: 'num', data: 'result.ratio', defaultContent: running_template, width: '100px',
+          name: 'area', type: 'num', data: 'cell_ratio', defaultContent: running_template, width: '100px',
           render: function (data, type, row, meta) {
             if (!data)
               return running_template;
@@ -104,21 +107,20 @@ $(document).ready(function () {
       // get a list of queued and running tasks
       //console.log(e, settings, json, xhr);
       if (!json) return; // consecutive ajax.reload() may result in 'abort' status
-      unfinished_task_ids = _.pluck(_.filter(json.data, (t) => _.contains(unfinished, t.result_status)), 'id');
+      unfinished_task_ids = _.pluck(_.filter(json, (t) => _.contains(unfinished, t.status)), 'id');
       //console.log(unfinished_task_ids);
       if (unfinished_task_ids.length > 0 && polling == false) {
         polling = true;
         var finished = ['success', 'failed'];
         var poll = function () {
           $.ajax({
-            url: '/api/v1/tasks/status',
+            url: 'api/v1/tasks/running',
             dataType: 'json',
             type: 'GET',
-            data: { 'id': unfinished_task_ids },
             traditional: true,
             success: function (data, status) {
               //console.log(_.some(finished, (c) => _.contains(_.pluck(data.data, 'result_status'), c)));
-              if (_.some(finished, (c) => _.contains(_.pluck(data.data, 'result_status'), c))) {
+              if (data.length < unfinished_task_ids.length) {
                 polling = false;
                 result_table.ajax.reload();
               } else
