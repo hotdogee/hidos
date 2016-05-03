@@ -13,6 +13,9 @@ urlpatterns = [
         'get': 'list',
         'post': 'create'
     }), name='task-list'),
+    url(r'^api/v1/tasks/running$', api.TaskViewSet.as_view({
+        'get': 'running',
+    }), name='task-running'),
     # {% url "cellc2:tasks" task.task_id %}
     url(r'^api/v1/tasks/(?P<task_id>[0-9a-zA-Z]+)$', api.TaskViewSet.as_view({
         'get': 'retrieve',
