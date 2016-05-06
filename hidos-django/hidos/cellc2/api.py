@@ -19,6 +19,31 @@ class TaskViewSet(viewsets.ModelViewSet):
     filter_fields = ('task_id', )
     pagination_class = None
 
+    def get_queryset(self):
+        """
+        Get the list of items for this view.
+        This must be an iterable, and may be a queryset.
+        Defaults to using `self.queryset`.
+        This method should always be used rather than accessing `self.queryset`
+        directly, as `self.queryset` gets evaluated only once, and those results
+        are cached for all subsequent requests.
+        You may want to override this if you need to provide different
+        querysets depending on the incoming request.
+        (Eg. return a list of items that is specific to the user)
+        """
+        return CellC2Task.objects.filter(user=self.request.user)
+
+    # def list(self, request, *args, **kwargs):
+    #     queryset = self.filter_queryset(self.get_queryset())
+
+    #     page = self.paginate_queryset(queryset)
+    #     if page is not None:
+    #         serializer = self.get_serializer(page, many=True)
+    #         return self.get_paginated_response(serializer.data)
+
+    #     serializer = self.get_serializer(queryset, many=True)
+    #     return Response(serializer.data)
+
     @list_route()
     def running(self, request, *args, **kwargs):
         running_tasks = CellC2Task.objects.filter(user=request.user, status__in=['queued', 'running'])
