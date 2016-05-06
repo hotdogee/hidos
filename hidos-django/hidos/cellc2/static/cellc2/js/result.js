@@ -10,6 +10,12 @@ $(function () {
       dataType: 'json',
       type: 'GET',
       traditional: true,
+      error:function (xhr, ajaxOptions, thrownError){
+        if(xhr.status==404) {
+            $('#loader-img').attr('src', '/static/app/images/error.png');
+            $('#loader-message').text('Task not found');
+        }
+      },
       success: function (data, status) {
         console.log(data);
 
