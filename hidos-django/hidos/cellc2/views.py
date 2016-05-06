@@ -23,7 +23,7 @@ class IndexView(TemplateView):
         return context
 
 
-class DetailView2(GenericModelView):
+class DetailView(GenericModelView):
     template_name = 'cellc2/result.html'
     model = CellC2Task
     lookup_field = 'task_id'
