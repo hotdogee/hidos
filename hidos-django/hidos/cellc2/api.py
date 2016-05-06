@@ -31,7 +31,10 @@ class TaskViewSet(viewsets.ModelViewSet):
         querysets depending on the incoming request.
         (Eg. return a list of items that is specific to the user)
         """
-        return CellC2Task.objects.filter(user=self.request.user)
+        if self.request.user.username:
+            return CellC2Task.objects.filter(user=self.request.user)
+        else:
+            return CellC2Task.objects.none()
 
     # def list(self, request, *args, **kwargs):
     #     queryset = self.filter_queryset(self.get_queryset())

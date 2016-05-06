@@ -17,7 +17,7 @@ class CellC2TaskSerializer(serializers.ModelSerializer):
             'created', 'modified']
         fields = read_only_fields + ['file']
 
-    #def create(self, validated_data):
+    # def create(self, validated_data):
     #    return CellC2Task.objects.create(**validated_data)
 
     # def validate_file
