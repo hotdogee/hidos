@@ -56,7 +56,15 @@ class SingleImageUploadManager(models.Manager):
         chmod(uploaded_image_path, Perm.S_IRWXU | Perm.S_IRWXG | Perm.S_IRWXO) # ensure the standalone dequeuing process can access the file
 
         # convert to jpeg for web display
-        Image.open(uploaded_image_path).save(input_image_viewer_path)
+        p = Image.open(original_image_path)
+        if p.mode.split(';')[1] == '16':
+            p = p.point(lambda x: x*(float(1)/256))
+        if p.mode != 'RGB':
+            p = p.convert('RGB')
+        p.save(input_image_viewer_path)
+        chmod(input_image_viewer_path, Perm.S_IRWXU | Perm.S_IRWXG | Perm.S_IRWXO)
+
+
 
         # Make input jpg
         # Make thumbnail
