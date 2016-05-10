@@ -10,6 +10,12 @@ $(function () {
       dataType: 'json',
       type: 'GET',
       traditional: true,
+      error:function (xhr, ajaxOptions, thrownError){
+        if(xhr.status==404) {
+            $('#loader-img').attr('src', '/static/app/images/error.png');
+            $('#loader-message').text('Task not found');
+        }
+      },
       success: function (data, status) {
         console.log(data);
 
@@ -17,7 +23,7 @@ $(function () {
           setTimeout(poll, 3000);
         else {
           // get result json data
-          $('#ratio').text(data.cell_ratio + '%');
+          $('#ratio').text(Math.round(data.cell_ratio * 10000) / 100 + '%');
           // display image
           // /media/image_analysis/task/7ef4f4782fc840738f67a43edafc9683/7ef4f4782fc840738f67a43edafc9683_in.jpg
           $('#input-img').attr('src', '/media/cellc2/task/' + task_id + '/' + task_id + '_in.jpg');

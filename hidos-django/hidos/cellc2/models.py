@@ -48,15 +48,22 @@ class SingleImageUploadManager(models.Manager):
         # create directory
         if not path.exists(path.dirname(path_prefix)):
             makedirs(path.dirname(path_prefix))
-        chmod(path.dirname(path_prefix), Perm.S_IRWXU | Perm.S_IRWXG | Perm.S_IRWXO) # ensure the standalone dequeuing process can open files in the directory
+        # ensure the standalone dequeuing process can open files in the directory
+        chmod(path.dirname(path_prefix), Perm.S_IRWXU | Perm.S_IRWXG | Perm.S_IRWXO)
 
         # write original image data to file
         with open(uploaded_image_path, 'wb') as uploaded_image_f:
             uploaded_image_f.write(uploaded_file_data)
-        chmod(uploaded_image_path, Perm.S_IRWXU | Perm.S_IRWXG | Perm.S_IRWXO) # ensure the standalone dequeuing process can access the file
+        chmod(uploaded_image_path, Perm.S_IRWXU | Perm.S_IRWXG | Perm.S_IRWXO)
 
         # convert to jpeg for web display
-        Image.open(uploaded_image_path).save(input_image_viewer_path)
+        p = Image.open(original_image_path)
+        if p.mode.split(';')[1] == '16':
+            p = p.point(lambda x: x*(float(1)/256))
+        if p.mode != 'RGB':
+            p = p.convert('RGB')
+        p.save(input_image_viewer_path)
+        chmod(input_image_viewer_path, Perm.S_IRWXU | Perm.S_IRWXG | Perm.S_IRWXO)
 
         # Make input jpg
         # Make thumbnail
