@@ -1,9 +1,9 @@
 {% extends "app/layout.html" %}
 {% load staticfiles %}
 {% block content %}
-  <h3>Cell C2: Confluency <small>v{{ version }}</small></h3>
+  <h3>Cell C1: Counting <small>v{{ version }}</small></h3>
   <div class="row center valign">
-    <img src="{% static 'cellc2/images/cellc2-diagram.png' %}">
+    <img src="{% static 'cellc1/images/cellc1-diagram-v0.2.png' %}">
   </div>
 
   <form id="add-photos" action="{% url 'c1:task-list' %}" class="dropzone">
@@ -36,7 +36,7 @@
         <tr>
           <th>Viewer</th>
           <th>File Name</th>
-          <th>Confluency</th>
+          <th>Count</th>
           <th>Created</th>
         </tr>
       </thead>
@@ -132,5 +132,5 @@
   <script type="text/template" id="cellq-name-template">
     <img class="cellq-icon" src="{% static 'app/images/cellq_icon.png' %}"> <%= name %>
   </script>
-  <script src="{% static 'cellc2/js/index.js' %}"></script>
+  <script src="{% static 'cellc1/js/index.js' %}"></script>
 {% endblock %}

@@ -13,7 +13,7 @@
     <h3>Cell C2: Confluency <small>v{{ version }}</small></h3>
     <ul>
       <li><h5>Image Name: <span id="name">{{ user_filename }}</span></h5></li>
-      <li><h5>Cell Confluency: <span id="ratio"></span></h5></li>
+      <li><h5>Cell Confluency: <span id="count"></span></h5></li>
     </ul>
     <p>Drag the image to pan, use the mousewheel to zoom</p>
     <div class="row">
@@ -79,5 +79,5 @@
 {% block scripts %}
   <script src="{% static 'app/scripts/jquery.panzoom.js' %}"></script>
   <script src="{% static 'app/scripts/underscore-min.js' %}"></script>
-  <script src="{% static 'cellc2/js/result.js' %}"></script>
+  <script src="{% static 'cellc1/js/result.js' %}"></script>
 {% endblock %}
