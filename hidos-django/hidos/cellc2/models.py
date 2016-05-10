@@ -58,7 +58,7 @@ class SingleImageUploadManager(models.Manager):
 
         # convert to jpeg for web display
         p = Image.open(uploaded_image_path)
-        if p.mode.split(';')[1:2] == '16':
+        if p.mode.split(';')[1:2] == ['16']:
             p = p.point(lambda x: x*(float(1)/256))
         if p.mode != 'RGB':
             p = p.convert('RGB')
