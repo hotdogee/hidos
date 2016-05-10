@@ -97,8 +97,6 @@ class SingleImageUploadManager(models.Manager):
 
 class CellC2Task(CellTaskModel):
     cell_ratio = models.FloatField(null=True, blank=True)
-    count_min = models.FloatField(null=True, blank=True)
-    count_max = models.FloatField(null=True, blank=True)
 
     objects = SingleImageUploadManager.from_queryset(ViewableQuerySet)()
 
@@ -122,8 +120,9 @@ class CellC2Task(CellTaskModel):
         input_image_viewer_path = path_prefix + '_in.jpg'
         output_image_viewer_path = path_prefix + '_out.jpg'
         # build command
-        args_list = [[settings.R_SCRIPT, script_path, uploaded_image_path, result_image_path, result_json_path]]
-        run_cell_c2_task.delay(self.task_id, args_list, path_prefix)
+        # args_list = [[settings.R_SCRIPT, script_path, uploaded_image_path, result_image_path, result_json_path]]
+        print(uploaded_image_path, result_image_path,result_json_path)
+        run_cell_c2_task.delay(self.task_id, uploaded_image_path, result_image_path, result_json_path, path_prefix)
 
     # def save(self, force_insert=False, force_update=False, using=None, update_fields=None)
     # def save(self, *args, **kwargs):

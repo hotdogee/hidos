@@ -18,6 +18,7 @@ from celery.signals import task_sent, task_success, task_failure
 from django.conf import settings
 from django.core.cache import cache
 
+from cellc2.bin.cellConfluence_singleTask import cellConfluence_singleTask
 logger = get_task_logger(__name__)
 
 if settings.USE_CACHE:
@@ -28,7 +29,7 @@ if settings.USE_CACHE:
     release_lock = lambda: cache.delete(LOCK_ID)
 
 @shared_task(bind=True) # ignore_result=True
-def run_cell_c2_task(self, task_id, args_list, path_prefix):
+def run_cell_c2_task(self, task_id, uploaded_image_path, result_image_path, result_json_path, path_prefix):
     import django
     django.setup()
 
@@ -43,17 +44,12 @@ def run_cell_c2_task(self, task_id, args_list, path_prefix):
     record.save()
 
     # run
-    out = ''
-    err = ''
-    for args in args_list:
-        stdoutdata, stderrdata = Popen(args, stdin=PIPE, stdout=PIPE, stderr=PIPE).communicate()
-        out += stdoutdata
-        err += stderrdata
-        result_image_path = args[3]
-        result_json_path = args[4]
-    record.stdout = out
-    record.stderr = err
-
+    try:
+       cellConfluence_singleTask(uploaded_image_path, result_image_path, result_json_path)
+    except Exception as e:
+        record.stderr = e
+        logger.info(e.args)
+    
     # update result state
     record.status = 'failed'
     if not path.isfile(result_image_path):
@@ -69,8 +65,6 @@ def run_cell_c2_task(self, task_id, args_list, path_prefix):
         with open(result_json_path, 'r') as f:
             result = json.load(f)
             record.cell_ratio = result['ratio']
-            record.count_min = result['count_min']
-            record.count_max = result['count_max']
         output_image_viewer_path = path_prefix + '_out.jpg'
         # convert to jpeg for web display
         Image.open(result_image_path).save(output_image_viewer_path)
