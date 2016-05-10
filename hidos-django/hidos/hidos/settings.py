@@ -195,7 +195,7 @@ TEMPLATES = [
                 'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',
                 # `allauth` needs this from django
-                'django.core.context_processors.request',
+                'django.template.context_processors.request',
             ],
         },
     },
