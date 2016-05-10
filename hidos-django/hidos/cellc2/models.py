@@ -57,7 +57,7 @@ class SingleImageUploadManager(models.Manager):
         chmod(uploaded_image_path, Perm.S_IRWXU | Perm.S_IRWXG | Perm.S_IRWXO)
 
         # convert to jpeg for web display
-        p = Image.open(original_image_path)
+        p = Image.open(uploaded_image_path)
         if p.mode.split(';')[1] == '16':
             p = p.point(lambda x: x*(float(1)/256))
         if p.mode != 'RGB':
