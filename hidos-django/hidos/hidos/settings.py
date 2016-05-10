@@ -318,3 +318,9 @@ CELERY_ACCEPT_CONTENT=['json']
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_DISABLE_RATE_LIMITS = True
 #CELERY_ENABLE_UTC = True
+
+# Ipython notebook settings
+NOTEBOOK_ARGUMENTS = [
+        '--ip=0.0.0.0',
+        '--port=8888',
+        ]

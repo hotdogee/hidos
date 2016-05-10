@@ -8,3 +8,8 @@ django-vanilla-views>=1.0.4
 djangorestframework>=3.3.3
 Markdown>=2.6.6
 django-filter>=0.13.0
+mahotas==1.4.1
+matplotlib==1.5.1
+numpy==1.11.0
+scikit-image==0.12.3
+scipy==0.17.0
