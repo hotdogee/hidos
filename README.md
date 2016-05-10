@@ -1,6 +1,6 @@
 # HiDOS
 HiDOS bioinformatics platform
-## CellQ
+## Cell Cloud
 Setting up the development environment on Windows
 
 1. Install Git
