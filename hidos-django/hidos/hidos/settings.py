@@ -156,6 +156,7 @@ INSTALLED_APPS = (
     'rest_framework',
     'app.apps.AppConfig',
     'cell.apps.CellConfig',
+    'cellc1.apps.CellC1Config',
     'cellc2.apps.CellC2Config',
     # Uncomment the next line to enable the admin:
     # 'django.contrib.admin',
@@ -303,6 +304,11 @@ CELERY_ROUTES = {
         'queue': 'cell',
         'routing_key': 'cell',
     },
+    'cellc1.tasks.run_cell_c1_task': {
+        'queue': 'cell',
+        'routing_key': 'cell',
+    },
+
 }
 BROKER_URL = 'amqp://'
 CELERY_RESULT_BACKEND = 'amqp://'
