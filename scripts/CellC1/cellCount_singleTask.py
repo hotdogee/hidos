@@ -90,22 +90,28 @@ def cellCount_singleTask(image_input_path, image_output_path, json_path):
     draw=ImageDraw.Draw(image_ori_resize)
     font = ImageFont.truetype("arial.ttf", 20)  
     cellCount=0
-    for i in region2:
-        if (round(i.area/area_mean2)):
-            cellCount +=round(i.area/area_mean2)
-            draw.text((int(i.centroid[1]),int(i.centroid[0])),str(int(round((i.area/area_mean2)))),(0,255,0),font=font)
-        elif (i.area/area_mean2>=0.3 and i.area/area_mean2<0.5):
-            cellCount +=1
-            draw.text((int(i.centroid[1]),int(i.centroid[0])),'1',(0,255,0),font=font)
-    font = ImageFont.truetype("arial.ttf", image_ori_resize.size[0]/20)  
-    draw.text((40,40),'counts='+str(int(cellCount)),(255,255,255),font=font)
+    out_file=open(json_path,"w")
+    #exception
+    if (numpy.isnan(area_mean2) or area_mean2<=0):
+    	font = ImageFont.truetype("arial.ttf",image_ori_resize.size[0]/20)
+	draw.text((40,40),'This image can not be analyzed.',(255,255,255),font=font)
+	cellCount_result = {'count':-1}		
+    else:
+    	for i in region2:
+        	if (round(i.area/area_mean2)):
+            		cellCount +=round(i.area/area_mean2)
+            		draw.text((int(i.centroid[1]),int(i.centroid[0])),str(int(round((i.area/area_mean2)))),(0,255,0),font=font)
+        	elif (i.area/area_mean2>=0.3 and i.area/area_mean2<0.5):
+            		cellCount +=1
+            		draw.text((int(i.centroid[1]),int(i.centroid[0])),'1',(0,255,0),font=font)
+    	font = ImageFont.truetype("arial.ttf", image_ori_resize.size[0]/20)  
+    	draw.text((40,40),'counts='+str(int(cellCount)),(255,255,255),font=font)
+	cellCount_result={'count':int(cellCount)}
     #Image.Image.show(image_ori_resize)
     #image_ori=resize(image_ori_resize,(img_ori.shape[0],img_ori.shape[1])) 
     image_ori=image_ori_resize.resize((img_ori.shape[1],img_ori.shape[0]))            
-    io.imsave(image_output_path,image_ori)
-    
-    out_file = open(json_path,"w")
-    cellCount_result = {'count': int(cellCount)}    
+    #io.imsave(image_output_path,image_ori)
+    Image.Image.save(image_ori,image_output_path)    
     json.dump(cellCount_result,out_file)
     out_file.close()
     
