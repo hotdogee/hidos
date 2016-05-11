@@ -96,8 +96,9 @@ def cellConfluence_singleTask(image_input_path, image_output_path, json_path):
     draw = ImageDraw.Draw(img_ori)
     draw.text((100, 80), str(confluence+'%'), (0, 0, 255), font=font)
     ###            
-    io.imsave(image_output_path,img_ori)
-    
+    #io.imsave(image_output_path,img_ori)
+    Image.Image.save(img_ori,image_output_path)	    
+
     out_file = open(json_path,"w")
     confluence_result = {'confluence': confluence}    
     
