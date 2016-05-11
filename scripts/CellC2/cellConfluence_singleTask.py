@@ -92,7 +92,7 @@ def cellConfluence_singleTask(image_input_path, image_output_path, json_path):
     confluence = '%.2f' % confluence 
     ### embed result to image        
     img_ori=Image.fromarray(img_ori)
-    font=ImageFont.truetype('arial.ttf',img_ori.size[0]/20)
+    font=ImageFont.truetype('DejaVuSerif-Italic.ttf',img_ori.size[0]/20)
     draw = ImageDraw.Draw(img_ori)
     draw.text((100, 80), str(confluence+'%'), (0, 0, 255), font=font)
     ###            
@@ -100,7 +100,7 @@ def cellConfluence_singleTask(image_input_path, image_output_path, json_path):
     Image.Image.save(img_ori,image_output_path)	    
 
     out_file = open(json_path,"w")
-    confluence_result = {'confluence': confluence}    
+    confluence_result = {'ratio': confluence}    
     
     json.dump(confluence_result,out_file)
     out_file.close()    
