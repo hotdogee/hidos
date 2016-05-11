@@ -93,7 +93,7 @@ def cellCount_singleTask(image_input_path, image_output_path, json_path):
     out_file=open(json_path,"w")
     #exception
     if (numpy.isnan(area_mean2) or area_mean2<=0):
-    	font = ImageFont.truetype("arial.ttf",image_ori_resize.size[0]/20)
+    	font = ImageFont.truetype("DejaVuSerif.ttf",image_ori_resize.size[0]/20)
 	draw.text((40,40),'This image can not be analyzed.',(255,255,255),font=font)
 	cellCount_result = {'count':-1}		
     else:
