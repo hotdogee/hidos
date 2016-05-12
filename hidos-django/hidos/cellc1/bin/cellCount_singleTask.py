@@ -38,7 +38,7 @@ def img_resize(img,max_size):
 
 
 def cellCount_singleTask(image_input_path, image_output_path, json_path):
-    
+
     img_ori=io.imread(image_input_path)
     if(img_ori.shape[0]>1024 or img_ori.shape[1]>1024):
         img_ori_resize=img_resize(img_ori,1024)  #resize
@@ -48,10 +48,10 @@ def cellCount_singleTask(image_input_path, image_output_path, json_path):
     img_gray=img_ori_resize[:,:,2] #only using blue layer
     #img_enhance=filters.rank.enhance_contrast(img_gray,disk(5))
     #thresh=filters.threshold_otsu(img_enhance)
-    thresh=filters.threshold_otsu(img_gray)            
+    thresh=filters.threshold_otsu(img_gray)
     #if (thresh>50):
     #    thresh -= 10;
-    thresh = round(thresh*0.7)            
+    thresh = round(thresh*0.7)
     img_thresh=img_gray>thresh
     img_opening=morphology.binary_opening(img_thresh)   #remove salt
     img_label=measure.label(img_opening)
@@ -61,18 +61,18 @@ def cellCount_singleTask(image_input_path, image_output_path, json_path):
         area_list.append(i.area)
     area_list.sort
     area_mean=round(numpy.mean(area_list[int(len(area_list)*0.1):int(len(area_list)*0.9)]))
-    #remove small object (area<(area_mean/2)            
+    #remove small object (area<(area_mean/2)
     img_prepro2=morphology.remove_small_objects(img_opening,area_mean/3)
     img_label2=measure.label(img_prepro2)
     img_dist=mahotas.distance(img_label2)
     img_edge=img_dist==1
     ###################################
-    #watershed test            
+    #watershed test
     #img_rmax=mahotas.regmax(img_dist)
     #img_seed=measure.label(img_rmax,connectivity=1)
     #img_watershed=morphology.watershed(-img_dist,img_seed,mask=img_label2)
     #img_watershed_dist=mahotas.distance(img_watershed)
-    #img_edge=img_watershed_dist==1       
+    #img_edge=img_watershed_dist==1
     ###################################
     for i in range(img_ori_resize.shape[0]):
         for j in range(img_ori_resize.shape[1]):
@@ -84,18 +84,21 @@ def cellCount_singleTask(image_input_path, image_output_path, json_path):
         area_list2.append(i.area)
     area_list2.sort
     area_mean2=round(numpy.mean(area_list2[int(len(area_list2)*0):int(len(area_list2)*0.9)]))
-              
-    
+
+
     image_ori_resize=Image.fromarray(img_ori_resize)
     draw=ImageDraw.Draw(image_ori_resize)
-    font = ImageFont.truetype("DejaVuSerif-Italic.ttf", 20)  
+    # font = ImageFont.truetype("DejaVuSerif-Italic.ttf", 20) ##uncomment to deploy on server
+    font = ImageFont.truetype('/System/Library/Fonts/Apple Braille.ttf', img_ori.size[0] / 20)
+
     cellCount=0
     out_file=open(json_path,"w")
     #exception
     if (numpy.isnan(area_mean2) or area_mean2<=0):
-    	font = ImageFont.truetype("DejaVuSerif.ttf",image_ori_resize.size[0]/20)
-	draw.text((40,40),'This image can not be analyzed.',(255,255,255),font=font)
-	cellCount_result = {'count':-1}		
+    	# font = ImageFont.truetype("DejaVuSerif.ttf",image_ori_resize.size[0]/20) ## uncomment to deploy on server
+        font = ImageFont.truetype('/System/Library/Fonts/Apple Braille.ttf', img_ori.size[0] / 20)
+        draw.text((40,40),'This image can not be analyzed.',(255,255,255),font=font)
+	cellCount_result = {'count':-1}
     else:
     	for i in region2:
         	if (round(i.area/area_mean2)):
@@ -104,17 +107,18 @@ def cellCount_singleTask(image_input_path, image_output_path, json_path):
         	elif (i.area/area_mean2>=0.3 and i.area/area_mean2<0.5):
             		cellCount +=1
             		draw.text((int(i.centroid[1]),int(i.centroid[0])),'1',(0,255,0),font=font)
-    	font = ImageFont.truetype("DejaVuSerif-Italic.ttf", image_ori_resize.size[0]/20)  
-    	draw.text((40,40),'counts='+str(int(cellCount)),(255,255,255),font=font)
+    	# font = ImageFont.truetype("DejaVuSerif-Italic.ttf", image_ori_resize.size[0]/20) ## uncomment to deplot on server
+        font = ImageFont.truetype('/System/Library/Fonts/Apple Braille.ttf', img_ori.size[0] / 20)
+        draw.text((40,40),'counts='+str(int(cellCount)),(255,255,255),font=font)
 	cellCount_result={'count':int(cellCount)}
     #Image.Image.show(image_ori_resize)
-    #image_ori=resize(image_ori_resize,(img_ori.shape[0],img_ori.shape[1])) 
-    image_ori=image_ori_resize.resize((img_ori.shape[1],img_ori.shape[0]))            
+    #image_ori=resize(image_ori_resize,(img_ori.shape[0],img_ori.shape[1]))
+    image_ori=image_ori_resize.resize((img_ori.shape[1],img_ori.shape[0]))
     #io.imsave(image_output_path,image_ori)
-    Image.Image.save(image_ori,image_output_path)    
+    Image.Image.save(image_ori,image_output_path)
     json.dump(cellCount_result,out_file)
     out_file.close()
-    
+
     return
 
 ###############################################################################
@@ -122,9 +126,9 @@ def cellCount_singleTask(image_input_path, image_output_path, json_path):
 #image_output_path = "D:\Aaron workspace\Aaron\CellCount_Project\output_single\\result.jpg"
 #json_path = "D:\Aaron workspace\Aaron\CellCount_Project\output_single\\result.json"
 #cellCount_singleTask(image_path,image_output_path,json_path)
-            
-            
-            
-            
-            
-            
+
+
+
+
+
+

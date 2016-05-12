@@ -22,8 +22,8 @@ from django.contrib.auth import views as auth_views
 from app.forms import BootstrapAuthenticationForm
 
 # Uncomment the next lines to enable the admin:
-# from django.conf.urls import include
-# from django.contrib import admin
+from django.conf.urls import include
+from django.contrib import admin
 # admin.autodiscover()
 
 urlpatterns = [
@@ -54,7 +54,8 @@ urlpatterns = [
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
     # Uncomment the next line to enable the admin:
-    # url(r'^admin/', admin.site.urls),
+    url(r'^admin/', admin.site.urls),
+
 ]
 
 # Serving files uploaded by a user during development

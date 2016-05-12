@@ -22,6 +22,7 @@ MANAGERS = ADMINS
 APPEND_SLASH = False
 
 LOGIN_URL = '/login'
+LOGIN_REDIRECT_URL = '/'
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'n(bd1f1c%e8=_xad02x53tfn%wgwpi492e$8_erx+d)!tpeoim'
@@ -159,7 +160,7 @@ INSTALLED_APPS = (
     'cellc1.apps.CellC1Config',
     'cellc2.apps.CellC2Config',
     # Uncomment the next line to enable the admin:
-    # 'django.contrib.admin',
+    'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
@@ -320,7 +321,30 @@ CELERY_DISABLE_RATE_LIMITS = True
 #CELERY_ENABLE_UTC = True
 
 # Ipython notebook settings
-NOTEBOOK_ARGUMENTS = [
-        '--ip=0.0.0.0',
-        '--port=8888',
-        ]
+# NOTEBOOK_ARGUMENTS = [
+#        '--ip=0.0.0.0',
+#        '--port=8889',
+#        ]
+
+
+
+SOCIALACCOUNT_PROVIDERS ={
+    'facebook':
+       {'METHOD': 'oauth2',
+        'SCOPE': ['email', 'public_profile'],
+        'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
+        'FIELDS': [
+            'id',
+            'email',
+            'name',
+            'first_name',
+            'last_name',
+            'verified',
+            'locale',
+            'timezone',
+            'link',
+            'gender',
+            'updated_time'],
+        'EXCHANGE_TOKEN': True,
+        'VERIFIED_EMAIL': False,
+        'VERSION': 'v2.4'}}

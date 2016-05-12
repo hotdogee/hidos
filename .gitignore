@@ -65,3 +65,7 @@ browse.VC.db
 # sqlite3
 *.sqlite3
 
+# Pycharm
+*.idea
+
+
