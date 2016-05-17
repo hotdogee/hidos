@@ -67,7 +67,7 @@ def run_cell_n1_task(self, task_id,uploaded_image_path, result_image_path, resul
         record.status = 'success'
         with open(result_json_path, 'r') as f:
             result = json.load(f)
-            record.cell_count = result['count']
+            record.soma_count = result['soma']
 
         output_image_viewer_path = path_prefix + '_out.jpg'
         # convert to jpeg for web display

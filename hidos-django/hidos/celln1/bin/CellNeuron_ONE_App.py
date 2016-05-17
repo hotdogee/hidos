@@ -96,7 +96,7 @@ def CellNOne(img_input_path, img_output_path, json_output_path):
     # display_3 = overlay(filled, blue = sk2, green = spine_sk, red = ep_show)
 
     display_3 = Image.fromarray(display_3)
-    text = ImageFont.truetype("arial.ttf",16)
+    text = ImageFont.truetype("/Library/Fonts/PTMono.ttc",16)
     draw = ImageDraw.Draw(display_3)
 
     k = 0

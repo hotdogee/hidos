@@ -104,7 +104,7 @@ class SingleImageUploadManager(models.Manager):
     #     return type(class_name, (cls,), class_dict)
 
 class CellN1Task(CellTaskModel):
-    cell_count = models.IntegerField(null=True, blank=True)
+    soma_count = models.IntegerField(null=True, blank=True)
 
     objects = SingleImageUploadManager.from_queryset(ViewableQuerySet)()
 
@@ -119,16 +119,13 @@ class CellN1Task(CellTaskModel):
         """
         # Generate args_list and path_prefix
         path_prefix = path.join(settings.MEDIA_ROOT, 'celln1', 'task', self.task_id, self.task_id)
-        script_path = path.join(settings.PROJECT_ROOT, 'celln1', 'bin', '1_6_obj_area_cal_cmd.R')
         # avoid exploits, don't any part of the user filename
         uploaded_image_path = path_prefix + '_uploaded.' + self.uploaded_filetype
         result_image_path = path_prefix + '_result.' + self.uploaded_filetype
         result_json_path = path_prefix + '_result.json'
         # jpg image for viewer
-        input_image_viewer_path = path_prefix + '_in.jpg'
-        output_image_viewer_path = path_prefix + '_out.jpg'
+
         # build command
-        # args_list = [[settings.R_SCRIPT, script_path, uploaded_image_path, result_image_path, result_json_path]]
         run_cell_n1_task.delay(self.task_id, uploaded_image_path, result_image_path, result_json_path, path_prefix)
         print(uploaded_image_path, result_image_path, result_json_path)
 

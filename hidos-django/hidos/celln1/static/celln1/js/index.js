@@ -38,7 +38,7 @@ $(document).ready(function () {
           }
         },
         {
-          name: 'count', type: 'num', data: 'cell_count', defaultContent: running_template, width: '100px',
+          name: 'count', type: 'num', data: 'soma_count', defaultContent: running_template, width: '100px',
           render: function (data, type, row, meta) {
             if (!data)
               return running_template;
