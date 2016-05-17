@@ -88,15 +88,15 @@ def cellCount_singleTask(image_input_path, image_output_path, json_path):
 
     image_ori_resize=Image.fromarray(img_ori_resize)
     draw=ImageDraw.Draw(image_ori_resize)
-    # font = ImageFont.truetype("DejaVuSerif-Italic.ttf", 20) ##uncomment to deploy on server
-    font = ImageFont.truetype('/System/Library/Fonts/Apple Braille.ttf', img_ori.size[0] / 20)
+    font = ImageFont.truetype("DejaVuSerif-Italic.ttf", 20) ##uncomment to deploy on server
+    #font = ImageFont.truetype('/System/Library/Fonts/Apple Braille.ttf', img_ori.size[0] / 20)
 
     cellCount=0
     out_file=open(json_path,"w")
     #exception
     if (numpy.isnan(area_mean2) or area_mean2<=0):
-    	# font = ImageFont.truetype("DejaVuSerif.ttf",image_ori_resize.size[0]/20) ## uncomment to deploy on server
-        font = ImageFont.truetype('/System/Library/Fonts/Apple Braille.ttf', img_ori.size[0] / 20)
+    	font = ImageFont.truetype("DejaVuSerif.ttf",image_ori_resize.size[0]/20) ## uncomment to deploy on server
+        # font = ImageFont.truetype('/System/Library/Fonts/Apple Braille.ttf', img_ori.size[0] / 20)
         draw.text((40,40),'This image can not be analyzed.',(255,255,255),font=font)
 	cellCount_result = {'count':-1}
     else:
@@ -107,8 +107,8 @@ def cellCount_singleTask(image_input_path, image_output_path, json_path):
         	elif (i.area/area_mean2>=0.3 and i.area/area_mean2<0.5):
             		cellCount +=1
             		draw.text((int(i.centroid[1]),int(i.centroid[0])),'1',(0,255,0),font=font)
-    	# font = ImageFont.truetype("DejaVuSerif-Italic.ttf", image_ori_resize.size[0]/20) ## uncomment to deplot on server
-        font = ImageFont.truetype('/System/Library/Fonts/Apple Braille.ttf', img_ori.size[0] / 20)
+    	font = ImageFont.truetype("DejaVuSerif-Italic.ttf", image_ori_resize.size[0]/20) ## uncomment to deplot on server
+        # font = ImageFont.truetype('/System/Library/Fonts/Apple Braille.ttf', img_ori.size[0] / 20)
         draw.text((40,40),'counts='+str(int(cellCount)),(255,255,255),font=font)
 	cellCount_result={'count':int(cellCount)}
     #Image.Image.show(image_ori_resize)

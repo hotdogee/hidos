@@ -159,6 +159,8 @@ INSTALLED_APPS = (
     'cell.apps.CellConfig',
     'cellc1.apps.CellC1Config',
     'cellc2.apps.CellC2Config',
+    'cellm3.apps.CellM3Config',
+    'celln1.apps.CellN1Config',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
