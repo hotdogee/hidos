@@ -141,6 +141,8 @@ STATICFILES_FINDERS = (
 SITE_ID = 1
 
 INSTALLED_APPS = (
+    'material',
+    'material.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -158,9 +160,9 @@ INSTALLED_APPS = (
     'cell.apps.CellConfig',
     'cellc2.apps.CellC2Config',
     # Uncomment the next line to enable the admin:
-    # 'django.contrib.admin',
+    'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
-    # 'django.contrib.admindocs',
+    'django.contrib.admindocs',
 )
 
 MIDDLEWARE_CLASSES = [

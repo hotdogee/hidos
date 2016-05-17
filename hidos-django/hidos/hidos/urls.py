@@ -16,6 +16,7 @@ Including another URLconf
 
 from datetime import datetime
 
+from django.contrib import admin
 from django.conf.urls import include, url
 from django.contrib.auth import views as auth_views
 
@@ -29,7 +30,7 @@ from app.forms import BootstrapAuthenticationForm
 urlpatterns = [
     #url(r'^api/v1/tasks$', app_views.tasks, name='tasks'),
     #url(r'^api/v1/tasks/status$', app_views.status, name='status'),
-    url(r'^login/$',
+    url(r'^login$',
         auth_views.login,
         {
             'template_name': 'app/login.html',
@@ -47,14 +48,14 @@ urlpatterns = [
             'next_page': '/',
         },
         name='logout'),
-    url(r'^accounts/', include('allauth.urls')),
+    url(r'^accounts', include('allauth.urls')),
     url(r'^', include('cell.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:
-    # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
+    url(r'^admin/doc', include('django.contrib.admindocs.urls')),
 
     # Uncomment the next line to enable the admin:
-    # url(r'^admin/', admin.site.urls),
+    url(r'^admin', admin.site.urls),
 ]
 
 # Serving files uploaded by a user during development
