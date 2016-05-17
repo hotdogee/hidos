@@ -1,10 +1,5 @@
 
-# coding: utf-8
-
-# In[62]:
-
-
-import cv2
+import skimage
 from PIL import Image, ImageDraw, ImageFont
 import json
 
@@ -27,7 +22,7 @@ def CellNOne(img_input_path, img_output_path, json_output_path):
 #     img_input_path = input_dir+img_name
     ori_img = io.imread(img_input_path)
 
-    ori_img_int8 = cv2.convertScaleAbs(ori_img)
+    ori_img_int8 = skimage.img_as_ubyte(ori_img)
     ori_img_int8_norm = (ori_img_int8 - ori_img.min())/float(ori_img_int8.max() - ori_img.min())*255.0
     ori_img_int8_norm = ori_img_int8_norm.astype('uint8')
 
