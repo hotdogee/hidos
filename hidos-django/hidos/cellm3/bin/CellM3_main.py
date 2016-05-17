@@ -5,7 +5,7 @@
 
 from PIL import Image
 import numpy as np
-# import pylab
+import pylab
 import cv2
 from skimage import io, morphology, data, color
 from skimage.transform import resize
