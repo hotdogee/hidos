@@ -6,7 +6,7 @@
 from PIL import Image
 import numpy as np
 import pylab
-import cv2
+import skimage
 from skimage import io, morphology, data, color
 from skimage.transform import resize
 from skimage.filters import gabor, laplace, gaussian, threshold_otsu
@@ -20,7 +20,7 @@ def cellm3(input_image_path, output_image_path, json_path):
         selem = disk(1)
 
         ori_img = io.imread(input_image_path, plugin='tifffile')
-        ori_img_int8 = cv2.convertScaleAbs(ori_img)
+        ori_img_int8 = skimage.img_as_ubyte(ori_img)
 
 
         # image resize
