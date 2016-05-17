@@ -16,7 +16,7 @@ from django_extensions.db.models import TimeStampedModel
 from . import app_name, verbose_name, version
 
 class Folder(TimeStampedModel):
-    folder_id = models.CharField(max_length=32, primary_key=True)
+    # id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255) # display name
     owner = models.ForeignKey(User, models.CASCADE)
     parent_folder = models.ForeignKey('self', models.CASCADE, related_name='child_folders')
