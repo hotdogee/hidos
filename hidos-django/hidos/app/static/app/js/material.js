@@ -74,9 +74,9 @@
         ".pagination li:not(.active):not(.disabled) a:not(.withoutripple)"
       ].join(","),
       "inputElements": "input.form-control, textarea.form-control, select.form-control",
-      "checkboxElements": ".checkbox > label > input[type=checkbox]",
+      "checkboxElements": ".checkbox > label > input[type=checkbox], label.checkbox-inline > input[type=checkbox]",
       "togglebuttonElements": ".togglebutton > label > input[type=checkbox]",
-      "radioElements": ".radio > label > input[type=radio]"
+      "radioElements": ".radio > label > input[type=radio], label.radio-inline > input[type=radio]"
     },
     "checkbox": function (selector) {
       // Add fake-checkbox to material checkboxes
@@ -155,9 +155,6 @@
             $formGroup.addClass("is-empty");
           }
 
-          // Add at the end of the form-group
-          $formGroup.append("<span class='material-input'></span>");
-
           // Support for file input
           if ($formGroup.find("input[type=file]").length > 0) {
             $formGroup.addClass("is-fileinput");
@@ -168,9 +165,6 @@
       var validate = this.options.validate;
 
       $(document)
-        .on("change", ".checkbox input[type=checkbox]", function () {
-          $(this).blur();
-        })
         .on("keydown paste", ".form-control", function (e) {
           if (_isChar(e)) {
             $(this).closest(".form-group").removeClass("is-empty");
