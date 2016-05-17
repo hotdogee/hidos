@@ -151,7 +151,7 @@ class CellTaskModel(TaskModel):
     objects = SingleImageUploadManager.from_queryset(ViewableQuerySet)()
 
     def __unicode__(self):
-        return '{0} ({1})'.format(self.user_filename, self.task_id[:6])
+        return '{0} ({1})'.format(self.uploaded_filename, self.task_id[:6])
 
     class Meta(TaskModel.Meta):
         abstract = True
