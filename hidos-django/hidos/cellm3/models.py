@@ -104,7 +104,7 @@ class SingleImageUploadManager(models.Manager):
     #     return type(class_name, (cls,), class_dict)
 
 class CellM3Task(CellTaskModel):
-    cell_count = models.IntegerField(null=True, blank=True)
+    ratio = models.IntegerField(null=True, blank=True)
 
     objects = SingleImageUploadManager.from_queryset(ViewableQuerySet)()
 

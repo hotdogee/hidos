@@ -11,7 +11,7 @@ class CellM3TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = CellM3Task
         read_only_fields = ['url',
-            'cell_count',
+            'ratio',
             'uploaded_filename', 'uploaded_filetype', 'stdout', 'stderr',
             'task_id', 'status', 'dequeued', 'finished', 'user', 'parent_folder', 'version',
             'created', 'modified']

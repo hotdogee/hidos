@@ -67,7 +67,7 @@ def run_cell_m3_task(self, task_id,uploaded_image_path, result_image_path, resul
         record.status = 'success'
         with open(result_json_path, 'r') as f:
             result = json.load(f)
-            record.cell_count = result['count']
+            record.ratio = result['ratio']
 
         output_image_viewer_path = path_prefix + '_out.jpg'
         # convert to jpeg for web display
