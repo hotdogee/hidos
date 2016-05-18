@@ -38,7 +38,7 @@ class SingleImageUploadManager(models.Manager):
         image_type = imghdr.what('', uploaded_file_data)
 
         # Generate args_list and path_prefix
-        path_prefix = path.join(settings.MEDIA_ROOT, 'cellc1', 'task', task_id, task_id)
+        path_prefix = path.join(settings.MEDIA_ROOT, 'cellm3', 'task', task_id, task_id)
         # avoid exploits, don't any part of the user filename
         uploaded_image_path = path_prefix + '_uploaded.' + image_type
         # jpg image for viewer
@@ -125,11 +125,8 @@ class CellM3Task(CellTaskModel):
         result_image_path = path_prefix + '_result.' + self.uploaded_filetype
         result_json_path = path_prefix + '_result.json'
         # jpg image for viewer
-        input_image_viewer_path = path_prefix + '_in.jpg'
-        output_image_viewer_path = path_prefix + '_out.jpg'
         # build command
-        # args_list = [[settings.R_SCRIPT, script_path, uploaded_image_path, result_image_path, result_json_path]]
-        run_cell_c1_task.delay(self.task_id, uploaded_image_path, result_image_path, result_json_path, path_prefix)
+        run_cell_m3_task.delay(self.task_id, uploaded_image_path, result_image_path, result_json_path, path_prefix)
         print(uploaded_image_path, result_image_path, result_json_path)
 
     # def save(self, force_insert=False, force_update=False, using=None, update_fields=None)

@@ -16,3 +16,4 @@ scipy==0.17.0
 django-material>=0.7.0
 docutils>=0.12
 
+pymorph==0.96

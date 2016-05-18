@@ -325,10 +325,10 @@ CELERY_DISABLE_RATE_LIMITS = True
 #CELERY_ENABLE_UTC = True
 
 # Ipython notebook settings
-# NOTEBOOK_ARGUMENTS = [
-#        '--ip=0.0.0.0',
-#        '--port=8889',
-#        ]
+NOTEBOOK_ARGUMENTS = [
+        '--ip=0.0.0.0',
+        '--port=8889',
+        ]
 
 
 

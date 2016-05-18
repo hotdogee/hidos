@@ -5,7 +5,7 @@
 
 from PIL import Image
 import numpy as np
-import pylab
+from matplotlib import pyplot
 import skimage
 from skimage import io, morphology, data, color
 from skimage.transform import resize
@@ -42,18 +42,21 @@ def cellm3(input_image_path, output_image_path, json_path):
 
         img_list = np.hstack(img_p1)
 
-        #histogram the gray vale
-        n, bins, patches = pylab.hist(img_list, 50, histtype='stepfilled')
 
-        n2list = n.tolist()
+        #### further modify here
+        #histogram the gray vale
+        # n, bins, patches = pyplot.hist(img_list, 50, histtype='stepfilled')
+
+        # n2list = n.tolist()
 
         #find the seg value of wound part
-        max_inx = n2list.index(max(n2list))
-
-        bins2list = bins.tolist()
-
+        # max_inx = n2list.index(max(n2list))
+        # bins2list = bins.tolist()
+        ####
+        
         #segmentation the wound part
-        img_p2 = img_p1 >= bins2list[max_inx+1]
+        # img_p2 = img_p1 >= bins2list[max_inx+1]
+        img_p2 = img_p1 >= 5
 
         #dilation and erosion
         eroded = dilation(img_p2, selem)
@@ -91,7 +94,7 @@ def cellm3(input_image_path, output_image_path, json_path):
 
 
 
-        ratio = 100-(img_p5_inverse.sum())/float(img_p5_inverse.shape[0]*img_p5_inverse.shape[1])*100
+        ratio = (img_p5_inverse.sum())/float(img_p5_inverse.shape[0]*img_p5_inverse.shape[1])*100
 
         json_out_file = open(json_path,'w')
         ratio_rsult = {'ratio' : ratio}
