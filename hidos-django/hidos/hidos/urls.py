@@ -48,7 +48,7 @@ urlpatterns = [
             'next_page': '/',
         },
         name='logout'),
-    url(r'^accounts', include('allauth.urls')),
+    url(r'^accounts/', include('allauth.urls')),
     url(r'^', include('cell.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:
