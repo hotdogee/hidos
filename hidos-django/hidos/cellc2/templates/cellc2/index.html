@@ -55,16 +55,33 @@
 {% block head-styles %}
   <link rel="stylesheet" type="text/css" href="{% static 'app/content/basic.css' %}" />
   <link rel="stylesheet" type="text/css" href="{% static 'app/content/dropzone.css' %}" />
-  <!--
-  <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.10/css/dataTables.bootstrap.css"/>
-  <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/scroller/1.4.0/css/scroller.bootstrap.css"/>
-  -->
-  <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.10/css/jquery.dataTables.min.css"/>
-  <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/scroller/1.4.0/css/scroller.dataTables.min.css"/>
-  <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/buttons/1.1.2/css/buttons.bootstrap.min.css"/>
-  <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css"/>
   <link rel="stylesheet" type="text/css" href="{% static 'app/content/spinkit.css' %}" />
+  <!-- Bootstrap -->
+  <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.css"/>
+  <!-- Bootstrap Material Design -->
+  <!--
+  <link rel="stylesheet" type="text/css" href="{% static 'app/css/bootstrap-material-design.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'app/css/ripples.min.css' %}">
+  -->
+  <!-- Material Design Bootstrap -->
+  <link rel="stylesheet" type="text/css" href="{% static 'app/css/mdb.css' %}">
 
+  <!-- Dropdown.js -->
+  <link href="//cdn.rawgit.com/FezVrasta/dropdown.js/master/jquery.dropdown.css" rel="stylesheet">
+
+  <!-- datatables -->
+  <!--
+  <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.11/css/dataTables.bootstrap.css"/>
+  <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/buttons/1.1.2/css/buttons.bootstrap.css"/>
+  <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/scroller/1.4.1/css/scroller.bootstrap.css"/>
+  <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/select/1.1.2/css/select.bootstrap.css"/>
+  -->
+  <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css"/>
+  <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/scroller/1.4.1/css/scroller.dataTables.min.css"/>
+  <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/buttons/1.1.2/css/buttons.bootstrap.css"/>
+  <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css"/>
+
+  <!-- Page style -->
   <style type="text/css">
     #icon {
       display: inline-block;
@@ -93,18 +110,42 @@
 {% block scripts %}
   <script src="{% static 'app/scripts/dropzone.js' %}"></script>
   <script src="{% static 'app/scripts/underscore-min.js' %}"></script>
+  <!-- Bootstrap -->
+  <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/js/bootstrap.js"></script>
+
+  <!-- Bootstrap Material Design -->
   <!--
-  <script type="text/javascript" src="//cdn.datatables.net/1.10.10/js/dataTables.bootstrap.js"></script>
+  <script src="{% static 'app/js/material.js' %}"></script>
+  <script src="{% static 'app/js/ripples.min.js' %}"></script>
+  <script>
+    $.material.init();
+  </script>
   -->
-  <script type="text/javascript" src="//cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
-  <script type="text/javascript" src="//cdn.datatables.net/scroller/1.4.0/js/dataTables.scroller.min.js"></script>
-  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
-  <script type="text/javascript" src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
-  <script type="text/javascript" src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
-  <script type="text/javascript" src="//cdn.datatables.net/buttons/1.1.2/js/dataTables.buttons.min.js"></script>
-  <script type="text/javascript" src="//cdn.datatables.net/buttons/1.1.2/js/buttons.bootstrap.min.js"></script>
-  <script type="text/javascript" src="//cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
-  <script type="text/javascript" src="//cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
+  <!-- Material Design Bootstrap -->
+  <script src="{% static 'app/js/mdb.js' %}"></script>
+
+  <!-- datatables -->
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.js"></script>
+  <script src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.js"></script>
+  <script src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+
+  <script src="//cdn.datatables.net/1.10.11/js/jquery.dataTables.js"></script>
+  <script src="//cdn.datatables.net/1.10.11/js/dataTables.bootstrap.js"></script>
+  <script src="//cdn.datatables.net/buttons/1.1.2/js/dataTables.buttons.js"></script>
+  <script src="//cdn.datatables.net/buttons/1.1.2/js/buttons.bootstrap.js"></script>
+  <script src="//cdn.datatables.net/buttons/1.1.2/js/buttons.html5.js"></script>
+  <script src="//cdn.datatables.net/scroller/1.4.1/js/dataTables.scroller.js"></script>
+  <script src="//cdn.datatables.net/select/1.1.2/js/dataTables.select.js"></script>
+
+  <!--
+  <script src="//cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
+  <script src="//cdn.datatables.net/scroller/1.4.1/js/dataTables.scroller.min.js"></script>
+  <script src="//cdn.datatables.net/buttons/1.1.2/js/dataTables.buttons.min.js"></script>
+  <script src="//cdn.datatables.net/buttons/1.1.2/js/buttons.bootstrap.js"></script>
+  <script src="//cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
+  <script src="//cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
+  -->
+
   <script type="text/template" id="loading-template">
     <div class="sk-fading-circle">
       <div class="sk-circle1 sk-circle"></div>

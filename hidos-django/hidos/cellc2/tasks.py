@@ -1,4 +1,4 @@
-﻿from __future__ import absolute_import
+﻿from __future__ import absolute_import, unicode_literals
 import json
 import time
 from pytz import utc
@@ -34,7 +34,7 @@ def run_cell_c2_task(self, task_id, uploaded_image_path, result_image_path, resu
     django.setup()
 
     self.app.log.redirect_stdouts_to_logger(logger)
-    logger.info("image_analysis task_id: %s" % (task_id,))
+    logger.info('image_analysis task_id: %s' % (task_id,))
 
     # update dequeue time
     from .models import CellC2Task
