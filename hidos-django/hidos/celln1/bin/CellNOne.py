@@ -25,7 +25,7 @@ from skimage import feature
 from skimage import exposure
 from skimage import measure
 from django.conf import settings
-
+import skimage
 # def PlotOut(img, title, img2, title2):
 #     fig = plt.figure(figsize=(30,30))
 #     ax0 = fig.add_subplot(121)
@@ -67,7 +67,7 @@ def CellNOne(img_input_path, img_output_path, json_output_path):
     # tran image type as uint8
 
     ori_img = io.imread(img_input_path)
-    ori_img_int8 = cv2.convertScaleAbs(ori_img)
+    ori_img_int8 = skimage.img_as_ubyte(ori_img)
     ori_img_int8_norm = (ori_img_int8 - ori_img.min())/float(ori_img_int8.max() - ori_img.min())*255.0
     ori_img_int8_norm = ori_img_int8_norm.astype('uint8')
 
