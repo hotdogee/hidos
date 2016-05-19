@@ -211,7 +211,7 @@ def pruneTree(img_skeleton,extremityMap,junctionMap,iter_num):
     return img_pruneTree
    
 
-def cellAngiogenesis(image_input_path, image_output_path, json_path):
+def cellAngiogenesis(image_input_path, image_output_path, json_path, add_boarder=True):
     img_ori=io.imread(image_input_path)
     
     if(img_ori.shape[0]>2048 or img_ori.shape[1]>2048):
@@ -234,6 +234,12 @@ def cellAngiogenesis(image_input_path, image_output_path, json_path):
 #    plt.figure()
 #    io.imshow(img_prewitt)
 #    io.show()
+    
+    if (add_boarder):
+        img_prewitt[0:1,:]=img_prewitt.max()
+        img_prewitt[-1:-2,:]=img_prewitt.max()
+        img_prewitt[:,0:1]=img_prewitt.max()
+        img_prewitt[:,-1:-2]=img_prewitt.max()
 
     
     thresh=filters.threshold_otsu(img_prewitt[img_prewitt.shape[0]/4:img_prewitt.shape[0]*3/4,img_prewitt.shape[0]/4:img_prewitt.shape[1]*3/4])
@@ -409,8 +415,9 @@ def cellAngiogenesis(image_input_path, image_output_path, json_path):
     
     #outputimage = m.overlay(img_final,blue=extremityMap, red=junctionMap)
     #io.imshow(outputimage)
-    
+   
     allBranch=detectAllBranch(img_final,extremityMap,junctionMap)
+    
 #    plt.figure()
 #    io.imshow(m.dilate(allBranch, m.sedisk(2)))
 #    io.show()    
@@ -425,7 +432,7 @@ def cellAngiogenesis(image_input_path, image_output_path, json_path):
     num_junction=junctionMap.sum()
     tot_branch_len=round(float(allBranch.sum())/img_final.size,6)
     tot_seg_len=round(float(img_final.sum())/img_final.size,6)
-    tot_len=tot_branch_len+tot_seg_len
+    tot_len=round(tot_branch_len+tot_seg_len,6)
     ###############################
      
     
@@ -435,19 +442,34 @@ def cellAngiogenesis(image_input_path, image_output_path, json_path):
     #img_region=morphology.binary_erosion(img_region)
     img_region=m.erode(img_region, m.sedisk(1)) 
     img_label=measure.label(img_region)
-    img_dist=mahotas.distance(img_label)
-    img_edge=((img_dist>=25)^(img_dist>=64))
+    #img_dist=mahotas.distance(img_label)
+    #img_edge=((img_dist>=25)^(img_dist>=64))
 #    plt.figure()
 #    io.imshow(img_edge)
 #    io.show() 
     
     #img_edge=m.dilate(img_edge, m.sedisk(2)) 
-    for i in range(img_ori_resize.shape[0]):
-        for j in range(img_ori_resize.shape[1]):
-            if (img_edge[i,j]):
-                img_ori_resize[i,j,0]=0
-                img_ori_resize[i,j,1]=255
-                img_ori_resize[i,j,2]=0
+#    for i in range(img_ori_resize.shape[0]):
+#        for j in range(img_ori_resize.shape[1]):
+#            if (img_edge[i,j]):
+#                img_ori_resize[i,j,0]=0
+#                img_ori_resize[i,j,1]=255
+#                img_ori_resize[i,j,2]=0
+    
+    
+    img_label_color = color.label2rgb(img_label,bg_label=0)
+    img_label_color=img_as_ubyte(img_label_color)
+    
+    for i in range(img_label_color.shape[0]):
+        for j in range(img_label_color.shape[1]):
+            if (sum(img_label_color[i,j,:])):
+                img_ori_resize[i,j,0]=int(float(img_ori_resize[i,j,0]*0.7) + float(img_label_color[i,j,0]*0.3))
+                img_ori_resize[i,j,1]=int(float(img_ori_resize[i,j,1]*0.7) + float(img_label_color[i,j,1]*0.3))
+                img_ori_resize[i,j,2]=int(float(img_ori_resize[i,j,2]*0.7) + float(img_label_color[i,j,2]*0.3))
+    
+#    plt.figure()
+#    io.imshow(img_ori_resize)
+#    io.show() 
     
     img_final=m.dilate(img_final, m.sedisk(2))  
     for i in range(img_ori_resize.shape[0]):
@@ -456,20 +478,7 @@ def cellAngiogenesis(image_input_path, image_output_path, json_path):
                 img_ori_resize[i,j,0]=255
                 img_ori_resize[i,j,1]=0
                 img_ori_resize[i,j,2]=0
-                 
-    # dilate to merge nearby hits
-    junctionMap = m.dilate(junctionMap, m.sedisk(7))
-    # locate centroids
-    junctionMap = m.blob(m.label(junctionMap), 'centroid')
-    junctionMap = m.dilate(junctionMap, m.sedisk(5))
     
-    for i in range(img_ori_resize.shape[0]):
-        for j in range(img_ori_resize.shape[1]):
-            if (junctionMap[i,j]):
-                img_ori_resize[i,j,0]=255
-                img_ori_resize[i,j,1]=255
-                img_ori_resize[i,j,2]=255
-            
     allBranch=m.dilate(allBranch, m.sedisk(2))              
     for i in range(img_ori_resize.shape[0]):
         for j in range(img_ori_resize.shape[1]):
@@ -477,7 +486,19 @@ def cellAngiogenesis(image_input_path, image_output_path, json_path):
                 img_ori_resize[i,j,0]=0
                 img_ori_resize[i,j,1]=255
                 img_ori_resize[i,j,2]=255
-    
+             
+    # dilate to merge nearby hits
+    junctionMap = m.dilate(junctionMap, m.sedisk(7))
+    # locate centroids
+    junctionMap = m.blob(m.label(junctionMap), 'centroid')
+    junctionMap = m.dilate(junctionMap, m.sedisk(5))  
+    for i in range(img_ori_resize.shape[0]):
+        for j in range(img_ori_resize.shape[1]):
+            if (junctionMap[i,j]):
+                img_ori_resize[i,j,0]=255
+                img_ori_resize[i,j,1]=255
+                img_ori_resize[i,j,2]=255
+            
     extremityMap = m.dilate(extremityMap, m.sedisk(5))    
     for i in range(img_ori_resize.shape[0]):
         for j in range(img_ori_resize.shape[1]):
@@ -489,7 +510,8 @@ def cellAngiogenesis(image_input_path, image_output_path, json_path):
     regions=measure.regionprops(img_label)
     image_ori_resize=Image.fromarray(img_ori_resize)
     draw=ImageDraw.Draw(image_ori_resize)
-    font = ImageFont.truetype("DejaVuSerif-Italic.ttf", 25)  
+    #font = ImageFont.truetype("arial.ttf", 30)
+    font = ImageFont.truetype("DejaVuSerif-Italic.ttf", 30)  
     
     num_mesh=0
     tot_mesh_area=0
@@ -513,17 +535,17 @@ def cellAngiogenesis(image_input_path, image_output_path, json_path):
     return
 
 
-# img_input_path=u'D:\Aaron workspace\Aaron\CellAngiogenesis_Project\Image data\CellQA_images_all'
-# img_output_path=u'D:\Aaron workspace\Aaron\CellAngiogenesis_Project\Image data\out'
-# file_list = listdir(img_input_path)
-# for filename in file_list:  
-#     if (filename[0]!='.'):
-#         print('Cell angiogenesis analyzing for %s'%filename)
-#         Img_filename=img_input_path+'\\'+filename
-#         Img_output_filename=img_output_path+'\\'+filename
-#         inx=Img_output_filename.rfind('.')
-#         json_filename=Img_output_filename[0:inx]+'.json'
-#         cellAngiogenesis(Img_filename,Img_output_filename,json_filename)
+#img_input_path=u'D:\Aaron workspace\Aaron\CellAngiogenesis_Project\Image data\CellQA_images_all'
+#img_output_path=u'D:\Aaron workspace\Aaron\CellAngiogenesis_Project\Image data\out'
+#file_list = listdir(img_input_path)
+#for filename in file_list:  
+#    if (filename[0]!='.'):
+#        print('Cell angiogenesis analyzing for %s'%filename)
+#        Img_filename=img_input_path+'\\'+filename
+#        Img_output_filename=img_output_path+'\\'+filename
+#        inx=Img_output_filename.rfind('.')
+#        json_filename=Img_output_filename[0:inx]+'.json'
+#        cellAngiogenesis(Img_filename,Img_output_filename,json_filename,add_boarder=False)
           
     
 
