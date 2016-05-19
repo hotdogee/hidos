@@ -45,6 +45,22 @@ $(document).ready(function () {
             else
               return type === 'display' ? data  : data;
           }
+        },{
+          name: 'body_attachments', type: 'num', data: 'body_attachments', defaultContent: running_template, width: '100px',
+          render: function (data, type, row, meta) {
+            if (!data)
+              return running_template;
+            else
+              return type === 'display' ? data  : data;
+          }
+        },{
+          name: 'endpoints', type: 'num', data: 'endpoints', defaultContent: running_template, width: '100px',
+          render: function (data, type, row, meta) {
+            if (!data)
+              return running_template;
+            else
+              return type === 'display' ? data  : data;
+          }
         },
         {
           name: 'created', type: 'date', data: 'created', width: '100px',

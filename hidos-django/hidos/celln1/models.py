@@ -105,6 +105,8 @@ class SingleImageUploadManager(models.Manager):
 
 class CellN1Task(CellTaskModel):
     soma_count = models.IntegerField(null=True, blank=True)
+    body_attachments = models.IntegerField(null=True, blank=True)
+    endpoints = models.IntegerField(null=True, blank=True)
 
     objects = SingleImageUploadManager.from_queryset(ViewableQuerySet)()
 

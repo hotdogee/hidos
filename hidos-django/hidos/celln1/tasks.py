@@ -15,7 +15,7 @@ from celery.decorators import periodic_task
 from celery.utils.log import get_task_logger
 from celery.signals import task_sent, task_success, task_failure
 
-from celln1.bin.CellNeuron_ONE_App import CellNOne
+from celln1.bin.CellNOne import CellNOne
 
 from django.conf import settings
 from django.core.cache import cache
@@ -68,7 +68,8 @@ def run_cell_n1_task(self, task_id,uploaded_image_path, result_image_path, resul
         with open(result_json_path, 'r') as f:
             result = json.load(f)
             record.soma_count = result['soma']
-
+            record.body_attachments = result['body_attachments']
+            record.endpoints = result['endpoints']
         output_image_viewer_path = path_prefix + '_out.jpg'
         # convert to jpeg for web display
         Image.open(result_image_path).save(output_image_viewer_path)
