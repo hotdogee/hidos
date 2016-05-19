@@ -17,7 +17,7 @@ $(function () {
           setTimeout(poll, 3000);
         else {
           // get result json data
-          $('#count').text(data.ratio);
+          $('#count').text(data.ratio + '%');
           // display image
           // /media/image_analysis/task/7ef4f4782fc840738f67a43edafc9683/7ef4f4782fc840738f67a43edafc9683_in.jpg
           $('#input-img').attr('src', '/media/cellm3/task/' + task_id + '/' + task_id + '_in.jpg');

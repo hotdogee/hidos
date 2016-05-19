@@ -164,6 +164,7 @@ INSTALLED_APPS = (
     'cellm3.apps.CellM3Config',
     'celln1.apps.CellN1Config',
     'cellm1.apps.CellM1Config',
+    'cella.apps.CellAConfig',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
@@ -289,12 +290,20 @@ LOGGING = {
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
 # Rscript path
+# Font path for labeling word on Image.
 from sys import platform
 R_SCRIPT = r"/usr/bin/Rscript"
+FONT = 'DejaVuSerif-Italic.ttf'
+
 if platform == 'win32':
     R_SCRIPT = r"C:\Program Files\R\R-3.2.4revised\bin\RScript.exe"
+if platform == 'darwin':
+    R_SCRIPT = r'/usr/local/bin/Rscript'
+    FONT = '/Library/Fonts/Times New Roman.ttf'
 
 USE_CACHE = False
+
+
 
 # Celery Settings
 from kombu import Exchange, Queue
@@ -314,6 +323,23 @@ CELERY_ROUTES = {
         'queue': 'cell',
         'routing_key': 'cell',
     },
+    'cellm1.tasks.run_cell_m1_task': {
+        'queue': 'cell',
+        'routing_key': 'cell',
+    },
+    'cellm3.tasks.run_cell_m3_task': {
+        'queue': 'cell',
+        'routing_key': 'cell',
+    },
+    'cella.tasks.run_cell_a_task': {
+        'queue': 'cell',
+        'routing_key': 'cell',
+    },
+    'celln1.tasks.run_cell_n1_task': {
+        'queue': 'cell',
+        'routing_key': 'cell',
+    },
+
 
 }
 BROKER_URL = 'amqp://'

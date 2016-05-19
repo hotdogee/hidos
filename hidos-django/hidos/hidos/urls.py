@@ -39,7 +39,7 @@ urlpatterns = [
             {
                 'title': 'Log in',
                 'year': datetime.now().year,
-            }
+            },
         },
         name='login'),
     url(r'^logout$',

@@ -51,7 +51,7 @@ def run_cell_c1_task(self, task_id,uploaded_image_path, result_image_path, resul
     except Exception as e:
         record.stderr = e
         logger.info(e.args)
- 
+
 
     # update result state
     record.status = 'failed'

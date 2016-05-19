@@ -24,8 +24,7 @@ from skimage.filters.rank import mean
 from skimage import feature
 from skimage import exposure
 from skimage import measure
-
-
+from django.conf import settings
 
 # def PlotOut(img, title, img2, title2):
 #     fig = plt.figure(figsize=(30,30))
@@ -83,7 +82,7 @@ def CellNOne(img_input_path, img_output_path, json_output_path):
 
     # --------------------------------------------------------------------------------------------
     # adaptive threshold
-    block_size = 100
+    block_size = 35
     img_pp1 = threshold_adaptive(img, block_size, offset = -10)
 
     # --------------------------------------------------------------------------------------------
@@ -163,7 +162,7 @@ def CellNOne(img_input_path, img_output_path, json_output_path):
     display_5 = overlay(img, red = img_p2, blue = soma_points , magenta = ep, green = dendrine)
 
     display_3 = Image.fromarray(display_3)
-    text = ImageFont.truetype("arial.ttf",16)
+    text = ImageFont.truetype(settings.FONT,16)
     draw = ImageDraw.Draw(display_3)
 
     k = 0
