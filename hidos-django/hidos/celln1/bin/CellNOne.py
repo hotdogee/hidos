@@ -5,7 +5,6 @@
 
 
 import numpy as np
-import cv2
 import json
 import pymorph
 import mahotas as ma
