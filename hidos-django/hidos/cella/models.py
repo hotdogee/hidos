@@ -11,7 +11,7 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 
 from cell.models import CellTaskModel, ViewableQuerySet
-from .tasks import run_cell_n1_task
+from .tasks import run_cell_a_task
 from . import app_name, verbose_name, version
 
 
@@ -38,7 +38,7 @@ class SingleImageUploadManager(models.Manager):
         image_type = imghdr.what('', uploaded_file_data)
 
         # Generate args_list and path_prefix
-        path_prefix = path.join(settings.MEDIA_ROOT, 'celln1', 'task', task_id, task_id)
+        path_prefix = path.join(settings.MEDIA_ROOT, 'cella', 'task', task_id, task_id)
         # avoid exploits, don't any part of the user filename
         uploaded_image_path = path_prefix + '_uploaded.' + image_type
         # jpg image for viewer
@@ -103,15 +103,20 @@ class SingleImageUploadManager(models.Manager):
     #     class_dict.update(cls._get_queryset_methods(queryset_class))
     #     return type(class_name, (cls,), class_dict)
 
-class CellN1Task(CellTaskModel):
-    soma_count = models.IntegerField(null=True, blank=True)
-    body_attachments = models.IntegerField(null=True, blank=True)
-    endpoints = models.IntegerField(null=True, blank=True)
+class CellATask(CellTaskModel):
+    extremity = models.IntegerField(null=True, blank=True)
+    junction = models.IntegerField(null=True, blank=True)
+    mesh = models.IntegerField(null=True, blank=True)
+    total_branch_length = models.FloatField(null=True, blank=True)
+    total_segment_length = models.FloatField(null=True, blank=True)
+    total_network_length = models.FloatField(null=True, blank=True)
+    total_mesh_area = models.FloatField(null=True, blank=True)
+
 
     objects = SingleImageUploadManager.from_queryset(ViewableQuerySet)()
 
     def get_absolute_url(self):
-        return reverse('n1:detail', kwargs={'task_id': self.task_id}, current_app=app_name)
+        return reverse('a:detail', kwargs={'task_id': self.task_id}, current_app=app_name)
 
     class Meta(CellTaskModel.Meta):
         verbose_name = '{0} {1}'.format(verbose_name, 'Task')
@@ -120,15 +125,18 @@ class CellN1Task(CellTaskModel):
         """Insert task into task queue
         """
         # Generate args_list and path_prefix
-        path_prefix = path.join(settings.MEDIA_ROOT, 'celln1', 'task', self.task_id, self.task_id)
+        path_prefix = path.join(settings.MEDIA_ROOT, 'cella', 'task', self.task_id, self.task_id)
+        # script_path = path.join(settings.PROJECT_ROOT, 'cella', 'bin', '1_6_obj_area_cal_cmd.R')
         # avoid exploits, don't any part of the user filename
         uploaded_image_path = path_prefix + '_uploaded.' + self.uploaded_filetype
         result_image_path = path_prefix + '_result.' + self.uploaded_filetype
         result_json_path = path_prefix + '_result.json'
         # jpg image for viewer
-
+        input_image_viewer_path = path_prefix + '_in.jpg'
+        output_image_viewer_path = path_prefix + '_out.jpg'
         # build command
-        run_cell_n1_task.delay(self.task_id, uploaded_image_path, result_image_path, result_json_path, path_prefix)
+        # args_list = [[settings.R_SCRIPT, script_path, uploaded_image_path, result_image_path, result_json_path]]
+        run_cell_a_task.delay(self.task_id, uploaded_image_path, result_image_path, result_json_path, path_prefix)
         print(uploaded_image_path, result_image_path, result_json_path)
 
     # def save(self, force_insert=False, force_update=False, using=None, update_fields=None)

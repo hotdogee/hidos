@@ -38,23 +38,25 @@ $(document).ready(function () {
           }
         },
         {
-          name: 'count', type: 'num', data: 'soma_count', defaultContent: running_template, width: '100px',
+          name: 'count', type: 'num', data: 'mesh', defaultContent: running_template, width: '100px',
           render: function (data, type, row, meta) {
             if (!data)
               return running_template;
             else
               return type === 'display' ? data  : data;
           }
-        },{
-          name: 'body_attachments', type: 'num', data: 'body_attachments', defaultContent: running_template, width: '100px',
+        },
+          {
+          name: 'count', type: 'num', data: 'junction', defaultContent: running_template, width: '100px',
           render: function (data, type, row, meta) {
             if (!data)
               return running_template;
             else
               return type === 'display' ? data  : data;
           }
-        },{
-          name: 'endpoints', type: 'num', data: 'endpoints', defaultContent: running_template, width: '100px',
+        },
+          {
+          name: 'count', type: 'num', data: 'extremity', defaultContent: running_template, width: '100px',
           render: function (data, type, row, meta) {
             if (!data)
               return running_template;

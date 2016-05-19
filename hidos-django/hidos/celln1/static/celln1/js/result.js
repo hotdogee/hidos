@@ -18,6 +18,8 @@ $(function () {
         else {
           // get result json data
           $('#count').text(data.soma_count);
+          $('#body_attachments').text(data.body_attachments);
+          $('#endpoints').text(data.endpoints);
           // display image
           // /media/image_analysis/task/7ef4f4782fc840738f67a43edafc9683/7ef4f4782fc840738f67a43edafc9683_in.jpg
           $('#input-img').attr('src', '/media/celln1/task/' + task_id + '/' + task_id + '_in.jpg');

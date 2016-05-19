@@ -1,17 +1,17 @@
 from rest_framework import serializers
 from rest_framework import filters
 
-from .models import CellN1Task
+from .models import CellATask
 
 
-class CellN1TaskSerializer(serializers.ModelSerializer):
+class CellATaskSerializer(serializers.ModelSerializer):
     file = serializers.ImageField(write_only=True, max_length=None, allow_empty_file=False, use_url=False)
     url = serializers.URLField(source='get_absolute_url', read_only=True)
 
     class Meta:
-        model = CellN1Task
+        model = CellATask
         read_only_fields = ['url',
-            'soma_count','body_attachments','endpoints',
+            'extremity','junction','mesh','total_branch_length','total_segment_length','total_network_length','total_mesh_area',
             'uploaded_filename', 'uploaded_filetype', 'stdout', 'stderr',
             'task_id', 'status', 'dequeued', 'finished', 'user', 'parent_folder', 'version',
             'created', 'modified']

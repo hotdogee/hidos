@@ -15,7 +15,7 @@ from celery.decorators import periodic_task
 from celery.utils.log import get_task_logger
 from celery.signals import task_sent, task_success, task_failure
 
-from cellc1.bin.cellCount_singleTask import cellCount_singleTask
+from cella.bin.cellAngiogenesis import cellAngiogenesis
 
 from django.conf import settings
 from django.core.cache import cache
@@ -30,7 +30,7 @@ if settings.USE_CACHE:
     release_lock = lambda: cache.delete(LOCK_ID)
 
 @shared_task(bind=True) # ignore_result=True
-def run_cell_c1_task(self, task_id,uploaded_image_path, result_image_path, result_json_path , path_prefix):
+def run_cell_a_task(self, task_id,uploaded_image_path, result_image_path, result_json_path , path_prefix):
     import django
     django.setup()
 
@@ -38,8 +38,8 @@ def run_cell_c1_task(self, task_id,uploaded_image_path, result_image_path, resul
     logger.info("image_analysis task_id: %s" % (task_id,))
 
     # update dequeue time
-    from .models import CellC1Task
-    record = CellC1Task.objects.get(task_id__exact=task_id)
+    from .models import CellATask
+    record = CellATask.objects.get(task_id__exact=task_id)
     record.dequeued = datetime.utcnow().replace(tzinfo=utc)
     record.status = 'running'
     record.save()
@@ -47,7 +47,7 @@ def run_cell_c1_task(self, task_id,uploaded_image_path, result_image_path, resul
     # run
 
     try:
-       cellCount_singleTask(uploaded_image_path, result_image_path, result_json_path)
+       cellAngiogenesis(uploaded_image_path, result_image_path, result_json_path)
     except Exception as e:
         record.stderr = e
         logger.info(e.args)
@@ -67,7 +67,13 @@ def run_cell_c1_task(self, task_id,uploaded_image_path, result_image_path, resul
         record.status = 'success'
         with open(result_json_path, 'r') as f:
             result = json.load(f)
-            record.cell_count = result['count']
+            record.extremity = result['extremity']
+            record.junction = result['junction']
+            record.mesh = result['mesh']
+            record.total_branch_length = result['total_branch_length']
+            record.total_segment_length = result['total_segment_length']
+            record.total_network_length = result['total_network_length']
+            record.total_mesh_area = result['total_mesh_area']
 
         output_image_viewer_path = path_prefix + '_out.jpg'
         # convert to jpeg for web display

@@ -2,7 +2,7 @@ $(function () {
   $('#result').hide();
   // get task-id from url
   var task_id = window.location.pathname.match(/\/([0-9a-zA-Z]+)\/?$/)[1];
-  var path_prefix = '/media/cellm3/task/' + task_id + '/' + task_id;
+  var path_prefix = '/media/cella/task/' + task_id + '/' + task_id;
   // check status
   var poll = function () {
     $.ajax({
@@ -17,14 +17,20 @@ $(function () {
           setTimeout(poll, 3000);
         else {
           // get result json data
-          $('#count').text(data.ratio + '%');
+          $('#extremity').text(data.extremity);
+          $('#junction').text(data.junction);
+          $('#mesh').text(data.mesh);
+          $('#total_branch_length').text(data.total_branch_length);
+          $('#total_segment_length').text(data.total_segment_length);
+          $('#total_network_length').text(data.total_network_length);
+          $('#total_mesh_area').text(data.total_mesh_area);
+
           // display image
           // /media/image_analysis/task/7ef4f4782fc840738f67a43edafc9683/7ef4f4782fc840738f67a43edafc9683_in.jpg
-          $('#input-img').attr('src', '/media/cellm3/task/' + task_id + '/' + task_id + '_in.jpg');
-          $('#input-download').attr('href', '/media/cellm3/task/' + task_id + '/' + task_id + '_in.jpg');
-          $('#result-img').attr('src', '/media/cellm3/task/' + task_id + '/' + task_id + '_out.jpg');
-          $('#result-download').attr('href', '/media/cellm3/task/' + task_id + '/' + task_id + '_out.jpg');
-
+          $('#input-img').attr('src', '/media/cella/task/' + task_id + '/' + task_id + '_in.jpg');
+          $('#input-download').attr('href', '/media/cella/task/' + task_id + '/' + task_id + '_in.jpg');
+          $('#result-img').attr('src', '/media/cella/task/' + task_id + '/' + task_id + '_out.jpg');
+          $('#result-download').attr('href', '/media/cella/task/' + task_id + '/' + task_id + '_out.jpg');
 
           // get image size
           $("<img/>") // Make in memory copy of image to avoid css issues
