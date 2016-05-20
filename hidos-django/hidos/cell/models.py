@@ -1,4 +1,5 @@
 from __future__ import absolute_import, unicode_literals
+import re
 import sys
 import hashlib
 import imghdr
@@ -15,18 +16,33 @@ from django_extensions.db.models import TimeStampedModel
 
 from . import app_name, verbose_name, version
 
+folder_re = re.compile(r'^[^\\/?%*:|"<>\.]+$', re.U)
+
 class Folder(TimeStampedModel):
     # id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=255) # display name
+    name = models.CharField(max_length=255, validators=[RegexValidator(folder_re, r'Folder names must not contain  \ / ? % * : | " < >')]) # display name
     owner = models.ForeignKey(User, models.CASCADE)
-    parent_folder = models.ForeignKey('self', models.CASCADE, related_name='child_folders')
+    parent_folder = models.ForeignKey('self', models.CASCADE, related_name='child_folders', null=True, blank=True)
 
     @property
     def path(self):
-        pass
+        if not self.parent_folder:
+            return self.name
+        else:
+            return self.parent_folder.path() + '/' + self.name
 
     class Meta(TimeStampedModel.Meta):
         pass
+
+    # built in
+    # def to_python(self, value): # CharField
+    #     "Returns a Unicode object."
+    #     if value in self.empty_values:
+    #         return ''
+    #     value = force_text(value)
+    #     if self.strip:
+    #         value = value.strip()
+    #     return value
 
 
 # Abstract model for a user submitted task
