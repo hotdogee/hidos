@@ -21,6 +21,10 @@ class Folder(TimeStampedModel):
     owner = models.ForeignKey(User, models.CASCADE)
     parent_folder = models.ForeignKey('self', models.CASCADE, related_name='child_folders')
 
+    @property
+    def path(self):
+        pass
+
     class Meta(TimeStampedModel.Meta):
         pass
 
