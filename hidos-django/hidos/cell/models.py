@@ -36,7 +36,7 @@ class TaskModel(TimeStampedModel):
     dequeued = models.DateTimeField(null=True, blank=True)
     finished = models.DateTimeField(null=True, blank=True)
     user = models.ForeignKey(User, null=True, blank=True)
-    parent_folder = models.ForeignKey(Folder, models.SET_NULL, null=True, blank=True)
+    parent_folder = models.ForeignKey(Folder, models.CASCADE, null=True, blank=True)
     version = models.CharField(max_length=32)
     #cell_ratio = models.FloatField()
 
