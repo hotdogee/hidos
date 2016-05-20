@@ -21,6 +21,9 @@ class Folder(TimeStampedModel):
     owner = models.ForeignKey(User, models.CASCADE)
     parent_folder = models.ForeignKey('self', models.CASCADE, related_name='child_folders')
 
+    class Meta(TimeStampedModel.Meta):
+        pass
+
 
 # Abstract model for a user submitted task
 class TaskModel(TimeStampedModel):
