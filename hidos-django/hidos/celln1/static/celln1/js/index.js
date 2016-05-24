@@ -1,6 +1,6 @@
 $(document).ready(function () {
   if ($('#result-list').length) { // check if user is logged in
-    var running_template = '<i>Running ' + $('#loading-template').html() + '</i>';
+    var running_template = '<div class="mdl-typography--text-center">' + $('#loading-template').html() + '</div>';
     var view_btn_compiled = _.template($('#viewer-btn-template').html());
     var cellq_name_compiled = _.template($('#cellq-name-template').html());
     var date_now = (new Date()).toLocaleDateString();
@@ -15,6 +15,11 @@ $(document).ready(function () {
       scrollY: 500,
       order: [[3, 'desc']],
       dom: 'Bfrtip',
+      columnDefs: [
+            {
+                className: 'mdl-data-table__cell--non-numeric'
+            }
+        ],
       columns: [
         {
           name: 'viewer', data: 'url', width: '50px', orderable: false,
@@ -80,7 +85,7 @@ $(document).ready(function () {
       ],
       createdRow: function (row, data, index) {
         // initialize bootstrap tooltip
-        $('.viewer-btn', row).tooltip();
+        $('.viewer-btn', row);
       },
       buttons: [
         {
@@ -149,21 +154,62 @@ $(document).ready(function () {
         polling = false;
       }
     });
-    Dropzone.options.addPhotos = {
-      maxFilesize: 256, // MB
-      uploadMultiple: false,
-      parallelUploads: 2,
-      maxFiles: null,
-      thumbnailWidth: null,
-      thumbnailHeight: 120,
-      dictDefaultMessage: 'Drop one or more images here to upload',
-      init: function () {
-        this.on('success', function (file, response) {
-          // reload result table data
-          result_table.ajax.reload()
-        });
-      }
-    };
+
+
+
+     // django csrf token set up
+     // using jQuery
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie != '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    var csrftoken = getCookie('csrftoken');
+
+    function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+    });
+
+    // Get the template HTML and remove it from the doumenthe template HTML and remove it from the doument
+    var previewNode = document.querySelector("#dz-template");
+    previewNode.id = "";
+    var previewTemplate = previewNode.parentNode.innerHTML;
+    previewNode.parentNode.removeChild(previewNode);
+
+     $("body").dropzone({
+        url: 'api/v1/tasks', // Set the url
+        thumbnailWidth: 80,
+        thumbnailHeight: 80,
+        parallelUploads: 2,
+        dictDefaultMessage: 'Drop Images to Upload',
+        previewTemplate: previewTemplate,
+        autoQueue: true, // Make sure the files aren't queued until manually added
+        previewsContainer: "#dz-preview", // Define the container to display the previews
+        sending:  function(file, xhr, formData) {
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        }
+     });
+
+
   } else {
     Dropzone.options.addPhotos = {
       maxFilesize: 256, // MB

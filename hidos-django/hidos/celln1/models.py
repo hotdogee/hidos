@@ -13,9 +13,12 @@ from django.core.urlresolvers import reverse
 from cell.models import CellTaskModel, ViewableQuerySet
 from .tasks import run_cell_n1_task
 from . import app_name, verbose_name, version
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 
 
 class SingleImageUploadManager(models.Manager):
+
 
     def create(self, file, user, **kwargs): # QuerySet, file=file, user=user
         """

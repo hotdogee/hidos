@@ -1,60 +1,122 @@
-{% extends "app/layout.html" %}
+{% extends "app/layout_material.html" %}
 {% load staticfiles %}
+
+{% block layout-title %}
+    <span class="mdl-layout-title">Cell N1: Neuron <small>v{{ version }}</small></span>
+{% endblock %}
+
+
+
+
+
 {% block content %}
-  <h3>Cell N1: Neuron <small>v{{ version }}</small></h3>
-  <div class="row center valign">
-    <img src="{% static 'cellc1/images/cellc1-diagram-v0.2.png' %}">
-  </div>
 
-  <form id="add-photos" action="{% url 'n1:task-list' %}" class="dropzone">
-    {% csrf_token %}
-  </form>
 
-  <br />
-  <ul>
-    <li>Example 1
-      <ul>
-        <li><a href="/media/cellc2/task/12a174a4100803cf9bc72081e23664fe/12a174a4100803cf9bc72081e23664fe_in.jpg" download>Download Input Image 2592x1944 (1.28 MB)</a></li>
-        <li><a href="/12a174a4100803cf9bc72081e23664fe">View Result Page</a></li>
-      </ul>
-    </li>
-    <li>Example 2
-      <ul>
-        <li><a href="/media/cellc2/task/33ec5a1d0cf411e1f7a4abcee3a53f13/33ec5a1d0cf411e1f7a4abcee3a53f13_in.jpg" download>Download Input Image 3648x2432 (4.08 MB)</a></li>
-        <li><a href="/33ec5a1d0cf411e1f7a4abcee3a53f13">View Result Page</a></li>
-      </ul>
-    </li>
-  </ul>
+<div class="section--center mdl-grid mdl-grid--no-spacing mdl-shadow--2dp">
+    <div class="mdl-cell mdl-cell--8-col">
+        <img src="{% static 'celln1/images/Example_2.jpg' %}" id='example-img' style="width:100%">
+    </div>
+    <div class="mdl-cell mdl-cell--4-col">
+        <div class="mdl-card__title">
+            <div class="mdl-card__title-text">Neuron analysis</div>
+        </div>
+        <div class="mdl-card__supporting-text">
+            The analysis provide parameters including:
+            <ul  class="demo-list-item mdl-list">
+                <li class="mdl-list__item">Total Soma Count</li>
+                <li class="mdl-list__item">Number of Total Attachment Points: the counts of dendrite grows out from soma.</li>
+                <li class="mdl-list__item">Number of Total EndPoints: the counts of detected dendrite ends.</li>
+            </ul>
+        </div>
+        <div class="mdl-card__actions mdl-card--border">
+            <button class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" id="preview-example">
+              Preview the example result
+            </button>
+        </div>
+    </div>
+</div>
 
-  <hr />
-  <div>
-    <h3>Results</h3>
-    {% if user.is_authenticated %}
+<script>
+var example_click_time = 0;
+$("#preview-example").click(function(){
+    console.log('here');
+    if(example_click_time === 0){
+        $("#example-img").attr("src", '{% static 'celln1/images/Example_2_output.jpg' %}');
+        example_click_time = 1;
+    }else{
+        $("#example-img").attr("src", '{% static 'celln1/images/Example_2.jpg' %}');
+        example_click_time = 0;
+    }
+})
+</script>
 
-    <table id="result-list" class="display" cellspacing="0" width="100%">
-      <thead>
-        <tr>
-          <th>Viewer</th>
-          <th>File Name</th>
-          <th>Soma Count</th>
-          <th>Body Attachments</th>
-          <th>EndPoints</th>
-          <th>Created</th>
-        </tr>
-      </thead>
-      <tbody>
-      </tbody>
-    </table>
 
-    {% else %}
+<div class="section--center mdl-grid mdl-grid--no-spacing mdl-shadow--2dp">
+    <div class="mdl-card__title">
+        <div class="mdl-card__title-text">Image Uploaded</div>
+    </div>
+    <div class="mdl-card__supporting-text">
+        <span>Drop Images to upload. </span>
 
-    <div>Log in to save your results</div>
+        <div class="mdl-grid" id="dz-preview">
+            <div class="mdl-cell mdl-cell--6-col" id="dz-template">
+                <div class="mdl-grid mdl-grid--no-spacing mdl-shadow--2dp dz-preview dz-file-preview"  >
+                    <div class="mdl-cell mdl-cell--4-col">
+                        <img data-dz-thumbnail />
+                    </div>
+                    <div class="mdl-cell mdl-cell--4-col">
+                        <div class="dz-filename"><span data-dz-name></span></div>
+                        <div class="dz-size" data-dz-size></div>
+                    </div>
+                    <div class="mdl-cell mdl-cell--4-col">
+                        <div class="dz-progress mdl-progress mdl-js-progress"><span class="dz-upload" data-dz-uploadprogress></span></div>
+                        <div class="dz-success-mark"><span>✔</span></div>
+                        <div class="dz-error-mark"><span>✘</span></div>
+                        <div class="dz-error-message"><span data-dz-errormessage></span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-    {% endif %}
-  </div>
+
+<div class="section--center mdl-grid mdl-grid--no-spacing mdl-shadow--2dp">
+    <div class="mdl-card__title">
+        <div class="mdl-card__title-text">Results</div>
+    </div>
+    <div class="mdl-card__supporting-text">
+        {% if user.is_authenticated %}
+        <table id="result-list" class="display" cellspacing="0" width="100%">
+          <thead>
+            <tr>
+              <th>Viewer</th>
+              <th>File Name</th>
+              <th>Soma Count</th>
+              <th>Body Attachments</th>
+              <th>EndPoints</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+        {% else %}
+        <div>Log in to save your results</div>
+        {% endif %}
+    </div>
+</div>
+
+
+
 
 {% endblock %}
+
+
+
+
 {% block head-styles %}
+
   <link rel="stylesheet" type="text/css" href="{% static 'app/content/basic.css' %}" />
   <link rel="stylesheet" type="text/css" href="{% static 'app/content/dropzone.css' %}" />
   <!--
@@ -65,9 +127,16 @@
   <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/scroller/1.4.0/css/scroller.dataTables.min.css"/>
   <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/buttons/1.1.2/css/buttons.bootstrap.min.css"/>
   <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css"/>
+
   <link rel="stylesheet" type="text/css" href="{% static 'app/content/spinkit.css' %}" />
 
   <style type="text/css">
+
+    .section--center{
+        max-width: 1080px;
+        margin: 48px auto 0 auto;
+    }
+
     #icon {
       display: inline-block;
       width: 64px;
@@ -108,20 +177,7 @@
   <script type="text/javascript" src="//cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
   <script type="text/javascript" src="//cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
   <script type="text/template" id="loading-template">
-    <div class="sk-fading-circle">
-      <div class="sk-circle1 sk-circle"></div>
-      <div class="sk-circle2 sk-circle"></div>
-      <div class="sk-circle3 sk-circle"></div>
-      <div class="sk-circle4 sk-circle"></div>
-      <div class="sk-circle5 sk-circle"></div>
-      <div class="sk-circle6 sk-circle"></div>
-      <div class="sk-circle7 sk-circle"></div>
-      <div class="sk-circle8 sk-circle"></div>
-      <div class="sk-circle9 sk-circle"></div>
-      <div class="sk-circle10 sk-circle"></div>
-      <div class="sk-circle11 sk-circle"></div>
-      <div class="sk-circle12 sk-circle"></div>
-    </div>
+    <div class="mdl-spinner mdl-js-spinner is-active"></div>
   </script>
   <script type="text/template" id="viewer-btn-template">
     <a class="btn btn-default btn-xs viewer-btn" data-toggle="tooltip" data-placement="right"
@@ -135,4 +191,5 @@
     <img class="cellq-icon" src="{% static 'app/images/cellq_icon.png' %}"> <%= name %>
   </script>
   <script src="{% static 'celln1/js/index.js' %}"></script>
+
 {% endblock %}

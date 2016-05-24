@@ -169,6 +169,8 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     'django.contrib.admindocs',
+    # debug_tool
+    'debug_toolbar',
 )
 
 MIDDLEWARE_CLASSES = [
