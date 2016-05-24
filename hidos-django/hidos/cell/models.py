@@ -25,7 +25,7 @@ class Folder(TimeStampedModel):
     parent_folder = models.ForeignKey('self', models.CASCADE, related_name='child_folders', null=True, blank=True)
 
     @property
-    def path(self):
+    def path(self): # will probably need some caching
         if not self.parent_folder:
             return self.name
         else:
