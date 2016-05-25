@@ -75,11 +75,21 @@ def findExtremities(img):
                   [False,False,True],
                   [False,True,True]], dtype=bool)
 
+    seA3 = array([[True,False,False],
+                  [False,True,False],
+                  [False,False,False]], dtype=bool)
+
+    seB3 = array([[False,True,True],
+                  [False,False,True],
+                  [True,True,True]], dtype=bool)
+
     # hit or miss templates from these SEs
     hmt1 = m.se2hmt(seA1, seB1)
     hmt2 = m.se2hmt(seA2, seB2)
+    hmt3 = m.se2hmt(seA3, seB3)
     # locate endpoint regions
     b1 = m.union(m.supcanon(img, hmt1), m.supcanon(img, hmt2))
+    b1 = m.union(b1, m.supcanon(img, hmt3))
 
     # dilate to merge nearby hits
     #b2 = m.dilate(b1, m.sedisk(10))
@@ -291,7 +301,7 @@ def cellAngiogenesis(image_input_path, image_output_path, json_path, add_boarder
     if float(hole_size[-1])/img_fill_holes.size<0.005: #the area of maximum hole still too small, therefore remove all holes  
         size_thresh=hole_size[-1]+1000
     else:
-        area_thresh=(img_ori_resize.shape[0]/40)*(img_ori_resize.shape[1]/40)
+        area_thresh=(img_ori_resize.shape[0]/30)*(img_ori_resize.shape[1]/30)
         for i in range(numpy.size(hole_size)-2):
             #print(hole_size[i])
             #if (round(float(hole_size[i+1])/hole_size[i])>gap and (hole_size[i+1]-hole_size[i])>100):
@@ -300,7 +310,7 @@ def cellAngiogenesis(image_input_path, image_output_path, json_path, add_boarder
                 index=i+1
                 if (round(gap)):
                     break
-        if(index<(numpy.size(hole_size)-3)):
+        if(index<(numpy.size(hole_size)-3) and hole_size[index]>area_thresh):
             size_thresh=hole_size[index]
         else:
             size_thresh=area_thresh
@@ -528,7 +538,7 @@ def cellAngiogenesis(image_input_path, image_output_path, json_path, add_boarder
     #io.imshow(img_ori)
      
     out_file = open(json_path,"w")
-    angiogenesis_result = {'#Extremity':num_extremity,'#Junction':num_junction,'Tot. branch length':tot_branch_len, 'Tot. segment legnth':tot_seg_len, 'Tot. network legth':tot_len, '#Mesh':num_mesh,'Tot.mesh area':tot_mesh_area}
+    angiogenesis_result = {'#Extremity':num_extremity,'#Junction':num_junction,'Tot. branch length':tot_branch_len, 'Tot. segment length':tot_seg_len, 'Tot. network length':tot_len, '#Mesh':num_mesh,'Tot. mesh area':tot_mesh_area}
     json.dump(angiogenesis_result,out_file)
     out_file.close()     
      
