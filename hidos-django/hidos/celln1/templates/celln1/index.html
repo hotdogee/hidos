@@ -13,33 +13,36 @@
 
 
 <div class="section--center mdl-grid mdl-grid--no-spacing mdl-shadow--2dp">
-    <div class="mdl-cell mdl-cell--8-col">
+    <div class="mdl-cell mdl-cell--6-col">
         <img src="{% static 'celln1/images/Example_2.jpg' %}" id='example-img' style="width:100%">
     </div>
-    <div class="mdl-cell mdl-cell--4-col">
+    <div class="mdl-cell mdl-cell--6-col">
+      <div class="mdl-layout">
         <div class="mdl-card__title">
-            <div class="mdl-card__title-text">Neuron analysis</div>
+            <div class="mdl-card__title-text">Neuron image dendrite quantification</div>
         </div>
         <div class="mdl-card__supporting-text">
-            The analysis provide parameters including:
-            <ul  class="demo-list-item mdl-list">
-                <li class="mdl-list__item">Total Soma Count</li>
-                <li class="mdl-list__item">Number of Total Attachment Points: the counts of dendrite grows out from soma.</li>
-                <li class="mdl-list__item">Number of Total EndPoints: the counts of detected dendrite ends.</li>
-            </ul>
+          The analysis output parameters:
+          <ul>
+            <li>Total Soma Count</li>
+            <li>Number of Total Attachment Points: the counts of dendrite grows out of neuron.</li>
+            <li>Number of Total EndPoints: the counts of detected dendrite ends.</li>
+          </ul>
+          Input images are not limited by any size
         </div>
+        <div class="mdl-layout-spacer"></div>
         <div class="mdl-card__actions mdl-card--border">
-            <button class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" id="preview-example">
-              Preview the example result
-            </button>
+           <button class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" id="preview-example">
+             Preview the example result
+           </button>
         </div>
+      </div>
     </div>
 </div>
 
 <script>
 var example_click_time = 0;
 $("#preview-example").click(function(){
-    console.log('here');
     if(example_click_time === 0){
         $("#example-img").attr("src", '{% static 'celln1/images/Example_2_output.jpg' %}');
         example_click_time = 1;
@@ -55,24 +58,24 @@ $("#preview-example").click(function(){
     <div class="mdl-card__title">
         <div class="mdl-card__title-text">Image Uploaded</div>
     </div>
-    <div class="mdl-card__supporting-text">
-        <span>Drop Images to upload. </span>
 
+    <div class="mdl-card__supporting-text">
         <div class="mdl-grid" id="dz-preview">
+
             <div class="mdl-cell mdl-cell--6-col" id="dz-template">
-                <div class="mdl-grid mdl-grid--no-spacing mdl-shadow--2dp dz-preview dz-file-preview"  >
-                    <div class="mdl-cell mdl-cell--4-col">
+                <div class="mdl-grid mdl-grid--no-spacing mdl-shadow--3dp dz-preview dz-file-preview">
+                    <div class="mdl-cell mdl-cell--3-col">
                         <img data-dz-thumbnail />
                     </div>
-                    <div class="mdl-cell mdl-cell--4-col">
+                    <div class="mdl-cell mdl-cell--8-col">
                         <div class="dz-filename"><span data-dz-name></span></div>
-                        <div class="dz-size" data-dz-size></div>
-                    </div>
-                    <div class="mdl-cell mdl-cell--4-col">
-                        <div class="dz-progress mdl-progress mdl-js-progress"><span class="dz-upload" data-dz-uploadprogress></span></div>
-                        <div class="dz-success-mark"><span>✔</span></div>
-                        <div class="dz-error-mark"><span>✘</span></div>
+                        <div class="dz-size"><span data-dz-size></span></div>
+                        <div class="mdl-progress mdl-js-progress"></div>
                         <div class="dz-error-message"><span data-dz-errormessage></span></div>
+                    </div>
+                    <div class="mdl-cell mdl-cell--1-col" style="display: flex;background: gainsboro;">
+                        <div class="dz-success-mark dz-status"><span>✔</span></div>
+                        <div class="dz-error-mark dz-status"><span>✘</span></div>
                     </div>
                 </div>
             </div>
@@ -92,8 +95,8 @@ $("#preview-example").click(function(){
             <tr>
               <th>Viewer</th>
               <th>File Name</th>
-              <th>Soma Count</th>
-              <th>Body Attachments</th>
+              <th>Soma</th>
+              <th>Attachments</th>
               <th>EndPoints</th>
               <th>Created</th>
             </tr>
@@ -107,8 +110,11 @@ $("#preview-example").click(function(){
     </div>
 </div>
 
-
-
+<div class="dz-upload-button">
+  <button class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored" id="dz-upload-material">
+    <i class="material-icons">add</i>
+  </button>
+</div>
 
 {% endblock %}
 
@@ -132,9 +138,28 @@ $("#preview-example").click(function(){
 
   <style type="text/css">
 
+    .dz-status{
+      display: none;
+      margin: auto;
+    }
+
+
+
+    .dz-upload-button{
+      position: fixed;
+      right: 25px;
+      bottom: 25px;
+    }
+
     .section--center{
         max-width: 1080px;
-        margin: 48px auto 0 auto;
+        margin: 48px auto 48px auto;
+    }
+
+    @media only screen and (max-width: 840px) {
+      .section--center {
+        margin: 48px 20px 48px 20px;
+      }
     }
 
     #icon {
@@ -180,7 +205,7 @@ $("#preview-example").click(function(){
     <div class="mdl-spinner mdl-js-spinner is-active"></div>
   </script>
   <script type="text/template" id="viewer-btn-template">
-    <a class="btn btn-default btn-xs viewer-btn" data-toggle="tooltip" data-placement="right"
+    <a class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect viewer-btn" data-toggle="tooltip" data-placement="right"
        data-container="body" data-html="true" data-trigger="hover"
        title="<div class='preview-img'>Result Image Preview <img src='<%= result_img %>' width='100%' height='100%'></div>"
        target="_blank" href="<%= task_url %>" role="button">

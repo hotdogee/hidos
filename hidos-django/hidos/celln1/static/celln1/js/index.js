@@ -195,19 +195,45 @@ $(document).ready(function () {
     var previewTemplate = previewNode.parentNode.innerHTML;
     previewNode.parentNode.removeChild(previewNode);
 
-     $("body").dropzone({
+     var myDropzone = new Dropzone(document.querySelector(".mdl-layout__content"), {
         url: 'api/v1/tasks', // Set the url
         thumbnailWidth: 80,
         thumbnailHeight: 80,
         parallelUploads: 2,
-        dictDefaultMessage: 'Drop Images to Upload',
+        dictDefaultMessage: "Drop Images to Upload",
         previewTemplate: previewTemplate,
         autoQueue: true, // Make sure the files aren't queued until manually added
         previewsContainer: "#dz-preview", // Define the container to display the previews
+        clickable: ".dz-upload-button",
         sending:  function(file, xhr, formData) {
             xhr.setRequestHeader("X-CSRFToken", csrftoken);
         }
      });
+
+
+    myDropzone.on("dragenter", function(file){
+       document.querySelector(".mdl-layout__content").style.border= "3px solid #D1C4E9";
+    });
+    myDropzone.on("dragover", function(file){
+       document.querySelector(".mdl-layout__content").style.border= "3px solid #D1C4E9";
+    });
+    myDropzone.on("dragleave", function(file){
+       document.querySelector(".mdl-layout__content").style.border= "0px solid red";
+    });
+
+    myDropzone.on("success", function(file){
+       document.querySelector(".dz-success-mark").style.display= "block";
+    });
+    myDropzone.on("error", function(file, erroMessage, xhr){
+       document.querySelector(".dz-error-mark").style.display= "block";
+    });
+    myDropzone.on("uploadprogress", function(file, progress, bytesSent){
+       document.querySelector('.mdl-progress').addEventListener('mdl-componentupgraded', function() {
+           this.MaterialProgress.setProgress(progress);
+        });
+    });
+
+
 
 
   } else {

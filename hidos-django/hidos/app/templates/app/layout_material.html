@@ -21,7 +21,6 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   <link rel="stylesheet" href="https://code.getmdl.io/1.1.3/material.indigo-pink.min.css">
   <script defer src="https://code.getmdl.io/1.1.3/material.min.js"></script>
-
   {% block head-styles %}{% endblock %}
 </head>
 
@@ -47,24 +46,48 @@
     </div>
   </header>
   <div class="mdl-layout__drawer">
-    <span class="mdl-layout-title">HiDOS CellCloud</span>
+      <div class="mdl-layout-title">
+          <span>HiDOS</span>
+      </div>
+
     <nav class="mdl-navigation">
-      <a class="mdl-navigation__link" href="">CellA<br>Angiogenesis</a>
-      <a class="mdl-navigation__link" href="">CellC1<br>Count</a>
-      <a class="mdl-navigation__link" href="">CellC2<br>Confluence</a>
-      <a class="mdl-navigation__link" href="">CellM1<br>Transwell Migration</a>
-      <a class="mdl-navigation__link" href="">CellM3<br>Wound Healing</a>
-      <a class="mdl-navigation__link" href="">CellN1<br>Neuron</a>
-        {%  include 'app/loginpartial.html' %}
+      <a class="mdl-navigation__link" href="/c1/"><i class="material-icons">fingerprint</i>CellC1</a>
+      <a class="mdl-navigation__link" href="/c2/"><i class="material-icons">fingerprint</i>CellC2</a>
+      <a class="mdl-navigation__link" href="/m1/"><i class="material-icons">fingerprint</i>CellM1</a>
+      <a class="mdl-navigation__link" href="/m3/"><i class="material-icons">fingerprint</i>CellM3</a>
+      <a class="mdl-navigation__link" href="/n1/"><i class="material-icons">fingerprint</i>CellN1</a>
+      <a class="mdl-navigation__link" href="/a/"><i class="material-icons">fingerprint</i>CellA</a>
     </nav>
+    <div class="mdl-layout-spacer"></div>
+    {%  include 'app/login_material.html' %}
+
+
   </div>
-  <main class="mdl-layout__content">
+  <main class="mdl-layout__content" style="background-color:#E0E0E0">
     <div class="page-content">
         {% block content %}{% endblock %}
     </div>
   </main>
 </div>
 
+<style>
+    {%  load staticfiles %}
+    .mdl-layout__drawer > .mdl-layout-title{
+        # background-image: url("{% static 'app/images/nav_background.jpg' %}");
+        # background-repeat: no-repeat;
+        # background-position:center center ;
+        height:64px;
+        border-bottom: 1px solid gainsboro;
+    }
+
+    .page-content > .section--center{
+        background-color:white;
+    }
+    .mdl-navigation__link .material-icons{
+        padding-right: 20px;
+    }
+
+</style>
 
 
 
