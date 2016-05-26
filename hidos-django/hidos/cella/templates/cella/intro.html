@@ -1,0 +1,58 @@
+{%  load staticfiles %}
+
+<div class="section--center mdl-grid mdl-grid--no-spacing mdl-shadow--2dp">
+    <div class="mdl-cell mdl-cell--6-col">
+        <img src="{% static 'cella/images/Example.jpg' %}" id='example-img' style="width:100%">
+    </div>
+    <div class="mdl-cell mdl-cell--6-col">
+      <div class="mdl-layout">
+        <div class="mdl-card__title">
+            <div class="mdl-card__title-text">Angiogenesis image quatification</div>
+        </div>
+        <div class="mdl-card__supporting-text">
+          The analysis output parameters:
+
+          <div class="mdl-grid">
+            <div class="mdl-cell mdl-cell--6-col">
+              <ul>
+                <li>Total mesh count</li>
+                <li>Total junction count</li>
+                <li>Total extremity count</li>
+                <li>Total branch length</li>
+              </ul>
+            </div>
+            <div class="mdl-cell mdl-cell--6-col">
+              <ul>
+                <li>Total segment length</li>
+                <li>Total network length</li>
+                <li>Total mesh area size</li>
+              </ul>
+            </div>
+          </div>
+
+
+          Input images are not limited by any size
+        </div>
+        <div class="mdl-layout-spacer"></div>
+        <div class="mdl-card__actions mdl-card--border">
+           <button class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" id="preview-example">
+             Preview the example result
+           </button>
+        </div>
+      </div>
+    </div>
+</div>
+
+<script>
+var example_click_time = 0;
+$("#preview-example").click(function(){
+    if(example_click_time === 0){
+        $("#example-img").attr("src", '{% static 'cella/images/Example_r.jpg' %}');
+        $("#example-img").attr("src", '{% static 'cella/images/Example_r.jpg' %}');
+        example_click_time = 1;
+    }else{
+        $("#example-img").attr("src", '{% static 'cella/images/Example.jpg' %}');
+        example_click_time = 0;
+    }
+})
+</script>
