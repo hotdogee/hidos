@@ -1,0 +1,40 @@
+{%  load staticfiles %}
+
+<div class="section--center mdl-grid mdl-grid--no-spacing mdl-shadow--2dp">
+    <div class="mdl-cell mdl-cell--6-col">
+        <img src="{% static 'cellc2/images/Example.jpg' %}" id='example-img' style="width:100%">
+    </div>
+    <div class="mdl-cell mdl-cell--6-col">
+      <div class="mdl-layout">
+        <div class="mdl-card__title">
+            <div class="mdl-card__title-text">Cell confluence identification</div>
+        </div>
+        <div class="mdl-card__supporting-text">
+          The analysis output parameters:
+          <ul>
+            <li>Cell confluence in the image</li>
+          </ul>
+          Input images are not limited by any size
+        </div>
+        <div class="mdl-layout-spacer"></div>
+        <div class="mdl-card__actions mdl-card--border">
+           <button class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" id="preview-example">
+             Preview the example result
+           </button>
+        </div>
+      </div>
+    </div>
+</div>
+
+<script>
+var example_click_time = 0;
+$("#preview-example").click(function(){
+    if(example_click_time === 0){
+        $("#example-img").attr("src", '{% static 'cellc2/images/Example_r.jpg' %}');
+        example_click_time = 1;
+    }else{
+        $("#example-img").attr("src", '{% static 'cellc2/images/Example.jpg' %}');
+        example_click_time = 0;
+    }
+})
+</script>
