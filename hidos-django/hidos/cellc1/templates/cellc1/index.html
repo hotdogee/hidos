@@ -1,58 +1,32 @@
-{% extends "app/layout.html" %}
+{% extends "app/layout_material.html" %}
 {% load staticfiles %}
+
+{% block layout-title %}
+    <span class="mdl-layout-title">Cell C1: Count <small>v{{ version }}</small></span>
+{% endblock %}
+
+
 {% block content %}
-  <h3>Cell C1: Counting <small>v{{ version }}</small></h3>
-  <div class="row center valign">
-    <img src="{% static 'cellc1/images/cellc1-diagram-v0.2.png' %}">
-  </div>
 
-  <form id="add-photos" action="{% url 'c1:task-list' %}" class="dropzone">
-    {% csrf_token %}
-  </form>
 
-  <br />
-  <ul>
-    <li>Example 1
-      <ul>
-        <li><a href="/media/cellc2/task/12a174a4100803cf9bc72081e23664fe/12a174a4100803cf9bc72081e23664fe_in.jpg" download>Download Input Image 2592x1944 (1.28 MB)</a></li>
-        <li><a href="/12a174a4100803cf9bc72081e23664fe">View Result Page</a></li>
-      </ul>
-    </li>
-    <li>Example 2
-      <ul>
-        <li><a href="/media/cellc2/task/33ec5a1d0cf411e1f7a4abcee3a53f13/33ec5a1d0cf411e1f7a4abcee3a53f13_in.jpg" download>Download Input Image 3648x2432 (4.08 MB)</a></li>
-        <li><a href="/33ec5a1d0cf411e1f7a4abcee3a53f13">View Result Page</a></li>
-      </ul>
-    </li>
-  </ul>
+  {%  include 'cellc1/intro.html' %}
+  {%  include 'cellc1/uploaded.html' %}
+  {%  include 'cellc1/result_table.html' %}
 
-  <hr />
-  <div>
-    <h3>Results</h3>
-    {% if user.is_authenticated %}
-
-    <table id="result-list" class="display" cellspacing="0" width="100%">
-      <thead>
-        <tr>
-          <th>Viewer</th>
-          <th>File Name</th>
-          <th>Count</th>
-          <th>Created</th>
-        </tr>
-      </thead>
-      <tbody>
-      </tbody>
-    </table>
-
-    {% else %}
-
-    <div>Log in to save your results</div>
-
-    {% endif %}
+  <!-- dropzone upload button -->
+  <div class="dz-upload-button">
+    <button class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored" id="dz-upload-material">
+      <i class="material-icons">add</i>
+    </button>
   </div>
 
 {% endblock %}
+
+
+
+
 {% block head-styles %}
+
   <link rel="stylesheet" type="text/css" href="{% static 'app/content/basic.css' %}" />
   <link rel="stylesheet" type="text/css" href="{% static 'app/content/dropzone.css' %}" />
   <!--
@@ -63,9 +37,37 @@
   <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/scroller/1.4.0/css/scroller.dataTables.min.css"/>
   <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/buttons/1.1.2/css/buttons.bootstrap.min.css"/>
   <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css"/>
+
   <link rel="stylesheet" type="text/css" href="{% static 'app/content/spinkit.css' %}" />
 
+  <link rel="stylesheet" href="https://code.getmdl.io/1.1.3/material.amber-red.min.css" />
+
   <style type="text/css">
+
+    .dz-status{
+      display: none;
+      margin: auto;
+    }
+
+
+
+    .dz-upload-button{
+      position: fixed;
+      right: 25px;
+      bottom: 25px;
+    }
+
+    .section--center{
+        max-width: 1080px;
+        margin: 48px auto 48px auto;
+    }
+
+    @media only screen and (max-width: 840px) {
+      .section--center {
+        margin: 48px 20px 48px 20px;
+      }
+    }
+
     #icon {
       display: inline-block;
       width: 64px;
@@ -106,23 +108,10 @@
   <script type="text/javascript" src="//cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
   <script type="text/javascript" src="//cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
   <script type="text/template" id="loading-template">
-    <div class="sk-fading-circle">
-      <div class="sk-circle1 sk-circle"></div>
-      <div class="sk-circle2 sk-circle"></div>
-      <div class="sk-circle3 sk-circle"></div>
-      <div class="sk-circle4 sk-circle"></div>
-      <div class="sk-circle5 sk-circle"></div>
-      <div class="sk-circle6 sk-circle"></div>
-      <div class="sk-circle7 sk-circle"></div>
-      <div class="sk-circle8 sk-circle"></div>
-      <div class="sk-circle9 sk-circle"></div>
-      <div class="sk-circle10 sk-circle"></div>
-      <div class="sk-circle11 sk-circle"></div>
-      <div class="sk-circle12 sk-circle"></div>
-    </div>
+    <div class="mdl-spinner mdl-js-spinner is-active"></div>
   </script>
   <script type="text/template" id="viewer-btn-template">
-    <a class="btn btn-default btn-xs viewer-btn" data-toggle="tooltip" data-placement="right"
+    <a class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect viewer-btn" data-toggle="tooltip" data-placement="right"
        data-container="body" data-html="true" data-trigger="hover"
        title="<div class='preview-img'>Result Image Preview <img src='<%= result_img %>' width='100%' height='100%'></div>"
        target="_blank" href="<%= task_url %>" role="button">
@@ -133,4 +122,5 @@
     <img class="cellq-icon" src="{% static 'app/images/cellq_icon.png' %}"> <%= name %>
   </script>
   <script src="{% static 'cellc1/js/index.js' %}"></script>
+
 {% endblock %}
