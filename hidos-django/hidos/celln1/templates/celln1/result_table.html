@@ -1,0 +1,25 @@
+<div class="section--center mdl-grid mdl-grid--no-spacing mdl-shadow--2dp">
+    <div class="mdl-card__title">
+        <div class="mdl-card__title-text">Results</div>
+    </div>
+    <div class="mdl-card__supporting-text">
+        {% if user.is_authenticated %}
+        <table id="result-list" class="display" cellspacing="0" width="100%">
+          <thead>
+            <tr>
+              <th>Viewer</th>
+              <th>File Name</th>
+              <th>Soma</th>
+              <th>Attachments</th>
+              <th>EndPoints</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+        {% else %}
+        <div>Log in to save your results</div>
+        {% endif %}
+    </div>
+</div>

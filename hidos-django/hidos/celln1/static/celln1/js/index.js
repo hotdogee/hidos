@@ -197,41 +197,55 @@ $(document).ready(function () {
 
      var myDropzone = new Dropzone(document.querySelector(".mdl-layout__content"), {
         url: 'api/v1/tasks', // Set the url
-        thumbnailWidth: 80,
-        thumbnailHeight: 80,
+        thumbnailWidth: 100,
+        thumbnailHeight: 100,
         parallelUploads: 2,
-        dictDefaultMessage: "Drop Images to Upload",
         previewTemplate: previewTemplate,
         autoQueue: true, // Make sure the files aren't queued until manually added
         previewsContainer: "#dz-preview", // Define the container to display the previews
         clickable: ".dz-upload-button",
         sending:  function(file, xhr, formData) {
             xhr.setRequestHeader("X-CSRFToken", csrftoken);
-        }
+        },
+        init: function(){
+
+           this.on("dragenter", function(event){
+               document.querySelector(".mdl-layout__content").style.border= "3px solid #D1C4E9";
+            });
+            this.on("dragover", function(event){
+               document.querySelector(".mdl-layout__content").style.border= "3px solid #D1C4E9";
+            });
+            this.on("dragleave", function(event){
+               document.querySelector(".mdl-layout__content").style.border= "0px solid red";
+            });
+            this.on("dragend", function(event){
+                console.log("end");
+                document.querySelector(".mdl-layout__content").style.border= "0px solid red";
+            });
+
+
+
+
+          this.on("success", function(file, responseText){
+              $(this).children(".dz-success-mark").css("display", "block");
+          });
+
+          this.on("error", function(file, erroMessage, xhr){
+              $(this).children(".dz-error-mark").css("display", "block");
+          });
+
+          this.on("uploadprogress", function(file, progress, bytesSent){
+            document.querySelector('.mdl-progress').addEventListener('mdl-componentupgraded', function() {
+            this.MaterialProgress.setProgress(progress);
+            });
+        });
+      }
      });
 
 
-    myDropzone.on("dragenter", function(file){
-       document.querySelector(".mdl-layout__content").style.border= "3px solid #D1C4E9";
-    });
-    myDropzone.on("dragover", function(file){
-       document.querySelector(".mdl-layout__content").style.border= "3px solid #D1C4E9";
-    });
-    myDropzone.on("dragleave", function(file){
-       document.querySelector(".mdl-layout__content").style.border= "0px solid red";
-    });
 
-    myDropzone.on("success", function(file){
-       document.querySelector(".dz-success-mark").style.display= "block";
-    });
-    myDropzone.on("error", function(file, erroMessage, xhr){
-       document.querySelector(".dz-error-mark").style.display= "block";
-    });
-    myDropzone.on("uploadprogress", function(file, progress, bytesSent){
-       document.querySelector('.mdl-progress').addEventListener('mdl-componentupgraded', function() {
-           this.MaterialProgress.setProgress(progress);
-        });
-    });
+
+
 
 
 

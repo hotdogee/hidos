@@ -6,115 +6,19 @@
 {% endblock %}
 
 
-
-
-
 {% block content %}
 
 
-<div class="section--center mdl-grid mdl-grid--no-spacing mdl-shadow--2dp">
-    <div class="mdl-cell mdl-cell--6-col">
-        <img src="{% static 'celln1/images/Example_2.jpg' %}" id='example-img' style="width:100%">
-    </div>
-    <div class="mdl-cell mdl-cell--6-col">
-      <div class="mdl-layout">
-        <div class="mdl-card__title">
-            <div class="mdl-card__title-text">Neuron image dendrite quantification</div>
-        </div>
-        <div class="mdl-card__supporting-text">
-          The analysis output parameters:
-          <ul>
-            <li>Total Soma Count</li>
-            <li>Number of Total Attachment Points: the counts of dendrite grows out of neuron.</li>
-            <li>Number of Total EndPoints: the counts of detected dendrite ends.</li>
-          </ul>
-          Input images are not limited by any size
-        </div>
-        <div class="mdl-layout-spacer"></div>
-        <div class="mdl-card__actions mdl-card--border">
-           <button class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" id="preview-example">
-             Preview the example result
-           </button>
-        </div>
-      </div>
-    </div>
-</div>
+  {%  include 'celln1/intro.html' %}
+  {%  include 'celln1/uploaded.html' %}
+  {%  include 'celln1/result_table.html' %}
 
-<script>
-var example_click_time = 0;
-$("#preview-example").click(function(){
-    if(example_click_time === 0){
-        $("#example-img").attr("src", '{% static 'celln1/images/Example_2_output.jpg' %}');
-        example_click_time = 1;
-    }else{
-        $("#example-img").attr("src", '{% static 'celln1/images/Example_2.jpg' %}');
-        example_click_time = 0;
-    }
-})
-</script>
-
-
-<div class="section--center mdl-grid mdl-grid--no-spacing mdl-shadow--2dp">
-    <div class="mdl-card__title">
-        <div class="mdl-card__title-text">Image Uploaded</div>
-    </div>
-
-    <div class="mdl-card__supporting-text">
-        <div class="mdl-grid" id="dz-preview">
-
-            <div class="mdl-cell mdl-cell--6-col" id="dz-template">
-                <div class="mdl-grid mdl-grid--no-spacing mdl-shadow--3dp dz-preview dz-file-preview">
-                    <div class="mdl-cell mdl-cell--3-col">
-                        <img data-dz-thumbnail />
-                    </div>
-                    <div class="mdl-cell mdl-cell--8-col">
-                        <div class="dz-filename"><span data-dz-name></span></div>
-                        <div class="dz-size"><span data-dz-size></span></div>
-                        <div class="mdl-progress mdl-js-progress"></div>
-                        <div class="dz-error-message"><span data-dz-errormessage></span></div>
-                    </div>
-                    <div class="mdl-cell mdl-cell--1-col" style="display: flex;background: gainsboro;">
-                        <div class="dz-success-mark dz-status"><span>✔</span></div>
-                        <div class="dz-error-mark dz-status"><span>✘</span></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<div class="section--center mdl-grid mdl-grid--no-spacing mdl-shadow--2dp">
-    <div class="mdl-card__title">
-        <div class="mdl-card__title-text">Results</div>
-    </div>
-    <div class="mdl-card__supporting-text">
-        {% if user.is_authenticated %}
-        <table id="result-list" class="display" cellspacing="0" width="100%">
-          <thead>
-            <tr>
-              <th>Viewer</th>
-              <th>File Name</th>
-              <th>Soma</th>
-              <th>Attachments</th>
-              <th>EndPoints</th>
-              <th>Created</th>
-            </tr>
-          </thead>
-          <tbody>
-          </tbody>
-        </table>
-        {% else %}
-        <div>Log in to save your results</div>
-        {% endif %}
-    </div>
-</div>
-
-<div class="dz-upload-button">
-  <button class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored" id="dz-upload-material">
-    <i class="material-icons">add</i>
-  </button>
-</div>
+  <!-- dropzone upload button -->
+  <div class="dz-upload-button">
+    <button class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored" id="dz-upload-material">
+      <i class="material-icons">add</i>
+    </button>
+  </div>
 
 {% endblock %}
 
