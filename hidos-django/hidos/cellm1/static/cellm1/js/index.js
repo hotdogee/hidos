@@ -133,21 +133,92 @@ $(document).ready(function () {
         polling = false;
       }
     });
-    Dropzone.options.addPhotos = {
-      maxFilesize: 256, // MB
-      uploadMultiple: false,
-      parallelUploads: 2,
-      maxFiles: null,
-      thumbnailWidth: null,
-      thumbnailHeight: 120,
-      dictDefaultMessage: 'Drop one or more images here to upload',
-      init: function () {
-        this.on('success', function (file, response) {
-          // reload result table data
-          result_table.ajax.reload()
+
+     // django csrf token set up
+     // using jQuery
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie != '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    var csrftoken = getCookie('csrftoken');
+
+    function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+    });
+
+    // Get the template HTML and remove it from the doumenthe template HTML and remove it from the doument
+    var previewNode = document.querySelector("#dz-template");
+    previewNode.id = "";
+    var previewTemplate = previewNode.parentNode.innerHTML;
+    previewNode.parentNode.removeChild(previewNode);
+
+     var myDropzone = new Dropzone(document.querySelector(".mdl-layout__content"), {
+        url: 'api/v1/tasks', // Set the url
+        thumbnailWidth: 100,
+        thumbnailHeight: 100,
+        parallelUploads: 2,
+        previewTemplate: previewTemplate,
+        autoQueue: true, // Make sure the files aren't queued until manually added
+        previewsContainer: "#dz-preview", // Define the container to display the previews
+        clickable: ".dz-upload-button",
+        sending:  function(file, xhr, formData) {
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        },
+        init: function(){
+
+           this.on("dragenter", function(event){
+               document.querySelector(".mdl-layout__content").style.border= "3px solid #D1C4E9";
+            });
+            this.on("dragover", function(event){
+               document.querySelector(".mdl-layout__content").style.border= "3px solid #D1C4E9";
+            });
+            this.on("dragleave", function(event){
+               document.querySelector(".mdl-layout__content").style.border= "0px solid red";
+            });
+            this.on("dragend", function(event){
+                console.log("end");
+                document.querySelector(".mdl-layout__content").style.border= "0px solid red";
+            });
+
+
+
+
+          this.on("success", function(file, responseText){
+              $(this).children(".dz-success-mark").css("display", "block");
+          });
+
+          this.on("error", function(file, erroMessage, xhr){
+              $(this).children(".dz-error-mark").css("display", "block");
+          });
+
+          this.on("uploadprogress", function(file, progress, bytesSent){
+            document.querySelector('.mdl-progress').addEventListener('mdl-componentupgraded', function() {
+            this.MaterialProgress.setProgress(progress);
+            });
         });
       }
-    };
+     });
+
   } else {
     Dropzone.options.addPhotos = {
       maxFilesize: 256, // MB

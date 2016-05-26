@@ -5,15 +5,17 @@
     <div class="jumbotron vertical-center">
       <div class="container text-center">
         <img src="{% static 'app/images/loading.gif' %}">
-        <h5>Cell C2 is working...</h5>
+        <h5>Cell N1 is working...</h5>
       </div>
     </div>
   </div>
   <section id="result">
-    <h3>Cell C2: Confluency <small>v{{ version }}</small></h3>
+    <h3>Cell N1: Neuron <small>v{{ version }}</small></h3>
     <ul>
-      <li><h5>Image Name: <span id="name">{{ user_filename }}</span></h5></li>
-      <li><h5>Cell Confluency: <span id="count"></span></h5></li>
+        <li><h5>Image Name: <span id="name">{{ user_filename }}</span></h5></li>
+        <li><h5>Soma Count: <span id="count"></span></h5></li>
+        <li><h5>Body Attachments: <span id="body_attachments"></span></h5></li>
+        <li><h5>Endpoints Count: <span id="endpoints"></span></h5></li>
     </ul>
     <p>Drag the image to pan, use the mousewheel to zoom</p>
     <div class="row">
@@ -79,5 +81,5 @@
 {% block scripts %}
   <script src="{% static 'app/scripts/jquery.panzoom.js' %}"></script>
   <script src="{% static 'app/scripts/underscore-min.js' %}"></script>
-  <script src="{% static 'cellc1/js/result.js' %}"></script>
+  <script src="{% static 'celln1/js/result.js' %}"></script>
 {% endblock %}
