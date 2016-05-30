@@ -197,27 +197,24 @@ $(document).ready(function () {
             this.on("dragleave", function(event){
                document.querySelector(".mdl-layout__content").style.border= "0px solid red";
             });
-            this.on("dragend", function(event){
-                console.log("end");
+            this.on("drop", function(event){
                 document.querySelector(".mdl-layout__content").style.border= "0px solid red";
             });
 
-
-
-
-          this.on("success", function(file, responseText){
-              $(this).children(".dz-success-mark").css("display", "block");
-          });
-
-          this.on("error", function(file, erroMessage, xhr){
-              $(this).children(".dz-error-mark").css("display", "block");
-          });
-
-          this.on("uploadprogress", function(file, progress, bytesSent){
-            document.querySelector('.mdl-progress').addEventListener('mdl-componentupgraded', function() {
-            this.MaterialProgress.setProgress(progress);
+            this.on("success", function(file, responseText){
+                 file.previewElement.getElementsByClassName("dz-success-mark")[0].style.display = "block";
             });
-        });
+
+            this.on("error", function(file, erroMessage, xhr){
+                file.previewElement.getElementsByClassName("dz-error-mark")[0].style.display = "block";
+            });
+
+            this.on("uploadprogress", function(file, progress, bytesSent){
+                console.log(file);
+                file.previewElement.getElementsByClassName("mdl-progress")[0].addEventListener('mdl-componentupgraded', function() {
+                    this.MaterialProgress.setProgress(progress);
+                 });
+            });
       }
      });
 

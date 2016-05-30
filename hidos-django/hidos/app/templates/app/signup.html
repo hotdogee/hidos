@@ -1,10 +1,87 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Title</title>
-</head>
-<body>
+{% extends "app/layout.html" %}
+{% load account socialaccount %}
+{% block head-styles %}
+<style type="text/css">
+#login-page {
+    width: 400px;
+    margin-top: 20px;
+}
+#login-ul {
+  display: none;
+}
+</style>
+{% endblock %}
+{% block content-body %}
 
-</body>
-</html>
+
+
+
+
+
+
+
+
+
+
+<div class="center">
+  <div id="login-page" class="row">
+    <div class="col s12 z-depth-4 card-panel">
+      <form action="/login" method="post" id="login-form">
+          {% csrf_token %}
+        <div class="row">
+          <div class="input-field col s12 center">
+            <h5 class="center login-form-text">HiDOS Account Login</h5>
+          </div>
+        </div>
+        <div class="row margin">
+          <div class="input-field col s12">
+            <i class="mdi-social-person-outline prefix"></i>
+            {{ form.username }}
+            <label for="username" class="center-align">Username</label>
+          </div>
+        </div>
+        <div class="row margin">
+          <div class="input-field col s12">
+            <i class="mdi-action-lock-outline prefix"></i>
+            {{ form.password }}
+            <label for="password">Password</label>
+          </div>
+        </div>
+        <div class="row">
+          <div class="input-field col s12">
+              <input type="hidden" name="next" value="/" />
+             <a href="javascript:document.getElementById('login-form').submit()" class="btn waves-effect waves-light col s12">Login</a>
+
+          </div>
+          <p class="mdi-typography__text-center"> Or </p>
+          <div class="col s12">
+
+            {% load socialaccount %}
+            <a href="{% provider_login_url "facebook" method="oauth2" %}" class="btn waves-effect waves-light col s12">Login with Facebook</a>
+            <a href="{% provider_login_url "google" method="oauth2" %}" class="btn waves-effect waves-light col s12">Login with Google</a>
+          </div>
+        </div>
+        <div class="row">
+          <div class="input-field col s6 m6 l6">
+            <p class="margin medium-small"><a href="#!">Register Now!</a></p>
+          </div>
+          <div class="input-field col s6 m6 l6">
+              <p class="margin right-align medium-small"><a href="#!">Forgot password ?</a></p>
+          </div>
+        </div>
+        {% if form.errors %}
+        <p class="validation-summary-errors">Please enter a correct user name and password.</p>
+        {% endif %}
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+
+{% block scripts %}
+
+  {% load staticfiles %}
+<script src="{% static 'app/scripts/jquery.validate.min.js' %}"></script>
+
+{% endblock %}

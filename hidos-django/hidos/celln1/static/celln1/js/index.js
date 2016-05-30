@@ -200,6 +200,7 @@ $(document).ready(function () {
         thumbnailWidth: 100,
         thumbnailHeight: 100,
         parallelUploads: 2,
+        autoDiscover: false,
         previewTemplate: previewTemplate,
         autoQueue: true, // Make sure the files aren't queued until manually added
         previewsContainer: "#dz-preview", // Define the container to display the previews
@@ -209,37 +210,34 @@ $(document).ready(function () {
         },
         init: function(){
 
-           this.on("dragenter", function(event){
-               document.querySelector(".mdl-layout__content").style.border= "3px solid #D1C4E9";
+            this.on("dragenter", function(event){
+                document.querySelector(".mdl-layout__content").style.border= "3px solid #D1C4E9";
             });
             this.on("dragover", function(event){
-               document.querySelector(".mdl-layout__content").style.border= "3px solid #D1C4E9";
+                document.querySelector(".mdl-layout__content").style.border= "3px solid #D1C4E9";
             });
             this.on("dragleave", function(event){
-               document.querySelector(".mdl-layout__content").style.border= "0px solid red";
+                document.querySelector(".mdl-layout__content").style.border= "0px solid red";
             });
-            this.on("dragend", function(event){
-                console.log("end");
+            this.on("drop", function(event){
                 document.querySelector(".mdl-layout__content").style.border= "0px solid red";
             });
 
-
-
-
-          this.on("success", function(file, responseText){
-              $(this).children(".dz-success-mark").css("display", "block");
-          });
-
-          this.on("error", function(file, erroMessage, xhr){
-              $(this).children(".dz-error-mark").css("display", "block");
-          });
-
-          this.on("uploadprogress", function(file, progress, bytesSent){
-            document.querySelector('.mdl-progress').addEventListener('mdl-componentupgraded', function() {
-            this.MaterialProgress.setProgress(progress);
+            this.on("success", function(file, responseText){
+                 file.previewElement.getElementsByClassName("dz-success-mark")[0].style.display = "block";
             });
-        });
-      }
+
+            this.on("error", function(file, erroMessage, xhr){
+                file.previewElement.getElementsByClassName("dz-error-mark")[0].style.display = "block";
+            });
+
+            this.on("uploadprogress", function(file, progress, bytesSent){
+                console.log(file);
+                file.previewElement.getElementsByClassName("mdl-progress")[0].addEventListener('mdl-componentupgraded', function() {
+                    this.MaterialProgress.setProgress(progress);
+                 });
+            });
+        }
      });
 
 
