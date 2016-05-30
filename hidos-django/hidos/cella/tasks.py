@@ -44,12 +44,19 @@ def run_cell_a_task(self, task_id,uploaded_image_path, result_image_path, result
     record.status = 'running'
     record.save()
 
-    # run
+    # slack report template
+    slack_manager = urllib3.PoolManager(1)
+    data = {"channel": "#image-bug", "username": "cellcloud", \
+            "text": "",
+            "icon_emoji": ":desktop_computer:"}
 
+    # run
     try:
        cellAngiogenesis(uploaded_image_path, result_image_path, result_json_path)
     except Exception as e:
         record.stderr = e
+        data["text"] = '`' + uploaded_image_path + '`\n' + e.args[0]
+        slack_manager.request('POST','https://hooks.slack.com/services/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',body = json.dumps(data),headers={'Content-Type': 'application/json'})
         logger.info(e.args)
 
 

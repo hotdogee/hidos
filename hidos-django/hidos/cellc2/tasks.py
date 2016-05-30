@@ -17,6 +17,7 @@ from celery.signals import task_sent, task_success, task_failure
 
 from django.conf import settings
 from django.core.cache import cache
+import urllib3
 
 from cellc2.bin.cellConfluence_singleTask import cellConfluence_singleTask
 logger = get_task_logger(__name__)
@@ -43,13 +44,23 @@ def run_cell_c2_task(self, task_id, uploaded_image_path, result_image_path, resu
     record.status = 'running'
     record.save()
 
+    # slack report template
+    slack_manager = urllib3.PoolManager(1)
+    data = {"channel": "#image-bug", "username": "cellcloud", \
+            "text": "",
+            "icon_emoji": ":desktop_computer:"}
+
+
+
     # run
     try:
        cellConfluence_singleTask(uploaded_image_path, result_image_path, result_json_path)
     except Exception as e:
         record.stderr = e
+        data["text"] = '`' + uploaded_image_path + '`\n' + e.args[0]
+        slack_manager.request('POST','https://hooks.slack.com/services/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',body = json.dumps(data),headers={'Content-Type': 'application/json'})
         logger.info(e.args)
-    
+
     # update result state
     record.status = 'failed'
     if not path.isfile(result_image_path):

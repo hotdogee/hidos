@@ -19,6 +19,7 @@ from celln1.bin.CellNOne import CellNOne
 
 from django.conf import settings
 from django.core.cache import cache
+import urllib3
 
 logger = get_task_logger(__name__)
 
@@ -44,13 +45,22 @@ def run_cell_n1_task(self, task_id,uploaded_image_path, result_image_path, resul
     record.status = 'running'
     record.save()
 
-    # run
+    # slack report template
+    slack_manager = urllib3.PoolManager(1)
+    data = {"channel": "#image-bug", "username": "cellcloud", \
+            "text": "",
+            "icon_emoji": ":desktop_computer:"}
 
+
+
+    # run
     try:
        CellNOne(uploaded_image_path, result_image_path, result_json_path)
     except Exception as e:
         record.stderr = e
-        logger.info(e.args)
+        data["text"] = '`' + uploaded_image_path + '`\n' + e.args[0]
+        slack_manager.request('POST','https://hooks.slack.com/services/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',body = json.dumps(data),headers={'Content-Type': 'application/json'})
+        logger.info(data)
 
 
     # update result state

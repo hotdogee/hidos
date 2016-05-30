@@ -19,6 +19,7 @@ from celery.signals import task_sent, task_success, task_failure
 
 from django.conf import settings
 from django.core.cache import cache
+import urllib3
 
 logger = get_task_logger(__name__)
 
@@ -44,9 +45,16 @@ def run_cell_m1_task(self, task_id, args_list, path_prefix):
     record.status = 'running'
     record.save()
 
+    # slack report template
+    slack_manager = urllib3.PoolManager(1)
+    data = {"channel": "#image-bug", "username": "cellcloud", \
+            "text": "",
+            "icon_emoji": ":desktop_computer:"}
+
+
+
+
     # run
-
-
     outerr = []
     for args in args_list:
         stdoutdata, stderrdata = Popen(args, stdin=PIPE, stdout=PIPE, stderr=PIPE).communicate()
