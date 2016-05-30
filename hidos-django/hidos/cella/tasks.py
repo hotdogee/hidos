@@ -19,6 +19,7 @@ from cella.bin.cellAngiogenesis import cellAngiogenesis
 
 from django.conf import settings
 from django.core.cache import cache
+import urllib3
 
 logger = get_task_logger(__name__)
 

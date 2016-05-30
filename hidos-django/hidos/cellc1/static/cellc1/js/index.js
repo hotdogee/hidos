@@ -64,7 +64,7 @@ $(document).ready(function () {
       ],
       createdRow: function (row, data, index) {
         // initialize bootstrap tooltip
-        $('.viewer-btn', row).tooltip();
+        $('.viewer-btn', row);
       },
       buttons: [
         {

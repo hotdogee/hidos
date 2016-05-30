@@ -214,15 +214,7 @@ $(document).ready(function () {
                     this.MaterialProgress.setProgress(progress);
                  });
             });
-        });
-      }
-     });
-
-
-
-
-
-
+     }});
 
   } else {
     Dropzone.options.addPhotos = {

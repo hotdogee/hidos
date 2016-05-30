@@ -21,7 +21,7 @@ class TaskViewSet(viewsets.ModelViewSet):
 
     @list_route()
     def running(self, request, *args, **kwargs):
-        running_tasks = CellC1Task.objects.filter(user=request.user, status__in=['queued', 'running'])
+        running_tasks = CellM3Task.objects.filter(user=request.user, status__in=['queued', 'running'])
         serializer = self.get_serializer(running_tasks, many=True)
         return Response(serializer.data)
 
