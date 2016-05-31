@@ -13,12 +13,24 @@ from .models import Folder
 from .serializers import FolderSerializer
 
 class FolderViewSet(viewsets.ModelViewSet):
+    """
+    list
+    create
+    retrieve
+    update
+    partial_update
+    destroy
+    @list_route
+    @detail_route
+     * contents
+     * move(destination)
+    """
     queryset = Folder.objects.all()
     serializer_class = FolderSerializer
     filter_backends = (filters.DjangoFilterBackend,)
     pagination_class = None
 
-    def get_queryset(self):
+    def get_queryset(self): # GenericAPIView
         """
         Get the list of items for this view.
         This must be an iterable, and may be a queryset.
@@ -35,7 +47,63 @@ class FolderViewSet(viewsets.ModelViewSet):
         else:
             return Folder.objects.none()
 
-    # def list(self, request, *args, **kwargs):
+    # built-in
+
+    def filter_queryset(self, queryset): # GenericAPIView
+        """
+        Given a queryset, filter it with whichever filter backend is in use.
+        You are unlikely to want to override this method, although you may need
+        to call it either from a list view, or from a custom `get_object`
+        method if you want to apply the configured filtering backend to the
+        default queryset.
+        """
+        for backend in list(self.filter_backends):
+            queryset = backend().filter_queryset(self.request, queryset, self)
+        return queryset
+
+    def get_object(self): # GenericAPIView
+        """
+        Returns the object the view is displaying.
+        You may want to override this if you need to provide non-standard
+        queryset lookups.  Eg if objects are referenced using multiple
+        keyword arguments in the url conf.
+        """
+        queryset = self.filter_queryset(self.get_queryset())
+
+        # Perform the lookup filtering.
+        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
+
+        assert lookup_url_kwarg in self.kwargs, (
+            'Expected view %s to be called with a URL keyword argument '
+            'named "%s". Fix your URL conf, or set the `.lookup_field` '
+            'attribute on the view correctly.' %
+            (self.__class__.__name__, lookup_url_kwarg)
+        )
+
+        filter_kwargs = {self.lookup_field: self.kwargs[lookup_url_kwarg]}
+        obj = get_object_or_404(queryset, **filter_kwargs)
+
+        # May raise a permission denied
+        self.check_object_permissions(self.request, obj) # APIView
+
+        return obj
+
+    # def update(self, request, *args, **kwargs): # UpdateModelMixin
+    #     partial = kwargs.pop('partial', False)
+    #     instance = self.get_object()
+    #     serializer = self.get_serializer(instance, data=request.data, partial=partial)
+    #     serializer.is_valid(raise_exception=True)
+    #     self.perform_update(serializer)
+    #     return Response(serializer.data)
+
+    # def perform_update(self, serializer): # UpdateModelMixin
+    #     serializer.save()
+
+    # def partial_update(self, request, *args, **kwargs): # UpdateModelMixin
+    #     kwargs['partial'] = True
+    #     return self.update(request, *args, **kwargs)
+
+    # def list(self, request, *args, **kwargs): # ListModelMixin
     #     queryset = self.filter_queryset(self.get_queryset())
 
     #     page = self.paginate_queryset(queryset)
@@ -46,23 +114,21 @@ class FolderViewSet(viewsets.ModelViewSet):
     #     serializer = self.get_serializer(queryset, many=True)
     #     return Response(serializer.data)
 
-    # def perform_create(self, serializer):
+    # def perform_create(self, serializer): # CreateModelMixin
     #     # If anonymous user will be django.contrib.auth.models.AnonymousUser
     #     # and username is a empty string.
     #     task = serializer.save(user=self.request.user) # returns create model instance
     #     # put task in queue
     #     task.enqueue()
 
-    # built-in
-
-    # def create(self, request, *args, **kwargs):
+    # def create(self, request, *args, **kwargs): # CreateModelMixin
     #     serializer = self.get_serializer(data=request.data)
     #     serializer.is_valid(raise_exception=True)
     #     self.perform_create(serializer)
     #     headers = self.get_success_headers(serializer.data)
     #     return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-    # def get_serializer(self, *args, **kwargs):
+    # def get_serializer(self, *args, **kwargs): # GenericAPIView
     #     """
     #     Return the serializer instance that should be used for validating and
     #     deserializing input, and for serializing output.
@@ -71,7 +137,7 @@ class FolderViewSet(viewsets.ModelViewSet):
     #     kwargs['context'] = self.get_serializer_context()
     #     return serializer_class(*args, **kwargs)
 
-    # def get_serializer_context(self):
+    # def get_serializer_context(self): # GenericAPIView
     #     """
     #     Extra context provided to the serializer class.
     #     """
