@@ -10,6 +10,9 @@ from vanilla import GenericModelView
 from . import app_name, verbose_name, version
 from .models import CellC1Task
 
+from django.contrib.auth.decorators import login_required
+
+
 logger = logging.getLogger(__name__) # __name__ == cellc1.views
 
 

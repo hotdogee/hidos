@@ -3,10 +3,10 @@
 from . import api
 from . import views
 from . import app_name # application namespace
-
+from django.contrib.auth.decorators import login_required
 
 urlpatterns = [
-    url(r'^$', views.IndexView.as_view(), name='index'),
+    url(r'^$', login_required(views.IndexView.as_view()), name='index'),
     url(r'^(?P<task_id>[0-9a-zA-Z]+)$', views.DetailView2.as_view(), name='detail'),
     # {% url "cellc1:tasks" %}
     url(r'^api/v1/tasks$', api.TaskViewSet.as_view({
