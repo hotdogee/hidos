@@ -20,6 +20,8 @@ from celery.signals import task_sent, task_success, task_failure
 from django.conf import settings
 from django.core.cache import cache
 import urllib3
+from cellm1.bin.CellM1_function import cellm1
+
 
 logger = get_task_logger(__name__)
 
@@ -31,7 +33,7 @@ if settings.USE_CACHE:
     release_lock = lambda: cache.delete(LOCK_ID)
 
 @shared_task(bind=True) # ignore_result=True
-def run_cell_m1_task(self, task_id, args_list, path_prefix):
+def run_cell_m1_task(self, task_id,uploaded_image_path, result_image_path, result_json_path , path_prefix):
     import django
     django.setup()
 
@@ -55,13 +57,14 @@ def run_cell_m1_task(self, task_id, args_list, path_prefix):
 
 
     # run
-    outerr = []
-    for args in args_list:
-        stdoutdata, stderrdata = Popen(args, stdin=PIPE, stdout=PIPE, stderr=PIPE).communicate()
-        outerr.append((stdoutdata, stderrdata))
-    record.result_outerr = json.dumps(outerr)
-    result_image_path = path_prefix + '_out.jpg'
-    result_json_path = path_prefix + '_out.json'
+    try:
+       cellm1(uploaded_image_path, result_image_path, result_json_path)
+    except Exception as e:
+        record.stderr = e
+        data["text"] = '`' + uploaded_image_path + '`\n' + e.args[0]
+        slack_manager.request('POST', 'https://hooks.slack.com/services/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',
+                              body=json.dumps(data), headers={'Content-Type': 'application/json'})
+        logger.info(e.args)
 
     # try:
     #    cellCount_singleTask(uploaded_image_path, result_image_path, result_json_path)
@@ -85,7 +88,7 @@ def run_cell_m1_task(self, task_id, args_list, path_prefix):
         record.status = 'success'
         with open(result_json_path, 'r') as f:
             result = json.load(f)
-            record.cell_count = result['count']
+            record.cell_count = result['ratio']
 
         output_image_viewer_path = path_prefix + '_out.jpg'
         # convert to jpeg for web display

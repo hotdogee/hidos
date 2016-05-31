@@ -2,7 +2,7 @@ $(function () {
   $('#result').hide();
   // get task-id from url
   var task_id = window.location.pathname.match(/\/([0-9a-zA-Z]+)\/?$/)[1];
-  var path_prefix = '/media/cellc1/task/' + task_id + '/' + task_id;
+  var path_prefix = '/media/cellm1/task/' + task_id + '/' + task_id;
   // check status
   var poll = function () {
     $.ajax({
@@ -17,13 +17,13 @@ $(function () {
           setTimeout(poll, 3000);
         else {
           // get result json data
-          $('#count').text(data.cell_count);
+          $('#ratio').text(data.cell_count + '%');
           // display image
           // /media/image_analysis/task/7ef4f4782fc840738f67a43edafc9683/7ef4f4782fc840738f67a43edafc9683_in.jpg
-          $('#input-img').attr('src', '/media/cellc1/task/' + task_id + '/' + task_id + '_in.jpg');
-          $('#input-download').attr('href', '/media/cellc1/task/' + task_id + '/' + task_id + '_in.jpg');
-          $('#result-img').attr('src', '/media/cellc1/task/' + task_id + '/' + task_id + '_out.jpg');
-          $('#result-download').attr('href', '/media/cellc1/task/' + task_id + '/' + task_id + '_out.jpg');
+          $('#input-img').attr('src', '/media/cellm1/task/' + task_id + '/' + task_id + '_in.jpg');
+          $('#input-download').attr('href', '/media/cellm1/task/' + task_id + '/' + task_id + '_in.jpg');
+          $('#result-img').attr('src', '/media/cellm1/task/' + task_id + '/' + task_id + '_out.jpg');
+          $('#result-download').attr('href', '/media/cellm1/task/' + task_id + '/' + task_id + '_out.jpg');
 
           // get image size
           $("<img/>") // Make in memory copy of image to avoid css issues

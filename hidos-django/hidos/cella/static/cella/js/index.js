@@ -1,6 +1,6 @@
 $(document).ready(function () {
   if ($('#result-list').length) { // check if user is logged in
-    var running_template = '<i>Running ' + $('#loading-template').html() + '</i>';
+    var running_template = $('#loading-template').html();
     var view_btn_compiled = _.template($('#viewer-btn-template').html());
     var cellq_name_compiled = _.template($('#cellq-name-template').html());
     var date_now = (new Date()).toLocaleDateString();
@@ -38,27 +38,28 @@ $(document).ready(function () {
           }
         },
         {
-          name: 'mesh', type: 'num', data: 'mesh', defaultContent: running_template, width: '100px',
+          name: 'mesh', type: 'num', data: 'mesh', defaultContent: running_template, width: '100px', className: 'dt-center',
           render: function (data, type, row, meta) {
-            if (!data)
+              console.log(data);
+            if (data === null)
               return running_template;
             else
               return type === 'display' ? data  : data;
           }
         },
           {
-          name: 'junction', type: 'num', data: 'junction', defaultContent: running_template, width: '100px',
+          name: 'junction', type: 'num', data: 'junction', defaultContent: running_template, width: '100px', className: 'dt-center',
           render: function (data, type, row, meta) {
-            if (!data)
+            if (data === null)
               return running_template;
             else
               return type === 'display' ? data  : data;
           }
         },
           {
-          name: 'extremity', type: 'num', data: 'extremity', defaultContent: running_template, width: '100px',
+          name: 'extremity', type: 'num', data: 'extremity', defaultContent: running_template, width: '100px', className: 'dt-center',
           render: function (data, type, row, meta) {
-            if (!data)
+            if (data === null)
               return running_template;
             else
               return type === 'display' ? data  : data;
@@ -87,7 +88,7 @@ $(document).ready(function () {
       buttons: [
         {
           extend: 'collection',
-          text: '<span class="glyphicon glyphicon-cloud-download" aria-hidden="true"></span> Export',
+          text: '<i class="material-icons">cloud_download</i>',
           buttons: [
             {
               extend: 'copy',
@@ -137,7 +138,7 @@ $(document).ready(function () {
             type: 'GET',
             traditional: true,
             success: function (data, status) {
-              console.log(_.some(finished, (c) => _.contains(_.pluck(data.data, 'result_status'), c)));
+              // console.log(_.some(finished, (c) => _.contains(_.pluck(data.data, 'result_status'), c)));
               if (data.length < unfinished_task_ids.length) {
                 polling = false;
                 result_table.ajax.reload();
@@ -206,19 +207,20 @@ $(document).ready(function () {
         init: function(){
 
            this.on("dragenter", function(event){
-               document.querySelector(".mdl-layout__content").style.border= "3px solid #D1C4E9";
+               document.querySelector(".mdl-layout__content").style.border= "3px solid #CDDC39";
             });
             this.on("dragover", function(event){
-               document.querySelector(".mdl-layout__content").style.border= "3px solid #D1C4E9";
+               document.querySelector(".mdl-layout__content").style.border= "3px solid #CDDC39";
             });
             this.on("dragleave", function(event){
-               document.querySelector(".mdl-layout__content").style.border= "0px solid red";
+               document.querySelector(".mdl-layout__content").style.border= "0px solid";
             });
             this.on("drop", function(event){
-                document.querySelector(".mdl-layout__content").style.border= "0px solid red";
+                document.querySelector(".mdl-layout__content").style.border= "0px solid";
             });
 
             this.on("success", function(file, responseText){
+                result_table.ajax.reload();
                  file.previewElement.getElementsByClassName("dz-success-mark")[0].style.display = "block";
             });
 

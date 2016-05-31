@@ -1,6 +1,6 @@
 $(document).ready(function () {
   if ($('#result-list').length) { // check if user is logged in
-    var running_template = '<i>Running ' + $('#loading-template').html() + '</i>';
+    var running_template = $('#loading-template').html();
     var view_btn_compiled = _.template($('#viewer-btn-template').html());
     var cellq_name_compiled = _.template($('#cellq-name-template').html());
     var date_now = (new Date()).toLocaleDateString();
@@ -38,7 +38,7 @@ $(document).ready(function () {
           }
         },
         {
-          name: 'area', type: 'num', data: 'cell_ratio', defaultContent: running_template, width: '100px',
+          name: 'area', type: 'num', data: 'cell_ratio', defaultContent: running_template, width: '100px', className: 'dt-center',
           render: function (data, type, row, meta) {
             if (!data)
               return running_template;
@@ -64,12 +64,12 @@ $(document).ready(function () {
       ],
       createdRow: function (row, data, index) {
         // initialize bootstrap tooltip
-        $('.viewer-btn', row).tooltip();
+        $('.viewer-btn', row);
       },
       buttons: [
         {
           extend: 'collection',
-          text: '<span class="glyphicon glyphicon-cloud-download" aria-hidden="true"></span> Export',
+          text: '<i class="material-icons">cloud_download</i>',
           buttons: [
             {
               extend: 'copy',
@@ -188,10 +188,10 @@ $(document).ready(function () {
         init: function(){
 
            this.on("dragenter", function(event){
-               document.querySelector(".mdl-layout__content").style.border= "3px solid #D1C4E9";
+               document.querySelector(".mdl-layout__content").style.border= "3px solid #E57373";
             });
             this.on("dragover", function(event){
-               document.querySelector(".mdl-layout__content").style.border= "3px solid #D1C4E9";
+               document.querySelector(".mdl-layout__content").style.border= "3px solid #E57373";
             });
             this.on("dragleave", function(event){
                document.querySelector(".mdl-layout__content").style.border= "0px solid red";
@@ -201,6 +201,7 @@ $(document).ready(function () {
             });
 
             this.on("success", function(file, responseText){
+                result_table.ajax.reload();
                  file.previewElement.getElementsByClassName("dz-success-mark")[0].style.display = "block";
             });
 
@@ -209,7 +210,6 @@ $(document).ready(function () {
             });
 
             this.on("uploadprogress", function(file, progress, bytesSent){
-                console.log(file);
                 file.previewElement.getElementsByClassName("mdl-progress")[0].addEventListener('mdl-componentupgraded', function() {
                     this.MaterialProgress.setProgress(progress);
                  });

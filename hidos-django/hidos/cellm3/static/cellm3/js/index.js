@@ -1,6 +1,6 @@
 $(document).ready(function () {
   if ($('#result-list').length) { // check if user is logged in
-    var running_template = '<i>Running ' + $('#loading-template').html() + '</i>';
+    var running_template = $('#loading-template').html();
     var view_btn_compiled = _.template($('#viewer-btn-template').html());
     var cellq_name_compiled = _.template($('#cellq-name-template').html());
     var date_now = (new Date()).toLocaleDateString();
@@ -38,7 +38,7 @@ $(document).ready(function () {
           }
         },
         {
-          name: 'count', type: 'num', data: 'ratio', defaultContent: running_template, width: '100px',
+          name: 'count', type: 'num', data: 'ratio', defaultContent: running_template, width: '100px', className: 'dt-center',
           render: function (data, type, row, meta) {
             if (!data)
               return running_template;
@@ -69,7 +69,7 @@ $(document).ready(function () {
       buttons: [
         {
           extend: 'collection',
-          text: '<span class="glyphicon glyphicon-cloud-download" aria-hidden="true"></span> Export',
+          text: '<i class="material-icons">cloud_download</i>',
           buttons: [
             {
               extend: 'copy',
@@ -188,20 +188,21 @@ $(document).ready(function () {
         init: function(){
 
            this.on("dragenter", function(event){
-               document.querySelector(".mdl-layout__content").style.border= "3px solid #D1C4E9";
+               document.querySelector(".mdl-layout__content").style.border= "3px solid #90A4AE";
             });
             this.on("dragover", function(event){
-               document.querySelector(".mdl-layout__content").style.border= "3px solid #D1C4E9";
+               document.querySelector(".mdl-layout__content").style.border= "3px solid #90A4AE";
             });
             this.on("dragleave", function(event){
-               document.querySelector(".mdl-layout__content").style.border= "0px solid red";
+               document.querySelector(".mdl-layout__content").style.border= "0px solid";
             });
            this.on("drop", function(event){
-                document.querySelector(".mdl-layout__content").style.border= "0px solid red";
+                document.querySelector(".mdl-layout__content").style.border= "0px solid";
             });
 
             this.on("success", function(file, responseText){
                  file.previewElement.getElementsByClassName("dz-success-mark")[0].style.display = "block";
+                result_table.ajax.reload();
             });
 
             this.on("error", function(file, erroMessage, xhr){

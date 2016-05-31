@@ -1,4 +1,7 @@
 $(document).ready(function () {
+
+
+  // result table rendering
   if ($('#result-list').length) { // check if user is logged in
     var running_template = '<div class="mdl-typography--text-center">' + $('#loading-template').html() + '</div>';
     var view_btn_compiled = _.template($('#viewer-btn-template').html());
@@ -15,11 +18,6 @@ $(document).ready(function () {
       scrollY: 500,
       order: [[3, 'desc']],
       dom: 'Bfrtip',
-      columnDefs: [
-            {
-                className: 'mdl-data-table__cell--non-numeric'
-            }
-        ],
       columns: [
         {
           name: 'viewer', data: 'url', width: '50px', orderable: false,
@@ -43,7 +41,7 @@ $(document).ready(function () {
           }
         },
         {
-          name: 'count', type: 'num', data: 'soma_count', defaultContent: running_template, width: '100px',
+          name: 'count', type: 'num', data: 'soma_count', defaultContent: running_template, width: '100px', className:'dt-center',
           render: function (data, type, row, meta) {
             if (!data)
               return running_template;
@@ -51,15 +49,15 @@ $(document).ready(function () {
               return type === 'display' ? data  : data;
           }
         },{
-          name: 'body_attachments', type: 'num', data: 'body_attachments', defaultContent: running_template, width: '100px',
+          name: 'body_attachments', type: 'num', data: 'body_attachments', defaultContent: running_template, width: '100px',className:'dt-center',
           render: function (data, type, row, meta) {
             if (!data)
               return running_template;
             else
-              return type === 'display' ? data  : data;
-          }
+              return type === 'display' ? data  : data.status;
+           }
         },{
-          name: 'endpoints', type: 'num', data: 'endpoints', defaultContent: running_template, width: '100px',
+          name: 'endpoints', type: 'num', data: 'endpoints', defaultContent: running_template, width: '100px',className:'dt-center',
           render: function (data, type, row, meta) {
             if (!data)
               return running_template;
@@ -90,7 +88,7 @@ $(document).ready(function () {
       buttons: [
         {
           extend: 'collection',
-          text: '<span class="glyphicon glyphicon-cloud-download" aria-hidden="true"></span> Export',
+          text: '<i class="material-icons">cloud_download</i>',
           buttons: [
             {
               extend: 'copy',
@@ -120,13 +118,16 @@ $(document).ready(function () {
         },
       ],
     });
+
+
+    //result table refresh
     var unfinished = ['queued', 'running'];
     var unfinished_task_ids;
     var polling = false;
     $('#result-list').on('xhr.dt', function (e, settings, json, xhr) {
       // json data loaded
       // get a list of queued and running tasks
-      //console.log(e, settings, json, xhr);
+      console.log(e, settings, json, xhr);
       if (!json) return; // consecutive ajax.reload() may result in 'abort' status
       unfinished_task_ids = _.pluck(_.filter(json, (t) => _.contains(unfinished, t.status)), 'id');
       //console.log(unfinished_task_ids);
@@ -176,18 +177,6 @@ $(document).ready(function () {
     }
     var csrftoken = getCookie('csrftoken');
 
-    function csrfSafeMethod(method) {
-        // these HTTP methods do not require CSRF protection
-        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-    }
-
-    $.ajaxSetup({
-        beforeSend: function(xhr, settings) {
-            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-                xhr.setRequestHeader("X-CSRFToken", csrftoken);
-            }
-        }
-    });
 
     // Get the template HTML and remove it from the doumenthe template HTML and remove it from the doument
     var previewNode = document.querySelector("#dz-template");
@@ -224,7 +213,8 @@ $(document).ready(function () {
             });
 
             this.on("success", function(file, responseText){
-                 file.previewElement.getElementsByClassName("dz-success-mark")[0].style.display = "block";
+                file.previewElement.getElementsByClassName("dz-success-mark")[0].style.display = "block";
+                result_table.ajax.reload();
             });
 
             this.on("error", function(file, erroMessage, xhr){
@@ -232,19 +222,12 @@ $(document).ready(function () {
             });
 
             this.on("uploadprogress", function(file, progress, bytesSent){
-                console.log(file);
                 file.previewElement.getElementsByClassName("mdl-progress")[0].addEventListener('mdl-componentupgraded', function() {
                     this.MaterialProgress.setProgress(progress);
                  });
             });
         }
      });
-
-
-
-
-
-
 
 
 

@@ -1,4 +1,4 @@
-{% extends "app/layout_material.html" %}
+{% extends "cell/layout_material.html" %}
 {% load staticfiles %}
 
 {% block layout-title %}
@@ -10,7 +10,7 @@
 
 
   {%  include 'cellc1/intro.html' %}
-  {%  include 'cellc1/uploaded.html' %}
+  {%  include 'cell/uploaded.html' %}
   {%  include 'cellc1/result_table.html' %}
 
   <!-- dropzone upload button -->
@@ -35,8 +35,8 @@
   -->
   <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.10/css/jquery.dataTables.min.css"/>
   <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/scroller/1.4.0/css/scroller.dataTables.min.css"/>
-  <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/buttons/1.1.2/css/buttons.bootstrap.min.css"/>
   <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css"/>
+   <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/buttons/1.2.1/css/buttons.dataTables.min.css"/>
 
   <link rel="stylesheet" type="text/css" href="{% static 'app/content/spinkit.css' %}" />
 
@@ -104,11 +104,10 @@
   <script type="text/javascript" src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
   <script type="text/javascript" src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
   <script type="text/javascript" src="//cdn.datatables.net/buttons/1.1.2/js/dataTables.buttons.min.js"></script>
-  <script type="text/javascript" src="//cdn.datatables.net/buttons/1.1.2/js/buttons.bootstrap.min.js"></script>
   <script type="text/javascript" src="//cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
   <script type="text/javascript" src="//cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
   <script type="text/template" id="loading-template">
-    <div class="mdl-spinner mdl-js-spinner is-active"></div>
+    <div class="mdl-spinner mdl-spinner--single-color mdl-js-spinner is-active"></div>
   </script>
   <script type="text/template" id="viewer-btn-template">
     <a class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect viewer-btn" data-toggle="tooltip" data-placement="right"
