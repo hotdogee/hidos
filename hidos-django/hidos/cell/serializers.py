@@ -10,9 +10,10 @@ class FolderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Folder
-        fields = ['id',
-            'name', 'owner', 'parent_folder',
-            'created', 'modified']
+        read_only_fields = ['id', 'created', 'modified']
+        fields = read_only_fields + ['name', 'owner', 'parent_folder']
+        # Model fields which have editable=False set, and AutoField fields will be set to read-only by default,
+        # and do not need to be added to the read_only_fields option.
 
     # def create(self, validated_data):
     #    return CellC2Task.objects.create(**validated_data)
