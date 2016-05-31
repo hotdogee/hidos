@@ -16,6 +16,23 @@ from django_extensions.db.models import TimeStampedModel
 
 from . import app_name, verbose_name, version
 
+# class TimeStampedModel(models.Model):
+#     """ TimeStampedModel
+#     An abstract base class model that provides self-managed "created" and
+#     "modified" fields.
+#     """
+#     created = CreationDateTimeField(_('created')) # editable=False, blank=True, auto_now_add=True
+#     modified = ModificationDateTimeField(_('modified')) # auto_now_add=True
+
+#     def save(self, **kwargs):
+#         self.update_modified = kwargs.pop('update_modified', getattr(self, 'update_modified', True))
+#         super(TimeStampedModel, self).save(**kwargs)
+
+#     class Meta:
+#         get_latest_by = 'modified'
+#         ordering = ('-modified', '-created',)
+#         abstract = True
+
 folder_re = re.compile(r'^[^\\/?%*:|"<>\.]+$', re.U)
 
 class Folder(TimeStampedModel):
