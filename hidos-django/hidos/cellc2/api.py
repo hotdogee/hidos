@@ -12,6 +12,18 @@ from .models import CellC2Task
 from .serializers import CellC2TaskSerializer
 
 class TaskViewSet(viewsets.ModelViewSet):
+    """
+    list
+    create
+    retrieve
+    update
+    partial_update
+    destroy
+     * also delete task folder
+    @list_route
+    @detail_route
+     * move(destination)
+    """
     queryset = CellC2Task.objects.all()
     serializer_class = CellC2TaskSerializer
     lookup_field = 'task_id'
@@ -53,7 +65,7 @@ class TaskViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(running_tasks, many=True)
         return Response(serializer.data)
 
-    def perform_create(self, serializer):
+    def perform_create(self, serializer): # CreateModelMixin
         # If anonymous user will be django.contrib.auth.models.AnonymousUser
         # and username is a empty string.
         task = serializer.save(user=self.request.user) # returns create model instance
@@ -62,14 +74,14 @@ class TaskViewSet(viewsets.ModelViewSet):
 
     # built-in
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    # def create(self, request, *args, **kwargs): # CreateModelMixin
+    #     serializer = self.get_serializer(data=request.data)
+    #     serializer.is_valid(raise_exception=True)
+    #     self.perform_create(serializer)
+    #     headers = self.get_success_headers(serializer.data)
+    #     return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-    # def get_serializer(self, *args, **kwargs):
+    # def get_serializer(self, *args, **kwargs): # GenericAPIView
     #     """
     #     Return the serializer instance that should be used for validating and
     #     deserializing input, and for serializing output.
@@ -78,7 +90,7 @@ class TaskViewSet(viewsets.ModelViewSet):
     #     kwargs['context'] = self.get_serializer_context()
     #     return serializer_class(*args, **kwargs)
 
-    # def get_serializer_context(self):
+    # def get_serializer_context(self): # GenericAPIView
     #     """
     #     Extra context provided to the serializer class.
     #     """
