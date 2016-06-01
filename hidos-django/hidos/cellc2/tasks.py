@@ -46,7 +46,7 @@ def run_cell_c2_task(self, task_id, uploaded_image_path, result_image_path, resu
 
     # slack report template
     slack_manager = urllib3.PoolManager(1)
-    data = {"channel": "#image-bug", "username": "cellcloud", \
+    data = {"channel": "#image-bug", "username": "cellc2", \
             "text": "",
             "icon_emoji": ":desktop_computer:"}
 

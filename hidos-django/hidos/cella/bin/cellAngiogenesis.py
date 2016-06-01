@@ -539,7 +539,7 @@ def cellAngiogenesis(image_input_path, image_output_path, json_path, add_boarder
     #io.imshow(img_ori)
 
     out_file = open(json_path,"w")
-    angiogenesis_result = {'extremity':num_extremity,'junction':num_junction,'total_branch_length':tot_branch_len, 'total_segment_length':tot_seg_len, 'total_network_length':tot_len, 'mesh':num_mesh,'tot_mesh_area':tot_mesh_area}
+    angiogenesis_result = {'extremity':num_extremity,'junction':num_junction,'total_branch_length':tot_branch_len, 'total_segment_length':tot_seg_len, 'total_network_length':tot_len, 'mesh':num_mesh,'total_mesh_area':tot_mesh_area}
     json.dump(angiogenesis_result,out_file)
     out_file.close()
 
