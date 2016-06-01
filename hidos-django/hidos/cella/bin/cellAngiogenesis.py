@@ -222,7 +222,7 @@ def pruneTree(img_skeleton,extremityMap,junctionMap,iter_num):
     return img_pruneTree
 
 
-def cellAngiogenesis(image_input_path, image_output_path, json_path, add_boarder=True):
+def cellAngiogenesis(image_input_path, image_output_path, json_path, add_boarder=False):
     img_ori=io.imread(image_input_path)
 
     if(img_ori.shape[0]>2048 or img_ori.shape[1]>2048):
