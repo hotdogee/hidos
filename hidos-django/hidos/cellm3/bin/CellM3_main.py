@@ -7,16 +7,11 @@ from PIL import Image
 #%matplotlib inline
 #%matplotlib qt
 import numpy as np
-import pylab
-import cv2
-import mahotas as mh
-from matplotlib import pyplot as plt
 from skimage import io, morphology, data, color, img_as_ubyte
 from skimage.transform import resize
 from skimage.filters import gabor, laplace, gaussian
 from skimage.util import img_as_ubyte
 from skimage.morphology import erosion, dilation, opening, closing, white_tophat, skeletonize, disk
-from PIL import ImageFont, ImageDraw
 import json
 
 def mask_create(image_phase):
