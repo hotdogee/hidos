@@ -51,8 +51,6 @@ def run_cell_n1_task(self, task_id,uploaded_image_path, result_image_path, resul
             "text": "",
             "icon_emoji": ":desktop_computer:"}
 
-
-
     # run
     try:
        CellNOne(uploaded_image_path, result_image_path, result_json_path)

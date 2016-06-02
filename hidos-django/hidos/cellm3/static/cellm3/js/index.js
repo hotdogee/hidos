@@ -43,7 +43,7 @@ $(document).ready(function () {
             if (!data)
               return running_template;
             else
-              return type === 'display' ? data  : data;
+              return type === 'display' ? data  + '%' : data;
           }
         },
         {

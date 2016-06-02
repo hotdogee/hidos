@@ -52,6 +52,7 @@ $(function () {
                 maxScale: 2.0,
                 contain: 'invert',
               });
+              $panzoom.panzoom("zoom", 0.1,{ animate: false});
               $panzoom.parent().on('mousewheel.focal', function (e) {
                 e.preventDefault();
                 var delta = e.delta || e.originalEvent.wheelDelta;
