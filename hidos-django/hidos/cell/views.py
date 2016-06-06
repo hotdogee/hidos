@@ -8,7 +8,7 @@ from . import app_name, verbose_name, version
 
 
 class IndexView(TemplateView):
-    template_name = 'cell/index.html'
+    template_name = 'cell/index_material.html'
 
     def get_context_data(self, **context):
         context['title'] = verbose_name

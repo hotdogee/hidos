@@ -1,85 +1,144 @@
-{% extends "app/layout.html" %}
+{% extends "cell/result_layout.html" %}
 {% load static %}
-{% block content-body %}
-  <div id="cover">
-    <div class="jumbotron vertical-center">
-      <div class="container text-center">
-        <img src="{% static 'app/images/loading.gif' %}">
-        <h5>Cell A is working...</h5>
+{% block content %}
+
+<div id="cover">
+  <div class="jumbotron vertical-center">
+    <div class="container text-center">
+      <img src="{% static 'app/images/loading.gif' %}">
+      <h5>Cell A is working...</h5>
+    </div>
+  </div>
+</div>
+
+
+<div class="mdl-layout mdl-js-layout" id="result">
+  <div class="result-info">
+    <div class="mdl-grid">
+      <div class="mdl-cell mdl-cell--12-col">
+        <div class="mdl-card mdl-shadow--2dp" id="info-card">
+          <div class="mdl-card__title">{{ user_filename }}</div>
+          <div class="mdl-card__actions mdl-card--border">
+          <div class="mdl-grid">
+            <div class="mdl-cell mdl-cell--3-col">
+              <div class="mdl-card mdl-shadow--2dp">
+                <div class="mdl-card__title mdl-card--expand">
+                  Mesh count
+                </div>
+                <div class="mdl-card__supporting-text">
+                  <h5><span id="mesh"></span></h5>
+                </div>
+              </div>
+            </div>
+            <div class="mdl-cell mdl-cell--3-col">
+              <div class="mdl-card mdl-shadow--2dp">
+                <div class="mdl-card__title mdl-card--expand">
+                  Junction count
+                </div>
+                <div class="mdl-card__supporting-text">
+                  <h5><span id="junction"></span></h5>
+                </div>
+              </div>
+            </div>
+            <div class="mdl-cell mdl-cell--3-col">
+              <div class="mdl-card mdl-shadow--2dp">
+                <div class="mdl-card__title mdl-card--expand">
+                  Extremity count
+                </div>
+                <div class="mdl-card__supporting-text">
+                  <h5><span id="extremity"></span></h5>
+                </div>
+              </div>
+            </div>
+            <div class="mdl-cell mdl-cell--3-col">
+              <div class="mdl-card mdl-shadow--2dp">
+                <div class="mdl-card__title mdl-card--expand">
+                  Total branch length
+                </div>
+                <div class="mdl-card__supporting-text">
+                  <h5><span id="total_branch_length"></span></h5>
+                </div>
+              </div>
+            </div>
+            <div class="mdl-cell mdl-cell--3-col">
+              <div class="mdl-card mdl-shadow--2dp">
+                <div class="mdl-card__title mdl-card--expand">
+                  Total segment length
+                </div>
+                <div class="mdl-card__supporting-text">
+                  <h5><span id="total_segment_length"></span></h5>
+                </div>
+              </div>
+            </div>
+            <div class="mdl-cell mdl-cell--3-col">
+              <div class="mdl-card mdl-shadow--2dp">
+                <div class="mdl-card__title mdl-card--expand">
+                  Total network length
+                </div>
+                <div class="mdl-card__supporting-text">
+                  <h5><span id="total_network_length"></span></h5>
+                </div>
+              </div>
+            </div>
+            <div class="mdl-cell mdl-cell--3-col">
+              <div class="mdl-card mdl-shadow--2dp">
+                <div class="mdl-card__title mdl-card--expand">
+                  Total mesh area
+                </div>
+                <div class="mdl-card__supporting-text">
+                  <h5><span id="total_mesh_area"></span></h5>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+         </div>
       </div>
     </div>
   </div>
-  <section id="result">
-    <h3>Cell A: Angiogenesis  <small>v{{ version }}</small></h3>
-    <ul>
-        <li><h5>Image Name: <span id="name">{{ user_filename }}</span></h5></li>
-        <li><h5>Mesh count: <span id="mesh"></span></h5></li>
-        <li><h5>Junction count: <span id="junction"></span></h5></li>
-        <li><h5>Extremity count: <span id="extremity"></span></h5></li>
-        <li><h5>Total branch length: <span id="total_branch_length"></span></h5></li>
-        <li><h5>Total segment length: <span id="total_segment_length"></span></h5></li>
-        <li><h5>Total network length: <span id="total_network_length"></span></h5></li>
-        <li><h5>Total mesh area: <span id="total_mesh_area"></span></h5></li>
-    </ul>
-    <p>Drag the image to pan, use the mousewheel to zoom</p>
-    <div class="row">
-      <div class="col s12 m6">
-        <h5>Input Image <a id="input-download" download><span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span></a></h5>
-        <div class="parent">
-          <img class="panzoom" id="input-img">
+
+  <div class="result-img">
+    <div class="mdl-grid">
+      <div class="mdl-cell mdl-cell--6-col">
+        <div class="mdl-card mdl-shadow--2dp">
+          <div class="mdl-card__title"><h5>Input Image</h5></div>
+          <div class="mdl-card__supporting-text">
+            <div  class="parent">
+              <img class="panzoom" id="input-img">
+            </div>
+          </div>
         </div>
       </div>
-      <div class="col s12 m6">
-        <h5>Result Image <a id="result-download" download><span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span></a></h5>
-        <div class="parent">
-          <img class="panzoom" id="result-img">
+      <div class="mdl-cell mdl-cell--6-col">
+        <div class="mdl-card mdl-shadow--2dp">
+          <div class="mdl-card__title"><h5>Input Image</h5></div>
+          <div class="mdl-card__supporting-text">
+            <div  class="parent">
+              <img class="panzoom" id="result-img">
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  </section>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
 {% endblock %}
 
 {% block head-styles %}
-  <style type="text/css">
-    #cover {
-      position: absolute;
-      height: 100%;
-      width: 100%;
-    }
-  </style>
-  <style type="text/css">
-    #result {
-      margin: 30px;
-      display: none;
-    }
-    div.parent {
-      display: inline-block;
-      /*border: 4px dotted;*/
-    }
-    /*.panzoom > img {
-      width: 300px;
-      height: 300px;
-    }*/
-    .vertical-center {
-      height: 100%;
-      width: 100%;
-      text-align: center; /* align the inline(-block) elements horizontally */
-      font: 0/0 a; /* remove the gap between inline(-block) elements */
-    }
-
-    .vertical-center:before { /* create a full-height inline block pseudo=element */
-      content: ' ';
-      display: inline-block;
-      vertical-align: middle; /* vertical alignment of the inline element */
-      height: 100%;
-    }
-
-    .vertical-center > .container {
-      max-width: 100%;
-      display: inline-block;
-      vertical-align: middle; /* vertical alignment of the inline element */
-    }
-  </style>
+<style>
+#info-card{
+  width:100%;
+}
+</style>
 {% endblock %}
 
 {% block scripts %}
