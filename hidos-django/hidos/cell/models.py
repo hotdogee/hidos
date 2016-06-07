@@ -11,6 +11,7 @@ from PIL import Image
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.validators import RegexValidator
 
 from django_extensions.db.models import TimeStampedModel
 
@@ -37,6 +38,7 @@ folder_re = re.compile(r'^[^\\/?%*:|"<>\.]+$', re.U)
 
 class Folder(TimeStampedModel):
     # id = models.AutoField(primary_key=True)
+    id = models.CharField(max_length=32, primary_key=True) # ex. 128c8661c25d45b8-9ca7809a09619db9
     name = models.CharField(max_length=255, validators=[RegexValidator(folder_re, r'Folder names must not contain  \ / ? % * : | " < >')]) # display name
     owner = models.ForeignKey(User, models.CASCADE)
     parent_folder = models.ForeignKey('self', models.CASCADE, related_name='child_folders', null=True, blank=True)
