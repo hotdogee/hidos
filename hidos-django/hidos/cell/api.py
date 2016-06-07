@@ -47,6 +47,16 @@ class FolderViewSet(viewsets.ModelViewSet):
         else:
             return Folder.objects.none()
 
+    @detail_route()
+    def contents(self, request, pk=None, *args, **kwargs):
+        folder = self.get_object()
+        pass
+
+    @detail_route(methods=['post'])
+    def move(self, request, pk=None, *args, **kwargs):
+        folder = self.get_object()
+        pass
+
     # built-in
 
     def filter_queryset(self, queryset): # GenericAPIView
@@ -87,6 +97,11 @@ class FolderViewSet(viewsets.ModelViewSet):
         self.check_object_permissions(self.request, obj) # APIView
 
         return obj
+
+    # def retrieve(self, request, *args, **kwargs): # RetrieveModelMixin
+    #     instance = self.get_object()
+    #     serializer = self.get_serializer(instance)
+    #     return Response(serializer.data)
 
     # def update(self, request, *args, **kwargs): # UpdateModelMixin
     #     partial = kwargs.pop('partial', False)
