@@ -40,18 +40,19 @@
       <section class="mdl-layout__tab-panel is-active" id="about">
         <div class="mdl-layout mdl-layout-js">
 
-          <!-- brief introduction -->
-          <div class="about-section" id="about-grid">
-            <div id="about-section1-text">
+          <!-- brief introduction
+          <div class="about-section mdl-grid" id="about-grid">
+            <div id="about-section1-text mdl-cell mdl-cell--col-6-desktop mdl-cell--col-12-tablet mdl-cell--col-12-phone">
               <div id="text">
                 <h4 class="mdl-typography--text-left">HiDOS CellCloud is a cloud-based image analysis system for biology experiments.</h4>
                 <p class="mdl-typography--body-1">We've design several image analysis pipeline to help you quantify your experiment images. There is no longer need to waste time to adjust any analysis parameter. </p>
               </div>
             </div>
-           <div id="about-section1-image">
-
-            </div>
+           <div id="about-section1-image mdl-cell mdl-cell--col-6-desktop mdl-cell--col-12-tablet mdl-cell--col-12-phone"></div>
           </div>
+          -->
+
+
 
           <!-- feature -->
           <div class="feature-section mdl-shadow--6dp mdl-color-text--lime-500">
@@ -134,7 +135,7 @@
                 <h2 class="mdl-typography--text-Caption mdl-typography--display-2">Service</h2>
               </div>
             </div>
-            <div class="mdl-cell mdl-cell--4-col">
+            <div class="mdl-cell mdl-cell--4-col-desktop mdl-cell--12-col-tablet mdl-cell--12-col-phone">
               <div class="mdl-card mdl-shadow--2dp" id="cella">
                 <div class="mdl-card__title">
                   <h2 class="mdl-card__title-text">Cell A</h2>
@@ -147,7 +148,7 @@
                 </div>
               </div>
             </div>
-            <div class="mdl-cell mdl-cell--4-col">
+            <div class="mdl-cell mdl-cell--4-col-desktop mdl-cell--12-col-tablet mdl-cell--12-col-phone">
               <div class="mdl-card mdl-shadow--2dp" id="cellc1">
                 <div class="mdl-card__title">
                   <h2 class="mdl-card__title-text">Cell C1</h2>
@@ -160,7 +161,7 @@
                 </div>
               </div>
             </div>
-            <div class="mdl-cell mdl-cell--4-col">
+            <div class="mdl-cell mdl-cell--4-col-desktop mdl-cell--12-col-tablet mdl-cell--12-col-phone">
               <div class="mdl-card mdl-shadow--2dp" id="cellc2">
                 <div class="mdl-card__title">
                   <h2 class="mdl-card__title-text">Cell C2</h2>
@@ -173,7 +174,7 @@
                 </div>
               </div>
             </div>
-            <div class="mdl-cell mdl-cell--4-col">
+            <div class="mdl-cell mdl-cell--4-col-desktop mdl-cell--12-col-tablet mdl-cell--12-col-phone">
               <div class="mdl-card mdl-shadow--2dp" id="cellm1">
                 <div class="mdl-card__title">
                   <h2 class="mdl-card__title-text">Cell M1</h2>
@@ -187,7 +188,7 @@
                 </div>
               </div>
             </div>
-            <div class="mdl-cell mdl-cell--4-col">
+            <div class="mdl-cell mdl-cell--4-col-desktop mdl-cell--12-col-tablet mdl-cell--12-col-phone">
               <div class="mdl-card mdl-shadow--2dp" id="cellm3">
                 <div class="mdl-card__title">
                   <h2 class="mdl-card__title-text">Cell M3</h2>
@@ -200,7 +201,7 @@
                 </div>
               </div>
             </div>
-            <div class="mdl-cell mdl-cell--4-col">
+            <div class="mdl-cell mdl-cell--4-col-desktop mdl-cell--12-col-tablet mdl-cell--12-col-phone">
               <div class="mdl-card mdl-shadow--2dp" id="celln1">
                 <div class="mdl-card__title">
                   <h2 class="mdl-card__title-text">Cell N1</h2>
@@ -253,11 +254,21 @@
 
   .mdl-layout__header-row{
     padding:0 0;
-    height: 500px;
+    height: 600px;
+    background: url("static/cell/images/cover.png") no-repeat center / cover;
   }
 
+  .hero{
+    margin: auto
+  }
+
+
   .hero > h2 {
-    padding-top:125px;
+    color: white;
+  }
+
+  .hero > p {
+    color: white;
   }
 
   .hero > a {
@@ -348,7 +359,7 @@
     width:50%;
     margin:auto;
     display: inline-block;
-    background: url("static/cell/images/hero.png") no-repeat center / cover;
+      background: url("static/cell/images/hero.png") no-repeat center / cover;
   }
 
   .feature-section-title{
