@@ -13,6 +13,7 @@ ALLOWED_HOSTS = (
     '.hidos.io',
 )
 
+
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
@@ -22,7 +23,7 @@ MANAGERS = ADMINS
 APPEND_SLASH = False
 
 LOGIN_URL = '/login'
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/a/'
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'n(bd1f1c%e8=_xad02x53tfn%wgwpi492e$8_erx+d)!tpeoim'
@@ -381,3 +382,6 @@ SOCIALACCOUNT_PROVIDERS ={
         'EXCHANGE_TOKEN': True,
         'VERIFIED_EMAIL': False,
         'VERSION': 'v2.4'}}
+
+
+

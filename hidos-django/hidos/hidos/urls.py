@@ -25,6 +25,7 @@ from app.forms import BootstrapAuthenticationForm
 # Uncomment the next lines to enable the admin:
 from django.conf.urls import include
 from django.contrib import admin
+import cell.views as cell_view
 # admin.autodiscover()
 
 urlpatterns = [
@@ -48,6 +49,7 @@ urlpatterns = [
             'next_page': '/',
         },
         name='logout'),
+    url(r'^register/', cell_view.RegisterView.as_view()),
     url(r'^accounts/', include('allauth.urls')),
     url(r'^', include('cell.urls')),
 
