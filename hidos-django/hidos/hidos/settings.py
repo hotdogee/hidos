@@ -28,6 +28,19 @@ LOGIN_REDIRECT_URL = '/a/'
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'n(bd1f1c%e8=_xad02x53tfn%wgwpi492e$8_erx+d)!tpeoim'
 
+
+# Email setting
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_HOST_PASSWORD = 53394221
+EMAIL_HOST_USER = "hidos.image@gmail.com"
+EMAIL_USE_TLS = True
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+# allauth email setting
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 

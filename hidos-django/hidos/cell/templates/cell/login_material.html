@@ -1,0 +1,19 @@
+{% if user.is_authenticated %}
+
+  <div class="mdl-layout-title">
+    <span>{{ user.username }}</span>
+    <button class="mdl-button mdl-js-button mdl-button--icon" id="user-menu-top-right">
+      <i class="material-icons">arrow_drop_up</i>
+    </button>
+  </div>
+
+  <ul class="mdl-menu mdl-menu--top-right mdl-js-menu mdl-js-ripple-effect" data-mdl-for="user-menu-top-right">
+    <li class="mdl-menu__item"><a class="mdl-navigation__link" href="javascript:document.getElementById('logoutForm').submit()">Log out</a></li>
+    <form id="logoutForm" action="/logout" method="post" class="right">{% csrf_token %}</form>
+  </ul>
+{% else %}
+  <div class="mdl-layout-title">
+    <a class="mdl-navigation__link" href="{% url 'login' %}">Log in</a>
+  </div>
+
+{% endif %}
