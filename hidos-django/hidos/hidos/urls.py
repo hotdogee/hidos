@@ -34,7 +34,7 @@ urlpatterns = [
     url(r'^login$',
         auth_views.login,
         {
-            'template_name': 'app/login.html',
+            'template_name': 'app/login_material.html',
             'authentication_form': BootstrapAuthenticationForm,
             'extra_context':
             {
