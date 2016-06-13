@@ -1,75 +1,48 @@
-{% extends "app/layout.html" %}
-{% load account socialaccount %}
-{% block head-styles %}
-<style type="text/css">
-#login-page {
-    width: 400px;
-    margin-top: 20px;
-}
-#login-ul {
-  display: none;
-}
-</style>
-{% endblock %}
-{% block content-body %}
 
 
+{% extends 'app/account_base.html' %}
 
+{% block content %}
+<div class="mdl-layout mdl-js-layout">
+  <div class="mdl-card mdl-shadow--6dp mdl-typography--text-center" id="login-page">
+<form action="/accounts/signup/" method="post" id="login-form">
+{% csrf_token %}
+  <div class="mdl-grid">
+    <div class="mdl-cell mdl-cell--12-col">
+      <p class="mdl-typography--headline">Account Registration</p>
+    </div>
+    <div class="mdl-cell mdl-cell--12-col mdl-textfield mdl-js-textfield">
+      {{ form.username }}
+      <label for="id_username" class="mdl-textfield__label">Username</label>
+    </div>
+    <div class="mdl-cell mdl-cell--12-col mdl-textfield mdl-js-textfield">
+      {{ form.email }}
+      <label for="id_email" class="mdl-textfield__label">Email</label>
+    </div>
+    <div class="mdl-cell mdl-cell--12-col mdl-textfield mdl-js-textfield">
+      {{ form.password1 }}
+      <label for="id_password1" class="mdl-textfield__label">Password</label>
+    </div>
+    <div class="mdl-cell mdl-cell--12-col mdl-textfield mdl-js-textfield">
+      {{ form.password2 }}
+      <label for="id_password2" class="mdl-textfield__label">Password again</label>
+    </div>
 
-<div class="center">
-  <div id="login-page" class="row">
-    <div class="col s12 z-depth-4 card-panel">
-      <form action="{% url 'account_signup' %}" method="post" id="login-form">
-          {% csrf_token %}
-        <div class="row">
-          <div class="input-field col s12 center">
-            <h5 class="center login-form-text">Account Register</h5>
-          </div>
-        </div>
-        <div class="row margin">
-          <div class="input-field col s12">
-            <i class="mdi-social-person-outline prefix"></i>
-            {{ form.username }}
-            <label for="username" class="center-align">Username</label>
-          </div>
-        </div>
-        <div class="row margin">
-          <div class="input-field col s12">
-            <i class="mdi-action-lock-outline prefix"></i>
-            {{ form.email }}
-            <label for="email">E-mail</label>
-          </div>
-        </div>
-        <div class="row margin">
-          <div class="input-field col s12">
-            <i class="mdi-action-lock-outline prefix"></i>
-            {{ form.password1 }}
-            <label for="password1">Password</label>
-          </div>
-        </div>
-        <div class="row margin">
-          <div class="input-field col s12">
-            <i class="mdi-action-lock-outline prefix"></i>
-            {{ form.password2 }}
-            <label for="password2">Password again</label>
-          </div>
-        </div>
-        <div class="row">
-          <div class="input-field col s12">
-            <input type="hidden" name="next" value="/a/" />
-            <a href="javascript:document.getElementById('login-form').submit()" class="btn waves-effect waves-light col s12">Register</a>
-          </div>
-        </div>
-      </form>
+    <div class="mdl-cell mdl-cell--12-col">
+      <input type="hidden" name="next" value="/a/" />
+      <a href="javascript:document.getElementById('login-form').submit()" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">Register</a>
     </div>
   </div>
+</form>
+{% if form.errors %}
+<p>Please enter consistent password</p>
+{% endif %}
+  </div>
 </div>
-{% endblock %}
-
-
-{% block scripts %}
-
-  {% load staticfiles %}
-<script src="{% static 'app/scripts/jquery.validate.min.js' %}"></script>
 
 {% endblock %}
+
+
+
+
+

@@ -20,7 +20,7 @@ from django.contrib import admin
 from django.conf.urls import include, url
 from django.contrib.auth import views as auth_views
 
-from app.forms import BootstrapAuthenticationForm
+from app.forms import LoginForm
 
 # Uncomment the next lines to enable the admin:
 from django.conf.urls import include
@@ -35,7 +35,7 @@ urlpatterns = [
         auth_views.login,
         {
             'template_name': 'app/login_material.html',
-            'authentication_form': BootstrapAuthenticationForm,
+            'authentication_form': LoginForm,
             'extra_context':
             {
                 'title': 'Log in',
@@ -50,6 +50,7 @@ urlpatterns = [
         },
         name='logout'),
     url(r'^register/', cell_view.RegisterView.as_view()),
+    url(r'^accounts/confirm-email/', cell_view.EmailConfirmationView.as_view()),
     url(r'^accounts/', include('allauth.urls')),
     url(r'^', include('cell.urls')),
 

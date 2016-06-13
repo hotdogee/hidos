@@ -5,8 +5,8 @@ from django.shortcuts import render
 from vanilla import TemplateView, FormView
 
 from . import app_name, verbose_name, version
-from app.forms import BootstrapAuthenticationForm
 from allauth.account.forms import SignupForm
+from app.forms import RegisterForm
 
 class IndexView(TemplateView):
     template_name = 'cell/index_material.html'
@@ -19,10 +19,13 @@ class IndexView(TemplateView):
 
 class RegisterView(FormView):
     template_name = 'app/register.html'
-    form_class = SignupForm
+    form_class = RegisterForm
 
     def get_form_class(self):
-        return SignupForm
+        return RegisterForm
+
+class EmailConfirmationView(TemplateView):
+    template_name = 'app/email_confirmation.html'
 
 
 

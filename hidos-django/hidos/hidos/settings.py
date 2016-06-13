@@ -40,6 +40,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 # allauth email setting
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+ACCOUNT_SIGNUP_FROM_CLASS = 'cell.forms.RegisterForm'
+
 
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
