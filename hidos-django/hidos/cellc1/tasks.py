@@ -51,13 +51,18 @@ def run_cell_c1_task(self, task_id,uploaded_image_path, result_image_path, resul
             "text": "",
             "icon_emoji": ":desktop_computer:"}
 
+    from django.contrib.auth.models import User
+    user = User.objects.get(id__exact=record.user_id)
+    username = user.username
+
 
     # run
     try:
        cellCount_singleTask(uploaded_image_path, result_image_path, result_json_path)
     except Exception as e:
         record.stderr = e
-        data["text"] = '`' + uploaded_image_path + '`\n' + e.args[0]
+        uploaded_image_name = uploaded_image_path.split('/')[-1]
+        data["text"] = username + '\n' + record.uploaded_filename + '\n' + e.args[0]  + '\n' + '`' + uploaded_image_name + '`'
         slack_manager.request('POST','https://hooks.slack.com/services/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',body = json.dumps(data),headers={'Content-Type': 'application/json'})
         logger.info(e.args)
 
