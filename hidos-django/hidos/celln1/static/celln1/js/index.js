@@ -16,7 +16,7 @@ $(document).ready(function () {
       deferRender: true,
       scroller: true,
       scrollY: 500,
-      order: [[3, 'desc']],
+      order: [[5s, 'desc']],
       dom: 'Bfrtip',
       columns: [
         {
