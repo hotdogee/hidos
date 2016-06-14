@@ -57,14 +57,14 @@ $(function () {
                 maxScale: 2.0,
                 contain: 'invert',
               });
-              $panzoom.parent().on('mousewheel.focal', function (e) {
+              $panzoom.parent().on('wheel', function (e) {
                 e.preventDefault();
                 var delta = e.delta || e.originalEvent.wheelDelta;
                 var zoomOut = delta ? delta < 0 : e.originalEvent.deltaY > 0;
                 $panzoom.panzoom('zoom', zoomOut, {
                   increment: 0.02,
                   animate: false,
-                  focal: e
+                  focal: e.originalEvent
                 });
               });
               var lazyLayout = _.throttle(function () {
