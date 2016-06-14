@@ -1,79 +1,92 @@
-{% extends "app/layout.html" %}
+{% extends "cell/result_layout.html" %}
 {% load static %}
-{% block content-body %}
-  <div id="cover">
-    <div class="jumbotron vertical-center">
-      <div class="container text-center">
-        <img src="{% static 'app/images/loading.gif' %}">
-        <h5>Cell M1 is working...</h5>
+
+
+{% block content %}
+
+
+
+<div id="cover">
+  <div class="mdl-typography--text-center" style="margin:auto">
+      <img src="{% static 'app/images/loading.gif' %}">
+        <h5>Cell M1 is running...</h5>
+  </div>
+</div>
+
+
+<div class="mdl-layout mdl-js-layout" id="result">
+  <div class="mdl-layout__header">
+    <div class="mdl-layout__header-row">
+      <a href="/m1/" id="back"><i class="fa fa-arrow-left" aria-hidden="true"></i></a>
+      <span class="mdl-layout-title">{{ user_filename }}</span>
+    </div>
+  </div>
+
+  <div class="result-info">
+    <div class="mdl-card mdl-shadow--4dp">
+      <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--8-col mdl-cell--8-tablet mdl-cell--8-phone">
+          <div class="mdl-card__title">Cell proportion</div>
+        </div>
+        <div class="mdl-cell mdl-cell--4-col mdl-cell--4-tablet mdl-cell--4-phone">
+          <div class="mdl-card__supporting-text"><span id="ratio"></span></div>
+        </div>
       </div>
     </div>
   </div>
-  <section id="result">
-    <h3>Cell M1: Transwell Migration <small>v{{ version }}</small></h3>
-    <ul>
-        <li><h5>Image Name: <span id="name">{{ user_filename }}</span></h5></li>
-        <li><h5>Cell proportion: <span id="ratio"></span></h5></li>
-    </ul>
-    <p>Drag the image to pan, use the mousewheel to zoom</p>
-    <div class="row">
-      <div class="col s12 m6">
-        <h5>Input Image <a id="input-download" download><span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span></a></h5>
-        <div class="parent">
+
+
+  <div class="result-img">
+    <div class="mdl-grid">
+      <div class="mdl-cell mdl-cell--6-col">
+        <h5>Input Image</h5>
+        <div  class="parent">
           <img class="panzoom" id="input-img">
         </div>
       </div>
-      <div class="col s12 m6">
-        <h5>Result Image <a id="result-download" download><span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span></a></h5>
-        <div class="parent">
+      <div class="mdl-cell mdl-cell--6-col">
+        <h5>Output Image</h5>
+        <div  class="parent">
           <img class="panzoom" id="result-img">
         </div>
       </div>
     </div>
-  </section>
+  </div>
+</div>
+
+
 {% endblock %}
 
 {% block head-styles %}
-  <style type="text/css">
-    #cover {
-      position: absolute;
-      height: 100%;
-      width: 100%;
-    }
-  </style>
-  <style type="text/css">
-    #result {
-      margin: 30px;
-      display: none;
-    }
-    div.parent {
-      display: inline-block;
-      /*border: 4px dotted;*/
-    }
-    /*.panzoom > img {
-      width: 300px;
-      height: 300px;
-    }*/
-    .vertical-center {
-      height: 100%;
-      width: 100%;
-      text-align: center; /* align the inline(-block) elements horizontally */
-      font: 0/0 a; /* remove the gap between inline(-block) elements */
-    }
+<link rel="stylesheet" href="https://code.getmdl.io/1.1.3/material.blue-red.min.css" />
 
-    .vertical-center:before { /* create a full-height inline block pseudo=element */
-      content: ' ';
-      display: inline-block;
-      vertical-align: middle; /* vertical alignment of the inline element */
-      height: 100%;
-    }
+<style>
+  #cover{
+    height:100vh;
+    width:100%;
+    display: flex;
+  }
+  .mdl-layout__header-row{
+    padding:0 0 0 20px;
 
-    .vertical-center > .container {
-      max-width: 100%;
-      display: inline-block;
-      vertical-align: middle; /* vertical alignment of the inline element */
-    }
-  </style>
+  }
+
+  #back{
+    font-size:20px;
+    padding-right:10px;
+  }
+
+  .mdl-card{
+    min-height:0px;
+    min-width:300px;
+    display: inline-block;
+  }
+
+  .result-info{
+    margin:16px 16px;
+  }
+
+</style>
 {% endblock %}
 
 {% block scripts %}
