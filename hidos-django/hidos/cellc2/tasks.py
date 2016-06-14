@@ -37,7 +37,7 @@ def run_cell_c2_task(self, task_id, args_list, path_prefix):
 
     # update dequeue time
     from .models import CellC2Task
-    record = CellC2Task.objects.get(task_id__exact=task_id)
+    record = CellC2Task.objects.get(id__exact=task_id)
     record.dequeued = datetime.utcnow().replace(tzinfo=utc)
     record.status = 'running'
     record.save()

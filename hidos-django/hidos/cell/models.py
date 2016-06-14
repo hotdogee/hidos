@@ -46,7 +46,7 @@ class Folder(TimeStampedModel):
     parent_folder = models.ForeignKey('self', models.CASCADE, related_name='child_folders', null=True, blank=True)
 
     def __unicode__(self):
-        return self.name
+        return '{0} ({1})'.format(self.name, self.id[:6])
 
     @property
     def path(self): # will probably need some caching
@@ -78,21 +78,20 @@ class File(TimeStampedModel):
     # file = models.OneToOneField(File, models.CASCADE, parent_link=True, related_name='content')
 
     def __unicode__(self):
-        return self.name
+        return '{0} ({1})'.format(self.name, self.id[:6])
 
     class Meta(TimeStampedModel.Meta):
         pass
 
 # Abstract model for a user submitted task
 class Task(File):
+    filemodel = models.OneToOneField(File, models.CASCADE, 
+        parent_link=True, related_name='content')
     status = models.CharField(max_length=32, default='queued') # queued, running, success, failed
     dequeued = models.DateTimeField(null=True, blank=True)
     finished = models.DateTimeField(null=True, blank=True)
     version = models.CharField(max_length=32)
     #cell_ratio = models.FloatField()
-
-    def __unicode__(self):
-        return self.task_id
 
     class Meta(File.Meta):
         abstract = True
@@ -106,7 +105,7 @@ class ViewableQuerySet(models.query.QuerySet):
 
 class SingleImageUploadManager(models.Manager):
 
-    def create(self, file, user, **kwargs): # QuerySet, file=file, user=user
+    def create(self, file, owner, **kwargs): # QuerySet, file=file, owner=user
         """
         Create a CellTaskModel from a validated UploadedFile object
         """
@@ -121,7 +120,7 @@ class SingleImageUploadManager(models.Manager):
         # Generate task id
         m = hashlib.md5()
         m.update(app.version)
-        m.update(user.username) # if anonymous, username is ''
+        m.update(owner.username) # if anonymous, username is ''
         m.update(uploaded_file_data)
         task_id = m.hexdigest()
 
@@ -171,8 +170,8 @@ class SingleImageUploadManager(models.Manager):
             'uploaded_filetype': image_type,
             'status': 'queued',
         }
-        if user.username:
-            data['owner'] = user
+        if owner.username:
+            data['owner'] = owner
         return super(SingleImageUploadManager, self).create(**data)
 
     # built-in
@@ -206,9 +205,6 @@ class CellTask(Task):
     stderr = models.TextField(blank=True)
 
     objects = SingleImageUploadManager.from_queryset(ViewableQuerySet)()
-
-    def __unicode__(self):
-        return '{0} ({1})'.format(self.name, self.task_id[:6])
 
     class Meta(Task.Meta):
         abstract = True

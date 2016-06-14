@@ -10,7 +10,7 @@ class CellC2TaskAdmin(admin.ModelAdmin):
             'dequeued', 'finished',
             'created', 'modified')
     readonly_fields = ('created', 'modified')
-    search_fields = ['id', 'status', 'owner', 'uploaded_filename']
+    search_fields = ['id', 'status', 'owner', 'name']
     view_on_site = True
     list_display = ('__unicode__', 'cell_ratio', 'status', 'owner', 'modified')
 

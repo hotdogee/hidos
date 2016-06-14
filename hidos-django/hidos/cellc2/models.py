@@ -10,7 +10,6 @@ from .tasks import run_cell_c2_task
 from . import app_name, verbose_name, version
 
 class CellC2Task(CellTask):
-    filemodel = models.OneToOneField(File, models.CASCADE, parent_link=True, related_name='content')
     cell_ratio = models.FloatField(null=True, blank=True)
     count_min = models.FloatField(null=True, blank=True)
     count_max = models.FloatField(null=True, blank=True)
@@ -25,7 +24,7 @@ class CellC2Task(CellTask):
         """Insert task into task queue
         """
         # Generate args_list and path_prefix
-        path_prefix = path.join(settings.MEDIA_ROOT, 'cellc2', 'task', self.task_id, self.task_id)
+        path_prefix = path.join(settings.MEDIA_ROOT, 'cellc2', 'task', self.id, self.id)
         script_path = path.join(settings.PROJECT_ROOT, 'cellc2', 'bin', '1_6_obj_area_cal_cmd.R')
         # avoid exploits, don't any part of the user filename
         uploaded_image_path = path_prefix + '_uploaded.' + self.uploaded_filetype
@@ -36,7 +35,7 @@ class CellC2Task(CellTask):
         output_image_viewer_path = path_prefix + '_out.jpg'
         # build command
         args_list = [[settings.R_SCRIPT, script_path, uploaded_image_path, result_image_path, result_json_path]]
-        run_cell_c2_task.delay(self.task_id, args_list, path_prefix)
+        run_cell_c2_task.delay(self.id, args_list, path_prefix)
 
     # def save(self, force_insert=False, force_update=False, using=None, update_fields=None)
     # def save(self, *args, **kwargs):

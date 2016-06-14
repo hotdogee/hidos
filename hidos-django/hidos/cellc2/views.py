@@ -29,10 +29,10 @@ class DetailView(GenericModelView):
     lookup_field = 'id'
 
     def get_context_data(self, **context):
-        context['title'] = '{0} - {1}'.format(verbose_name, self.object.uploaded_filename)
+        context['title'] = '{0} - {1}'.format(verbose_name, self.object.name)
         context['year'] = datetime.now().year
         context['version'] = version
-        context['user_filename'] = self.object.uploaded_filename
+        context['user_filename'] = self.object.name
         return context
 
     def get(self, request, *args, **kwargs):
