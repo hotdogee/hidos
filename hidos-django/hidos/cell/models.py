@@ -1,4 +1,5 @@
 from __future__ import absolute_import, unicode_literals
+import re
 import sys
 import hashlib
 import imghdr
@@ -10,16 +11,57 @@ from PIL import Image
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.validators import RegexValidator
 
 from django_extensions.db.models import TimeStampedModel
 
 from . import app_name, verbose_name, version
 
+# class TimeStampedModel(models.Model):
+#     """ TimeStampedModel
+#     An abstract base class model that provides self-managed "created" and
+#     "modified" fields.
+#     """
+#     created = CreationDateTimeField(_('created')) # editable=False, blank=True, auto_now_add=True
+#     modified = ModificationDateTimeField(_('modified')) # auto_now_add=True
+
+#     def save(self, **kwargs):
+#         self.update_modified = kwargs.pop('update_modified', getattr(self, 'update_modified', True))
+#         super(TimeStampedModel, self).save(**kwargs)
+
+#     class Meta:
+#         get_latest_by = 'modified'
+#         ordering = ('-modified', '-created',)
+#         abstract = True
+
+folder_re = re.compile(r'^[^\\/?%*:|"<>\.]+$', re.U)
+
 class Folder(TimeStampedModel):
-    folder_id = models.CharField(max_length=32, primary_key=True)
-    name = models.CharField(max_length=255) # display name
+    # id = models.AutoField(primary_key=True)
+    id = models.CharField(max_length=32, primary_key=True) # ex. 128c8661c25d45b8-9ca7809a09619db9
+    name = models.CharField(max_length=255, validators=[RegexValidator(folder_re, r'Folder names must not contain  \ / ? % * : | " < >')]) # display name
     owner = models.ForeignKey(User, models.CASCADE)
-    parent_folder = models.ForeignKey('self', models.CASCADE, related_name='child_folders')
+    parent_folder = models.ForeignKey('self', models.CASCADE, related_name='child_folders', null=True, blank=True)
+
+    @property
+    def path(self): # will probably need some caching
+        if not self.parent_folder:
+            return self.name
+        else:
+            return self.parent_folder.path() + '/' + self.name
+
+    class Meta(TimeStampedModel.Meta):
+        pass
+
+    # built in
+    # def to_python(self, value): # CharField
+    #     "Returns a Unicode object."
+    #     if value in self.empty_values:
+    #         return ''
+    #     value = force_text(value)
+    #     if self.strip:
+    #         value = value.strip()
+    #     return value
 
 
 # Abstract model for a user submitted task
@@ -29,7 +71,7 @@ class TaskModel(TimeStampedModel):
     dequeued = models.DateTimeField(null=True, blank=True)
     finished = models.DateTimeField(null=True, blank=True)
     user = models.ForeignKey(User, null=True, blank=True)
-    parent_folder = models.ForeignKey(Folder, models.SET_NULL, null=True, blank=True)
+    parent_folder = models.ForeignKey(Folder, models.CASCADE, null=True, blank=True)
     version = models.CharField(max_length=32)
     #cell_ratio = models.FloatField()
 

@@ -6,18 +6,14 @@ from rest_framework import filters
 from .models import CellC2Task
 
 
-class CellC2TaskSerializer(serializers.ModelSerializer):
-    file = serializers.ImageField(write_only=True, max_length=None, allow_empty_file=False, use_url=False)
-    url = serializers.URLField(source='get_absolute_url', read_only=True)
+class FolderSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = CellC2Task
-        read_only_fields = ['url',
-            'cell_ratio',
-            'uploaded_filename', 'uploaded_filetype', 'stdout', 'stderr',
-            'task_id', 'status', 'dequeued', 'finished', 'user', 'parent_folder', 'version',
-            'created', 'modified']
-        fields = read_only_fields + ['file']
+        model = Folder
+        read_only_fields = ['id', 'created', 'modified']
+        fields = read_only_fields + ['name', 'owner', 'parent_folder']
+        # Model fields which have editable=False set, and AutoField fields will be set to read-only by default,
+        # and do not need to be added to the read_only_fields option.
 
     # def create(self, validated_data):
     #    return CellC2Task.objects.create(**validated_data)

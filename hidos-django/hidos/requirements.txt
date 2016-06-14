@@ -1,6 +1,6 @@
 celery>=3.1.20
-Django[bcrypt]>=1.9.1
-django-extensions>=1.6.1
+Django[bcrypt]>=1.9.6
+django-extensions>=1.6.7
 django-allauth>=0.24.1
 Pillow>=3.1.1
 django-model-utils>=2.4

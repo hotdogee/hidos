@@ -1,0 +1,16 @@
+// Place your settings in this file to overwrite default and user settings.
+{
+    // When opening a file, `editor.tabSize` and `editor.insertSpaces` will be detected based on the file contents.
+    "editor.detectIndentation": true,
+    
+    // Configure glob patterns for excluding files and folders.
+    "files.exclude": {
+        "**/*.pyc": true,
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.DS_Store": true
+    },
+
+    // Controls if the explorer should automatically reveal files when opening them.
+    "explorer.autoReveal": true,
+}
