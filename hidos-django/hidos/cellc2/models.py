@@ -16,7 +16,7 @@ class CellC2Task(CellTask):
     count_max = models.FloatField(null=True, blank=True)
 
     def get_absolute_url(self):
-        return reverse('c2:detail', kwargs={'task_id': self.task_id}, current_app=app_name)
+        return reverse('c2:detail', kwargs={'id': self.id}, current_app=app_name)
 
     class Meta(CellTask.Meta):
         verbose_name = '{0} {1}'.format(verbose_name, 'Task')

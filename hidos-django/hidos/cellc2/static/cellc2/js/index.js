@@ -29,7 +29,7 @@ $(document).ready(function () {
           }
         },
         {
-          name: 'file-name', data: 'uploaded_filename',
+          name: 'file-name', data: 'name',
           render: function (data, type, row, meta) {
             if (type === 'display')
               return cellq_name_compiled({ name: data });
