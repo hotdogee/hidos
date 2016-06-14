@@ -5,11 +5,12 @@ from django.db import models
 from django.conf import settings
 from django.core.urlresolvers import reverse
 
-from cell.models import CellTaskModel, ViewableQuerySet, SingleImageUploadManager
+from cell.models import File, CellTask, ViewableQuerySet, SingleImageUploadManager
 from .tasks import run_cell_c2_task
 from . import app_name, verbose_name, version
 
-class CellC2Task(CellTaskModel):
+class CellC2Task(CellTask):
+    filemodel = models.OneToOneField(File, models.CASCADE, parent_link=True, related_name='content')
     cell_ratio = models.FloatField(null=True, blank=True)
     count_min = models.FloatField(null=True, blank=True)
     count_max = models.FloatField(null=True, blank=True)
@@ -17,7 +18,7 @@ class CellC2Task(CellTaskModel):
     def get_absolute_url(self):
         return reverse('c2:detail', kwargs={'task_id': self.task_id}, current_app=app_name)
 
-    class Meta(CellTaskModel.Meta):
+    class Meta(CellTask.Meta):
         verbose_name = '{0} {1}'.format(verbose_name, 'Task')
 
     def enqueue(self):

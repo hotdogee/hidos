@@ -27,9 +27,9 @@ class TaskViewSet(viewsets.ModelViewSet):
     """
     queryset = CellC2Task.objects.all()
     serializer_class = CellC2TaskSerializer
-    lookup_field = 'task_id'
+    lookup_field = 'id'
     filter_backends = (filters.DjangoFilterBackend,)
-    filter_fields = ('task_id', )
+    filter_fields = ('id', )
     pagination_class = None
 
     def get_queryset(self):
@@ -45,7 +45,7 @@ class TaskViewSet(viewsets.ModelViewSet):
         (Eg. return a list of items that is specific to the user)
         """
         if self.request.user.username:
-            return CellC2Task.objects.filter(user=self.request.user)
+            return CellC2Task.objects.filter(owner=self.request.user)
         else:
             return CellC2Task.objects.none()
 
@@ -62,14 +62,14 @@ class TaskViewSet(viewsets.ModelViewSet):
 
     @list_route()
     def running(self, request, *args, **kwargs):
-        running_tasks = CellC2Task.objects.filter(user=request.user, status__in=['queued', 'running'])
+        running_tasks = CellC2Task.objects.filter(owner=request.user, status__in=['queued', 'running'])
         serializer = self.get_serializer(running_tasks, many=True)
         return Response(serializer.data)
 
     def perform_create(self, serializer): # CreateModelMixin
         # If anonymous upload, user will be django.contrib.auth.models.AnonymousUser
         # and username will be an empty string.
-        task = serializer.save(user=self.request.user) # returns create model instance
+        task = serializer.save(owner=self.request.user) # returns create model instance
         # put task in queue
         task.enqueue()
 

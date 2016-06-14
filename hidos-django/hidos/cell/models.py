@@ -34,14 +34,19 @@ from . import app_name, verbose_name, version
 #         ordering = ('-modified', '-created',)
 #         abstract = True
 
-folder_re = re.compile(r'^[^\\/?%*:|"<>\.]+$', re.U)
+folder_re = re.compile(r'^[^\\/:*?"<>|\.]+$', re.U)
+file_re = re.compile(r'^[^\\/:*?"<>|]+$', re.U)
 
 class Folder(TimeStampedModel):
     # id = models.AutoField(primary_key=True)
     id = models.CharField(max_length=32, primary_key=True) # ex. 128c8661c25d45b8-9ca7809a09619db9
-    name = models.CharField(max_length=255, validators=[RegexValidator(folder_re, r'Folder names must not contain  \ / ? % * : | " < >')]) # display name
+    name = models.CharField(max_length=255,  # display name
+        validators=[RegexValidator(folder_re, r'Folder names must not contain  \ / : * ? " < > | .')])
     owner = models.ForeignKey(User, models.CASCADE)
     parent_folder = models.ForeignKey('self', models.CASCADE, related_name='child_folders', null=True, blank=True)
+
+    def __unicode__(self):
+        return self.name
 
     @property
     def path(self): # will probably need some caching
@@ -63,22 +68,33 @@ class Folder(TimeStampedModel):
     #         value = value.strip()
     #     return value
 
+class File(TimeStampedModel):
+    id = models.CharField(max_length=32, primary_key=True) # ex. 128c8661c25d45b8-9ca7809a09619db9
+    name = models.CharField(max_length=255,  # display name
+        validators=[RegexValidator(file_re, r'File names must not contain  \ / : * ? " < > |')])
+    owner = models.ForeignKey(User, models.CASCADE, null=True, blank=True)
+    parent_folder = models.ForeignKey(Folder, models.CASCADE, null=True, blank=True)
+    # content points to child models
+    # file = models.OneToOneField(File, models.CASCADE, parent_link=True, related_name='content')
+
+    def __unicode__(self):
+        return self.name
+
+    class Meta(TimeStampedModel.Meta):
+        pass
 
 # Abstract model for a user submitted task
-class TaskModel(TimeStampedModel):
-    task_id = models.CharField(max_length=32, primary_key=True) # ex. 128c8661c25d45b8-9ca7809a09619db9
+class Task(File):
     status = models.CharField(max_length=32, default='queued') # queued, running, success, failed
     dequeued = models.DateTimeField(null=True, blank=True)
     finished = models.DateTimeField(null=True, blank=True)
-    user = models.ForeignKey(User, null=True, blank=True)
-    parent_folder = models.ForeignKey(Folder, models.CASCADE, null=True, blank=True)
     version = models.CharField(max_length=32)
     #cell_ratio = models.FloatField()
 
     def __unicode__(self):
         return self.task_id
 
-    class Meta(TimeStampedModel.Meta):
+    class Meta(File.Meta):
         abstract = True
 
 
@@ -109,8 +125,9 @@ class SingleImageUploadManager(models.Manager):
         m.update(uploaded_file_data)
         task_id = m.hexdigest()
 
-        existing_queryset = self.filter(task_id=task_id)
+        existing_queryset = self.filter(id=task_id)
         if existing_queryset.exists():
+            # TODO: log existing
             return existing_queryset[0]
 
         # get image format
@@ -148,14 +165,14 @@ class SingleImageUploadManager(models.Manager):
 
         # Build data dictionary
         data = {
-            'task_id': task_id,
+            'id': task_id,
             'version': app.version,
-            'uploaded_filename': file.name,
+            'name': file.name,
             'uploaded_filetype': image_type,
             'status': 'queued',
         }
         if user.username:
-            data['user'] = user
+            data['owner'] = user
         return super(SingleImageUploadManager, self).create(**data)
 
     # built-in
@@ -182,9 +199,7 @@ class SingleImageUploadManager(models.Manager):
 
 
 # CellQ result model
-class CellTaskModel(TaskModel):
-    # user file name
-    uploaded_filename = models.CharField(max_length=255) # ext3 max filename = 255
+class CellTask(Task):
     # uploaded image file type
     uploaded_filetype = models.CharField(max_length=10)
     stdout = models.TextField(blank=True)
@@ -193,9 +208,9 @@ class CellTaskModel(TaskModel):
     objects = SingleImageUploadManager.from_queryset(ViewableQuerySet)()
 
     def __unicode__(self):
-        return '{0} ({1})'.format(self.uploaded_filename, self.task_id[:6])
+        return '{0} ({1})'.format(self.name, self.task_id[:6])
 
-    class Meta(TaskModel.Meta):
+    class Meta(Task.Meta):
         abstract = True
 
 # TODO: Permissions class for sharing

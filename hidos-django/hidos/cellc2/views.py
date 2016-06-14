@@ -26,7 +26,7 @@ class IndexView(TemplateView):
 class DetailView(GenericModelView):
     template_name = 'cellc2/result.html'
     model = CellC2Task
-    lookup_field = 'task_id'
+    lookup_field = 'id'
 
     def get_context_data(self, **context):
         context['title'] = '{0} - {1}'.format(verbose_name, self.object.uploaded_filename)

@@ -14,8 +14,8 @@ class CellC2TaskSerializer(serializers.ModelSerializer):
         model = CellC2Task
         read_only_fields = ['url',
             'cell_ratio', 'count_min', 'count_max',
-            'uploaded_filename', 'uploaded_filetype', 'stdout', 'stderr',
-            'task_id', 'status', 'dequeued', 'finished', 'user', 'parent_folder', 'version',
+            'name', 'uploaded_filetype', 'stdout', 'stderr',
+            'id', 'status', 'dequeued', 'finished', 'owner', 'parent_folder', 'version',
             'created', 'modified']
         fields = read_only_fields + ['file']
 
