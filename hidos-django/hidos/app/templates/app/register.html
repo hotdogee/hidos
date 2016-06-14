@@ -5,38 +5,40 @@
 {% block content %}
 <div class="mdl-layout mdl-js-layout">
   <div class="mdl-card mdl-shadow--6dp mdl-typography--text-center" id="login-page">
-<form action="/accounts/signup/" method="post" id="login-form">
-{% csrf_token %}
-  <div class="mdl-grid">
-    <div class="mdl-cell mdl-cell--12-col">
-      <p class="mdl-typography--headline">Account Registration</p>
-    </div>
-    <div class="mdl-cell mdl-cell--12-col mdl-textfield mdl-js-textfield">
-      {{ form.username }}
-      <label for="id_username" class="mdl-textfield__label">Username</label>
-    </div>
-    <div class="mdl-cell mdl-cell--12-col mdl-textfield mdl-js-textfield">
-      {{ form.email }}
-      <label for="id_email" class="mdl-textfield__label">Email</label>
-    </div>
-    <div class="mdl-cell mdl-cell--12-col mdl-textfield mdl-js-textfield">
-      {{ form.password1 }}
-      <label for="id_password1" class="mdl-textfield__label">Password</label>
-    </div>
-    <div class="mdl-cell mdl-cell--12-col mdl-textfield mdl-js-textfield">
-      {{ form.password2 }}
-      <label for="id_password2" class="mdl-textfield__label">Password again</label>
-    </div>
+  <form action="/accounts/signup/" method="post" id="login-form">
+  {% csrf_token %}
+    <div class="mdl-grid">
+      <div class="mdl-cell mdl-cell--12-col">
+        <p class="mdl-typography--headline">Account Registration</p>
+      </div>
+      <div class="mdl-cell mdl-cell--12-col mdl-textfield mdl-js-textfield">
+        {{ form.username }}
+        <label for="id_username" class="mdl-textfield__label">Username</label>
+      </div>
+      <div class="mdl-cell mdl-cell--12-col mdl-textfield mdl-js-textfield">
+        {{ form.email }}
+        <label for="id_email" class="mdl-textfield__label">Email</label>
+      </div>
+      <div class="mdl-cell mdl-cell--12-col mdl-textfield mdl-js-textfield">
+        {{ form.password1 }}
+        <label for="id_password1" class="mdl-textfield__label">Password</label>
+      </div>
+      <div class="mdl-cell mdl-cell--12-col mdl-textfield mdl-js-textfield">
+        {{ form.password2 }}
+        <label for="id_password2" class="mdl-textfield__label">Password again</label>
+      </div>
 
-    <div class="mdl-cell mdl-cell--12-col">
-      <input type="hidden" name="next" value="/a/" />
-      <a href="javascript:document.getElementById('login-form').submit()" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">Register</a>
+      <div class="mdl-cell mdl-cell--12-col">
+        <input type="hidden" name="next" value="/a/" />
+        <a href="javascript:document.getElementById('login-form').submit()" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">Register</a>
+      </div>
     </div>
-  </div>
-</form>
-{% if form.errors %}
-<p>Please enter consistent password</p>
-{% endif %}
+    {% if form.errors %}
+      {% for error in field.errors %}
+        {{ error }}
+      {% endfor %}
+    {% endif %}
+  </form>
   </div>
 </div>
 
