@@ -23,7 +23,11 @@
           <div class="hero">
             <p class="mdl-typography--display-2">HiDOS Cell Cloud</p>
             <p class="mdl-typography--headline">Instant cell image analysis without any parameter setting for modern biologists</p>
+            {% if user.is_authenticated %}
+            <a class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent mdl-typography--display-1" href="{% url 'logout' %}">logout</a>
+            {% else %}
             <a class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent mdl-typography--display-1" href="/login">login</a>
+            {% endif %}
           </div>
         </div>
       </div>
@@ -316,6 +320,10 @@
     color: #FFF;
   }
 
+  .mdl-card__supporting-text{
+     min-height:200px;
+  }
+
   .mdl-cell > .mdl-card{
     margin: auto;
   }
@@ -445,17 +453,6 @@
 
 </style>
 
-
-<script>
-  $(document).ready(function(){
-    var time = 1;
-    while (time < 2){
-       $(".mdl-layout__header-row").css("backgound) =
-    }
-  });
-
-
-</script>
 
 
 
