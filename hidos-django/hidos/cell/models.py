@@ -86,7 +86,7 @@ class File(TimeStampedModel):
 # Abstract model for a user submitted task
 class Task(File):
     filemodel = models.OneToOneField(File, models.CASCADE, 
-        parent_link=True, related_name='content')
+        parent_link=True, related_name='content') # explicit parent link with fixed related name
     status = models.CharField(max_length=32, default='queued') # queued, running, success, failed
     dequeued = models.DateTimeField(null=True, blank=True)
     finished = models.DateTimeField(null=True, blank=True)

@@ -1,5 +1,7 @@
 celery>=3.1.20
 docutils>=0.12
+numpy>=1.11.0
+matplotlib>=1.5.1
 Markdown>=2.6.6
 Pillow>=3.1.1
 Django[bcrypt]>=1.9.6
