@@ -340,9 +340,9 @@ def CellNOne(img_input_path, img_output_path, json_output_path):
 #     display_8 = overlay(img_p3, red = cellbody)
 #     display_9 = overlay(img_p3, red = img_cellbody)
     count_branches = count_ep-count_attpoint
-    mean_length = float(count_length)/count_cellbody
-    mean_branch = float(count_branches)/count_cellbody
-    mean_outgrowth = float(count_attpoint)/count_cellbody
+    mean_length = round(float(count_length)/count_cellbody,3)
+    mean_branch = round(float(count_branches)/count_cellbody,3)
+    mean_outgrowth = round(float(count_attpoint)/count_cellbody,3)
     # draw text count on image
 #     display_3 = Image.fromarray(display_3)
 #     text = ImageFont.truetype("arial.ttf",16)
