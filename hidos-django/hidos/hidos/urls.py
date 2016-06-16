@@ -49,13 +49,13 @@ urlpatterns = [
         },
         name='logout'),
     url(r'^accounts', include('allauth.urls')),
-    url(r'^', include('cell.urls')),
 
-    # Uncomment the admin/doc line below to enable admin documentation:
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
-
-    # Uncomment the next line to enable the admin:
     url(r'^admin/', admin.site.urls),
+    
+    url(r'^api/v1/fs/', include('fs.urls')),
+
+    url(r'^', include('cell.urls')),
 ]
 
 # Serving files uploaded by a user during development

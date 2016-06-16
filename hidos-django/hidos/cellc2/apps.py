@@ -4,7 +4,7 @@ from django.apps import AppConfig
 
 from . import app_name, verbose_name
 
-class CellC2Config(AppConfig):
+class Config(AppConfig):
     name = app_name
     verbose_name = verbose_name
 

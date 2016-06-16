@@ -2,7 +2,8 @@ from __future__ import unicode_literals
 
 from django.apps import AppConfig
 
+from . import app_name, verbose_name
 
-class CellConfig(AppConfig):
-    name = 'cell'
-    verbose_name = 'Cell Cloud'
+class Config(AppConfig):
+    name = app_name
+    verbose_name = verbose_name

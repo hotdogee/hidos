@@ -12,5 +12,5 @@
     },
 
     // Controls if the explorer should automatically reveal files when opening them.
-    "explorer.autoReveal": true,
+    "explorer.autoReveal": false,
 }

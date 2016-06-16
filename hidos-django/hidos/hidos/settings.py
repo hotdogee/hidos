@@ -157,8 +157,9 @@ INSTALLED_APPS = (
     'allauth.socialaccount.providers.google',
     'rest_framework',
     'app.apps.AppConfig',
-    'cell.apps.CellConfig',
-    'cellc2.apps.CellC2Config',
+    'fs.apps.Config',
+    'cell.apps.Config',
+    'cellc2.apps.Config',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
