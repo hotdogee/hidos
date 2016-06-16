@@ -75,3 +75,8 @@ class File(TimeStampedModel):
 
     class Meta(TimeStampedModel.Meta):
         pass
+
+class FileType(models.Model):
+    """app, icon, props?
+    """
+    pass
