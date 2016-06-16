@@ -109,11 +109,11 @@ class SingleImageUploadManager(models.Manager):
 class CellN1Task(CellTaskModel):
     cell_body = models.IntegerField(null=True, blank=True)
     outgrowth_length = models.IntegerField(null=True, blank=True)
-    mean_length = models.IntegerField(null=True, blank=True)
+    mean_length = models.FloatField(null=True, blank=True)
     number_of_branches = models.IntegerField(null=True, blank=True)
-    mean_branch = models.IntegerField(null=True, blank=True)
+    mean_branch = models.FloatField(null=True, blank=True)
     neurite_outgrowth = models.IntegerField(null=True, blank=True)
-    mean_outgrowth = models.IntegerField(null=True, blank=True)
+    mean_outgrowth = models.FloatField(null=True, blank=True)
 
 
     objects = SingleImageUploadManager.from_queryset(ViewableQuerySet)()
