@@ -107,9 +107,14 @@ class SingleImageUploadManager(models.Manager):
     #     return type(class_name, (cls,), class_dict)
 
 class CellN1Task(CellTaskModel):
-    soma_count = models.IntegerField(null=True, blank=True)
-    body_attachments = models.IntegerField(null=True, blank=True)
-    endpoints = models.IntegerField(null=True, blank=True)
+    cell_body = models.IntegerField(null=True, blank=True)
+    outgrowth_length = models.IntegerField(null=True, blank=True)
+    mean_length = models.IntegerField(null=True, blank=True)
+    number_of_branches = models.IntegerField(null=True, blank=True)
+    mean_branch = models.IntegerField(null=True, blank=True)
+    neurite_outgrowth = models.IntegerField(null=True, blank=True)
+    mean_outgrowth = models.IntegerField(null=True, blank=True)
+
 
     objects = SingleImageUploadManager.from_queryset(ViewableQuerySet)()
 

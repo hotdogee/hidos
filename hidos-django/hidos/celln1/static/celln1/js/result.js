@@ -17,9 +17,16 @@ $(function () {
           setTimeout(poll, 3000);
         else {
           // get result json data
-          $('#count').text(data.soma_count);
-          $('#body_attachments').text(data.body_attachments);
-          $('#endpoints').text(data.endpoints);
+          $('#cell_body').text(data.cell_body);
+          $('#outgrowth_length').text(data.outgrowth_length);
+          $('#mean_length').text(data.mean_length);
+          $('#number_of_branches').text(data.number_of_branches);
+          $('#mean_branch').text(data.mean_branch);
+          $('#neurite_outgrowth').text(data.neurite_outgrowth);
+          $('#mean_outgrowth').text(data.mean_outgrowth);
+
+
+
           // display image
           // /media/image_analysis/task/7ef4f4782fc840738f67a43edafc9683/7ef4f4782fc840738f67a43edafc9683_in.jpg
           $('#input-img').attr('src', '/media/celln1/task/' + task_id + '/' + task_id + '_in.jpg');

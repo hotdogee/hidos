@@ -25,33 +25,80 @@
     <div class="mdl-card mdl-shadow--4dp">
       <div class="mdl-grid">
         <div class="mdl-cell mdl-cell--8-col mdl-cell--8-tablet mdl-cell--8-phone">
-          <div class="mdl-card__title">Soma Count</div>
+          <div class="mdl-card__title">Cell body count</div>
         </div>
         <div class="mdl-cell mdl-cell--4-col mdl-cell--4-tablet mdl-cell--4-phone">
-          <div class="mdl-card__supporting-text"><span id="count"></span></div>
+          <div class="mdl-card__supporting-text"><span id="cell_body"></span></div>
         </div>
       </div>
     </div>
+
     <div class="mdl-card mdl-shadow--2dp">
       <div class="mdl-grid">
         <div class="mdl-cell mdl-cell--8-col mdl-cell--8-tablet mdl-cell--8-phone">
-          <div class="mdl-card__title">Body Attachments</div>
+          <div class="mdl-card__title">Total outgrowth length (pixel)</div>
         </div>
         <div class="mdl-cell mdl-cell--4-col mdl-cell--4-tablet mdl-cell--4-phone">
-          <div class="mdl-card__supporting-text"><span id="body_attachments"></span></div>
+          <div class="mdl-card__supporting-text"><span id="outgrowth_length"></span></div>
         </div>
       </div>
     </div>
+
     <div class="mdl-card mdl-shadow--2dp">
       <div class="mdl-grid">
         <div class="mdl-cell mdl-cell--8-col mdl-cell--8-tablet mdl-cell--8-phone">
-          <div class="mdl-card__title">Endopoints count</div>
+          <div class="mdl-card__title">Mean outgrowth length (pixel)</div>
         </div>
         <div class="mdl-cell mdl-cell--4-col mdl-cell--4-tablet mdl-cell--4-phone">
-          <div class="mdl-card__supporting-text"><span id="endpoints"></span></div>
+          <div class="mdl-card__supporting-text"><span id="mean_length"></span></div>
         </div>
       </div>
     </div>
+
+    <div class="mdl-card mdl-shadow--2dp">
+      <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--8-col mdl-cell--8-tablet mdl-cell--8-phone">
+          <div class="mdl-card__title">Number of branches</div>
+        </div>
+        <div class="mdl-cell mdl-cell--4-col mdl-cell--4-tablet mdl-cell--4-phone">
+          <div class="mdl-card__supporting-text"><span id="number_of_branches"></span></div>
+        </div>
+      </div>
+    </div>
+
+        <div class="mdl-card mdl-shadow--2dp">
+      <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--8-col mdl-cell--8-tablet mdl-cell--8-phone">
+          <div class="mdl-card__title">Number of branches per cell</div>
+        </div>
+        <div class="mdl-cell mdl-cell--4-col mdl-cell--4-tablet mdl-cell--4-phone">
+          <div class="mdl-card__supporting-text"><span id="mean_branch"></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mdl-card mdl-shadow--2dp">
+      <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--8-col mdl-cell--8-tablet mdl-cell--8-phone">
+          <div class="mdl-card__title">Total neurite outgrowth</div>
+        </div>
+        <div class="mdl-cell mdl-cell--4-col mdl-cell--4-tablet mdl-cell--4-phone">
+          <div class="mdl-card__supporting-text"><span id="neurite_outgrowth"></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mdl-card mdl-shadow--2dp">
+      <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--8-col mdl-cell--8-tablet mdl-cell--8-phone">
+          <div class="mdl-card__title">Mean neurite outgrowth</div>
+        </div>
+        <div class="mdl-cell mdl-cell--4-col mdl-cell--4-tablet mdl-cell--4-phone">
+          <div class="mdl-card__supporting-text"><span id="mean_outgrowth"></span></div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
 
@@ -96,7 +143,7 @@
   }
 
   .mdl-card{
-    min-height:0px;
+    min-height:100px;
     min-width:300px;
     display: inline-block;
   }

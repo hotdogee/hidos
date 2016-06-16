@@ -16,7 +16,7 @@ $(document).ready(function () {
       deferRender: true,
       scroller: true,
       scrollY: 500,
-      order: [[5s, 'desc']],
+      order: [[5, 'desc']],
       dom: 'Bfrtip',
       columns: [
         {
@@ -41,7 +41,7 @@ $(document).ready(function () {
           }
         },
         {
-          name: 'count', type: 'num', data: 'soma_count', defaultContent: running_template, width: '100px', className:'dt-center',
+          name: 'count', type: 'num', data: 'cell_body', defaultContent: running_template, width: '100px', className:'dt-center',
           render: function (data, type, row, meta) {
             if (!data)
               return running_template;
@@ -49,7 +49,7 @@ $(document).ready(function () {
               return type === 'display' ? data  : data;
           }
         },{
-          name: 'body_attachments', type: 'num', data: 'body_attachments', defaultContent: running_template, width: '100px',className:'dt-center',
+          name: 'body_attachments', type: 'num', data: 'mean_length', defaultContent: running_template, width: '100px',className:'dt-center',
           render: function (data, type, row, meta) {
             if (!data)
               return running_template;
@@ -57,7 +57,7 @@ $(document).ready(function () {
               return type === 'display' ? data  : data.status;
            }
         },{
-          name: 'endpoints', type: 'num', data: 'endpoints', defaultContent: running_template, width: '100px',className:'dt-center',
+          name: 'endpoints', type: 'num', data: 'mean_branch', defaultContent: running_template, width: '100px',className:'dt-center',
           render: function (data, type, row, meta) {
             if (!data)
               return running_template;

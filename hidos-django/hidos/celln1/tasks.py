@@ -81,9 +81,15 @@ def run_cell_n1_task(self, task_id,uploaded_image_path, result_image_path, resul
         record.status = 'success'
         with open(result_json_path, 'r') as f:
             result = json.load(f)
-            record.soma_count = result['soma']
-            record.body_attachments = result['body_attachments']
-            record.endpoints = result['endpoints']
+            record.cell_body = result['cell_body']
+            record.outgrowth_length = result['outgrowth_length']
+            record.mean_length = result['mean_length']
+            record.number_of_branches = result['number_of_branches']
+            record.mean_branch = result['mean_branch']
+            record.neurite_outgrowth = result['neurite_outgrowth']
+            record.mean_outgrowth = result['mean_outgrowth']
+
+
         output_image_viewer_path = path_prefix + '_out.jpg'
         # convert to jpeg for web display
         Image.open(result_image_path).save(output_image_viewer_path)

@@ -11,7 +11,9 @@ class CellN1TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = CellN1Task
         read_only_fields = ['url',
-            'soma_count','body_attachments','endpoints',
+            'cell_body','outgrowth_length','mean_length',
+            'number_of_branches','mean_branch','neurite_outgrowth',
+            'mean_outgrowth',
             'uploaded_filename', 'uploaded_filetype', 'stdout', 'stderr',
             'task_id', 'status', 'dequeued', 'finished', 'user', 'parent_folder', 'version',
             'created', 'modified']
