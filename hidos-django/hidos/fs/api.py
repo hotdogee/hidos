@@ -9,8 +9,41 @@ from rest_framework.response import Response
 from rest_framework.decorators import list_route
 
 
-from .models import Folder
-from .serializers import FolderSerializer
+from .models import Folder, File
+from .serializers import FolderSerializer, FileSerializer
+
+
+class FileViewSet(viewsets.ModelViewSet):
+    """
+    list
+    create
+    retrieve
+    update
+    partial_update
+    destroy
+    """
+    queryset = File.objects.all()
+    serializer_class = FileSerializer
+    filter_backends = (filters.DjangoFilterBackend,)
+    pagination_class = None
+
+    def get_queryset(self): # GenericAPIView
+        """
+        Get the list of items for this view.
+        This must be an iterable, and may be a queryset.
+        Defaults to using `self.queryset`.
+        This method should always be used rather than accessing `self.queryset`
+        directly, as `self.queryset` gets evaluated only once, and those results
+        are cached for all subsequent requests.
+        You may want to override this if you need to provide different
+        querysets depending on the incoming request.
+        (Eg. return a list of items that is specific to the user)
+        """
+        if self.request.user.username:
+            return File.objects.filter(owner=self.request.user)
+        else:
+            return File.objects.none()
+
 
 class FolderViewSet(viewsets.ModelViewSet):
     """
@@ -22,8 +55,8 @@ class FolderViewSet(viewsets.ModelViewSet):
     destroy
     @list_route
     @detail_route
-     * contents
-     * move(destination)
+     * contents -> retrieve
+     * move(destination) -> partial_update
     """
     queryset = Folder.objects.all()
     serializer_class = FolderSerializer
@@ -47,56 +80,56 @@ class FolderViewSet(viewsets.ModelViewSet):
         else:
             return Folder.objects.none()
 
-    @detail_route()
-    def contents(self, request, pk=None, *args, **kwargs):
-        folder = self.get_object()
-        pass
+    # @detail_route()
+    # def contents(self, request, pk=None, *args, **kwargs):
+    #     folder = self.get_object()
+    #     pass
 
-    @detail_route(methods=['post'])
-    def move(self, request, pk=None, *args, **kwargs):
-        folder = self.get_object()
-        pass
+    # @detail_route(methods=['post'])
+    # def move(self, request, pk=None, *args, **kwargs):
+    #     folder = self.get_object()
+    #     pass
 
     # built-in
 
-    def filter_queryset(self, queryset): # GenericAPIView
-        """
-        Given a queryset, filter it with whichever filter backend is in use.
-        You are unlikely to want to override this method, although you may need
-        to call it either from a list view, or from a custom `get_object`
-        method if you want to apply the configured filtering backend to the
-        default queryset.
-        """
-        for backend in list(self.filter_backends):
-            queryset = backend().filter_queryset(self.request, queryset, self)
-        return queryset
+    # def filter_queryset(self, queryset): # GenericAPIView
+    #     """
+    #     Given a queryset, filter it with whichever filter backend is in use.
+    #     You are unlikely to want to override this method, although you may need
+    #     to call it either from a list view, or from a custom `get_object`
+    #     method if you want to apply the configured filtering backend to the
+    #     default queryset.
+    #     """
+    #     for backend in list(self.filter_backends):
+    #         queryset = backend().filter_queryset(self.request, queryset, self)
+    #     return queryset
 
-    def get_object(self): # GenericAPIView
-        """
-        Returns the object the view is displaying.
-        You may want to override this if you need to provide non-standard
-        queryset lookups.  Eg if objects are referenced using multiple
-        keyword arguments in the url conf.
-        """
-        queryset = self.filter_queryset(self.get_queryset())
+    # def get_object(self): # GenericAPIView
+    #     """
+    #     Returns the object the view is displaying.
+    #     You may want to override this if you need to provide non-standard
+    #     queryset lookups.  Eg if objects are referenced using multiple
+    #     keyword arguments in the url conf.
+    #     """
+    #     queryset = self.filter_queryset(self.get_queryset())
 
-        # Perform the lookup filtering.
-        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
+    #     # Perform the lookup filtering.
+    #     lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
 
-        assert lookup_url_kwarg in self.kwargs, (
-            'Expected view %s to be called with a URL keyword argument '
-            'named "%s". Fix your URL conf, or set the `.lookup_field` '
-            'attribute on the view correctly.' %
-            (self.__class__.__name__, lookup_url_kwarg)
-        )
+    #     assert lookup_url_kwarg in self.kwargs, (
+    #         'Expected view %s to be called with a URL keyword argument '
+    #         'named "%s". Fix your URL conf, or set the `.lookup_field` '
+    #         'attribute on the view correctly.' %
+    #         (self.__class__.__name__, lookup_url_kwarg)
+    #     )
 
-        filter_kwargs = {self.lookup_field: self.kwargs[lookup_url_kwarg]}
-        obj = get_object_or_404(queryset, **filter_kwargs)
+    #     filter_kwargs = {self.lookup_field: self.kwargs[lookup_url_kwarg]}
+    #     obj = get_object_or_404(queryset, **filter_kwargs)
 
-        # May raise a permission denied
-        self.check_object_permissions(self.request, obj) # APIView
+    #     # May raise a permission denied
+    #     self.check_object_permissions(self.request, obj) # APIView
 
-        return obj
+    #     return obj
 
     # def retrieve(self, request, *args, **kwargs): # RetrieveModelMixin
     #     instance = self.get_object()

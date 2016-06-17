@@ -1,16 +1,37 @@
 from __future__ import absolute_import, unicode_literals
+import re
+
+from django.core.validators import RegexValidator
 
 from rest_framework import serializers
 from rest_framework import filters
 
-from .models import Folder
+from .models import Folder, File
 
 
-class FolderSerializer(serializers.ModelSerializer):
+folder_re = re.compile(r'^[^\\/:*?"<>|\.]+$', re.U)
+file_re = re.compile(r'^[^\\/:*?"<>|]+$', re.U)
+
+
+class FileSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(max_length=255,  # display name
+        validators=[RegexValidator(file_re, r'File names must not contain  \ / : * ? " < > |')])
+    type = serializers.CharField(max_length=32, # look up in FileType model
+        validators=[RegexValidator(file_re, r'File type must not contain  \ / : * ? " < > |')])
+
+    class Meta:
+        model = File
+        read_only_fields = ['id', 'type', 'created', 'modified', 'content']
+        fields = read_only_fields + ['name', 'owner', 'parent_folder']
+
+
+class FolderSerializer(FileSerializer):
+    name = serializers.CharField(max_length=255,  # display name
+        validators=[RegexValidator(folder_re, r'Folder names must not contain  \ / : * ? " < > | .')])
 
     class Meta:
         model = Folder
-        read_only_fields = ['id', 'created', 'modified']
+        read_only_fields = ['id', 'type', 'created', 'modified', 'files']
         fields = read_only_fields + ['name', 'owner', 'parent_folder']
         # Model fields which have editable=False set, and AutoField fields will be set to read-only by default,
         # and do not need to be added to the read_only_fields option.

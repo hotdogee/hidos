@@ -5,6 +5,8 @@ from os import path
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import RegexValidator
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
 
 from django_extensions.db.models import TimeStampedModel
 
@@ -27,19 +29,35 @@ from . import app_name, verbose_name, version
 #         ordering = ('-modified', '-created',)
 #         abstract = True
 
-folder_re = re.compile(r'^[^\\/:*?"<>|\.]+$', re.U)
-file_re = re.compile(r'^[^\\/:*?"<>|]+$', re.U)
 
-class Folder(TimeStampedModel):
-    # id = models.AutoField(primary_key=True)
+class FileType(models.Model):
+    """app, icon, props?
+    """
+    pass
+
+
+class File(TimeStampedModel):
     id = models.CharField(max_length=32, primary_key=True) # ex. 128c8661c25d45b8-9ca7809a09619db9
-    name = models.CharField(max_length=255,  # display name
-        validators=[RegexValidator(folder_re, r'Folder names must not contain  \ / : * ? " < > | .')])
-    owner = models.ForeignKey(User, models.CASCADE)
-    parent_folder = models.ForeignKey('self', models.CASCADE, related_name='child_folders', null=True, blank=True)
+    name = models.CharField(max_length=255)  # display name
+        #validators=[RegexValidator(file_re, r'File names must not contain  \ / : * ? " < > |')])
+    type = models.CharField(max_length=32) # look up in FileType model
+        #validators=[RegexValidator(file_re, r'File type must not contain  \ / : * ? " < > |')])
+    owner = models.ForeignKey(User, models.CASCADE, null=True, blank=True)
+    folder = models.ForeignKey('Folder', models.CASCADE, null=True, blank=True, related_name='files')
+    # content points to child models
+    # filemodel = models.OneToOneField(File, models.CASCADE, parent_link=True, related_name='content')
 
     def __unicode__(self):
         return '{0} ({1})'.format(self.name, self.id[:6])
+
+    class Meta(TimeStampedModel.Meta):
+        pass
+
+
+class Folder(File):
+    #name = models.CharField(max_length=255)  # display name
+        #validators=[RegexValidator(folder_re, r'Folder names must not contain  \ / : * ? " < > | .')])
+    filemodel = models.OneToOneField(File, models.CASCADE, parent_link=True, related_name='content')
 
     @property
     def path(self): # will probably need some caching
@@ -60,23 +78,3 @@ class Folder(TimeStampedModel):
     #     if self.strip:
     #         value = value.strip()
     #     return value
-
-class File(TimeStampedModel):
-    id = models.CharField(max_length=32, primary_key=True) # ex. 128c8661c25d45b8-9ca7809a09619db9
-    name = models.CharField(max_length=255,  # display name
-        validators=[RegexValidator(file_re, r'File names must not contain  \ / : * ? " < > |')])
-    owner = models.ForeignKey(User, models.CASCADE, null=True, blank=True)
-    parent_folder = models.ForeignKey(Folder, models.CASCADE, null=True, blank=True)
-    # content points to child models
-    # file = models.OneToOneField(File, models.CASCADE, parent_link=True, related_name='content')
-
-    def __unicode__(self):
-        return '{0} ({1})'.format(self.name, self.id[:6])
-
-    class Meta(TimeStampedModel.Meta):
-        pass
-
-class FileType(models.Model):
-    """app, icon, props?
-    """
-    pass
