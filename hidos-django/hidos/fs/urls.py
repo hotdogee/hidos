@@ -15,7 +15,7 @@ urlpatterns = [
         'post': 'create',
     }), name='folder-list'),
     # {% url "fs:folders" folder.id %}
-    url(r'^folders/(?P<id>[0-9a-zA-Z]+)$', api.FolderViewSet.as_view({
+    url(r'^folders/(?P<pk>[0-9a-zA-Z]+)$', api.FolderViewSet.as_view({
         'get': 'retrieve', # includes content list
         'put': 'update',
         'patch': 'partial_update',
@@ -27,7 +27,7 @@ urlpatterns = [
         'post': 'create'
     }), name='file-list'),
     # {% url "fs:files" file.id %}
-    url(r'^files/(?P<id>[0-9a-zA-Z]+)$', api.FileViewSet.as_view({
+    url(r'^files/(?P<pk>[0-9a-zA-Z]+)$', api.FileViewSet.as_view({
         'get': 'retrieve',
         'put': 'update',
         'patch': 'partial_update',

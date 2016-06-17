@@ -14,6 +14,7 @@ file_re = re.compile(r'^[^\\/:*?"<>|]+$', re.U)
 
 
 class FileSerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField(format='hex', read_only=True)
     name = serializers.CharField(max_length=255,  # display name
         validators=[RegexValidator(file_re, r'File names must not contain  \ / : * ? " < > |')])
     type = serializers.CharField(max_length=32, # look up in FileType model
@@ -21,18 +22,19 @@ class FileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = File
-        read_only_fields = ['id', 'type', 'created', 'modified', 'content']
-        fields = read_only_fields + ['name', 'owner', 'parent_folder']
+        read_only_fields = ['id', 'created', 'modified', 'content']
+        fields = read_only_fields + ['name', 'type', 'owner', 'folder']
 
 
 class FolderSerializer(FileSerializer):
     name = serializers.CharField(max_length=255,  # display name
         validators=[RegexValidator(folder_re, r'Folder names must not contain  \ / : * ? " < > | .')])
+    type = serializers.CharField(max_length=32, read_only=True)
 
     class Meta:
         model = Folder
         read_only_fields = ['id', 'type', 'created', 'modified', 'files']
-        fields = read_only_fields + ['name', 'owner', 'parent_folder']
+        fields = read_only_fields + ['name', 'owner', 'folder']
         # Model fields which have editable=False set, and AutoField fields will be set to read-only by default,
         # and do not need to be added to the read_only_fields option.
 
