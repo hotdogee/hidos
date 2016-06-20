@@ -14,7 +14,6 @@ from cell.models import CellTaskModel, ViewableQuerySet, SingleImageUploadManage
 from .tasks import run_cell_a_task
 from . import app_name, verbose_name, version
 
-
 from django.utils.html import format_html
 
 class CellATask(CellTaskModel):

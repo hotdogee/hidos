@@ -9,6 +9,8 @@ from cell.models import CellTaskModel, ViewableQuerySet, SingleImageUploadManage
 from .tasks import run_cell_c2_task
 from . import app_name, verbose_name, version
 
+from django.utils.html import format_html
+
 class CellC2Task(CellTaskModel):
     cell_ratio = models.FloatField(null=True, blank=True)
 
@@ -36,9 +38,16 @@ class CellC2Task(CellTaskModel):
         print(uploaded_image_path, result_image_path,result_json_path)
         run_cell_c2_task.delay(self.task_id, uploaded_image_path, result_image_path, result_json_path, path_prefix)
 
+    def original_image(self):
+        return format_html('<a href="/media/cellc2/task/{}/{}_in.jpg">Uploaded Image</a>', self.task_id,
+                           self.task_id)
+
+
     # def save(self, force_insert=False, force_update=False, using=None, update_fields=None)
     # def save(self, *args, **kwargs):
     #     if self.name == "Yoko Ono's blog":
     #         return # Yoko shall never have her own blog!
     #     else:
     #         super(CellC2Task, self).save(*args, **kwargs) # Call the "real" save() method.
+
+
