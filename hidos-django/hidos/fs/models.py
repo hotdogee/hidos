@@ -45,8 +45,8 @@ class File(TimeStampedModel):
         #validators=[RegexValidator(file_re, r'File type must not contain  \ / : * ? " < > |')])
     owner = models.ForeignKey(User, models.CASCADE, null=True, blank=True)
     folder = models.ForeignKey('Folder', models.CASCADE, null=True, blank=True, related_name='files')
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True, blank=True)
-    content_id = models.CharField(max_length=32, null=True, blank=True)
+    content_type = models.ForeignKey(ContentType, models.CASCADE, null=True, blank=True)
+    content_id = models.UUIDField(max_length=32, null=True, blank=True)
     content = GenericForeignKey('content_type', 'content_id')
 
     def __unicode__(self):
@@ -64,10 +64,10 @@ class Folder(File):
 
     @property
     def path(self): # will probably need some caching
-        if not self.parent_folder:
+        if not self.folder:
             return self.name
         else:
-            return self.parent_folder.path() + '/' + self.name
+            return self.folder.path() + '/' + self.name
 
     class Meta(File.Meta):
         pass
