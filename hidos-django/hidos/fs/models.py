@@ -55,12 +55,37 @@ class File(TimeStampedModel):
     class Meta(TimeStampedModel.Meta):
         pass
 
+class FolderManager(models.Manager):
+
+    def create(self, name, folder, **kwargs): # QuerySet
+        """
+        Create a new folder given the name and parent folder
+        """
+        # app
+        app_name = self.model.__module__.split('.')[0]
+        app = sys.modules[app_name]
+
+        # Build data dictionary
+        data = {
+            'name': name,
+            'type': 'folder',
+            'folder': folder,
+            'content': 'queued',
+        }
+        if owner.username:
+            data['owner'] = owner
+        obj = super(SingleImageUploadManager, self).create(**data)
+        obj.content = instance
+        obj.save()
+        return obj
 
 class Folder(File):
     #name = models.CharField(max_length=255)  # display name
         #validators=[RegexValidator(folder_re, r'Folder names must not contain  \ / : * ? " < > | .')])
     file_model = models.OneToOneField(File, models.CASCADE, 
         parent_link=True, related_name='+') # explicit parent link with no related name
+
+    objects = FolderManager()
 
     @property
     def path(self): # will probably need some caching
