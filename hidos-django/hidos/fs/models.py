@@ -57,25 +57,20 @@ class File(TimeStampedModel):
 
 class FolderManager(models.Manager):
 
-    def create(self, name, folder, **kwargs): # QuerySet
+    def create(self, name, owner, folder, **kwargs): # QuerySet
         """
         Create a new folder given the name and parent folder
         """
-        # app
-        app_name = self.model.__module__.split('.')[0]
-        app = sys.modules[app_name]
-
         # Build data dictionary
         data = {
             'name': name,
             'type': 'folder',
             'folder': folder,
-            'content': 'queued',
         }
         if owner.username:
             data['owner'] = owner
-        obj = super(SingleImageUploadManager, self).create(**data)
-        obj.content = instance
+        obj = super(FolderManager, self).create(**data)
+        obj.content = obj
         obj.save()
         return obj
 

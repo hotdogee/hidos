@@ -80,6 +80,11 @@ class FolderViewSet(viewsets.ModelViewSet):
         else:
             return Folder.objects.none()
 
+    def perform_create(self, serializer): # CreateModelMixin
+        # If anonymous upload, user will be django.contrib.auth.models.AnonymousUser
+        # and username will be an empty string.
+        obj = serializer.save(owner=self.request.user) # returns create model instance
+
     # @detail_route()
     # def contents(self, request, pk=None, *args, **kwargs):
     #     folder = self.get_object()
