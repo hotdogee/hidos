@@ -6,129 +6,132 @@ Created on Thu Apr 28 11:30:31 2016
 """
 
 #get_ipython().magic(u'matplotlib qt')
-from skimage import io
-#from skimage import color
-from skimage import filters
-from skimage.transform import resize
-from skimage import morphology
-#from skimage.morphology import disk
-from skimage import measure
-#from os import listdir
-from PIL import Image,ImageDraw,ImageFont
-import numpy
+#import time
+import cv2
+import numpy as np
+from skimage.morphology import remove_small_objects
 import mahotas
-from skimage.util import img_as_ubyte
-from skimage.morphology import disk
 import json
-from django.conf import settings
 
+###############################################################################
 def img_resize(img,max_size):
     len1 = img.shape[0]
     len2 = img.shape[1]
+    
+    if(len1<max_size and len2<max_size):
+        return img
+    
     if (len1>=len2):
         factor = float(max_size)/len1
-        img_out = resize(img,(max_size,int(factor*len2)))
+        img_out = cv2.resize(img,(max_size,int(factor*len2)))
     else:
         factor =float(max_size)/len2
-        img_out = resize(img,(int(factor*len1),max_size))
+        img_out = cv2.resize(img,(int(factor*len1),max_size))
     return img_out
 ###############################################################################
 
-
-
-
 def cellCount_singleTask(image_input_path, image_output_path, json_path):
-
-    img_ori=io.imread(image_input_path)
-    if(img_ori.shape[0]>1024 or img_ori.shape[1]>1024):
-        img_ori_resize=img_resize(img_ori,1024)  #resize
+   
+    #tStart=time.time()   
+       
+    img_ori=cv2.imread(image_input_path)
+    #img_ori=cv2.cvtColor(img_ori, cv2.COLOR_BGR2RGB)    #BGR->RGB
+    
+    img_ori_resize=img_resize(img_ori,1024)  #resize
+    
+    #automatically determine using which layer to analyze
+    otsu_all=np.empty_like(img_ori_resize)
+    ret_all = np.array([0,0,0])
+    tmp_sum = np.array([0,0,0])
+    for i in range(3):
+        ret_all[i], otsu_all[:,:,i]= cv2.threshold(img_ori_resize[:,:,i],0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+        tmp_sum[i]=otsu_all[:,:,i].sum()
+    
+    tmp_sum/=(tmp_sum.max()/10) #size如果差10倍以上,就不需考慮
+    if (np.logical_and(ret_all>20,tmp_sum>0).sum()==0):
+        inx=0
     else:
-        img_ori_resize=img_ori
-    img_ori_resize=img_as_ubyte(img_ori_resize)
-    img_gray=img_ori_resize[:,:,2] #only using blue layer
-    #img_enhance=filters.rank.enhance_contrast(img_gray,disk(5))
-    #thresh=filters.threshold_otsu(img_enhance)
-    thresh=filters.threshold_otsu(img_gray)
-    #if (thresh>50):
-    #    thresh -= 10;
-    thresh = round(thresh*0.7)
-    img_thresh=img_gray>thresh
-    img_opening=morphology.binary_opening(img_thresh)   #remove salt
-    img_label=measure.label(img_opening)
-    region=measure.regionprops(img_label)
-    area_list=[]
-    for i in region:
-        area_list.append(i.area)
-    area_list.sort
-    area_mean=round(numpy.mean(area_list[int(len(area_list)*0.1):int(len(area_list)*0.9)]))
-    #remove small object (area<(area_mean/2)
-    img_prepro2=morphology.remove_small_objects(img_opening,area_mean/3)
-    img_label2=measure.label(img_prepro2)
+        inx=(tmp_sum==tmp_sum[np.logical_and(ret_all>20,tmp_sum>0)].min()).argmax() #二值化門檻值須>20且size需相差10倍以內,滿足這些條件下,選擇size較小的layer
+    color_text = np.array([[0,255,255],[255,0,255],[255,255,0]])
+    color_edge = np.array([[0,0,255],[255,0,0],[0,255,0]])
+    ############################
+    
+    #cv2.imshow('image',img_gray)
+    #cv2.waitKey(0)
+    #cv2.destroyAllWindows()
+
+    img_thresh=otsu_all[:,:,inx]
+        
+    kernel = np.ones((2,2),np.uint8)
+    img_thresh=np.uint8(img_thresh)
+    img_opening = cv2.morphologyEx(img_thresh, cv2.MORPH_OPEN, kernel)  #remove salt 
+        
+    ret, img_label, stats, centroids = cv2.connectedComponentsWithStats(img_opening)
+    #stats 1:leftmost coordinate
+    #stats 2:topmost coordinate
+    #stats 3:horizontal size
+    #stats 4:vertical size
+    #stats 5:area    
+    
+    area_list=stats[1:,4].copy()
+    area_list.sort()
+    area_mean=round(np.mean(area_list[int(len(area_list)*0.1):int(len(area_list)*0.9)]))
+    
+    #remove small object          
+    img_prepro2=remove_small_objects(np.bool_(img_opening),area_mean/3)
+    img_prepro2=np.uint8(img_prepro2)
+    ret, img_label2, stats2, centroids2 = cv2.connectedComponentsWithStats(img_prepro2)
+    
     img_dist=mahotas.distance(img_label2)
     img_edge=img_dist==1
-    ###################################
-    #watershed test
-    #img_rmax=mahotas.regmax(img_dist)
-    #img_seed=measure.label(img_rmax,connectivity=1)
-    #img_watershed=morphology.watershed(-img_dist,img_seed,mask=img_label2)
-    #img_watershed_dist=mahotas.distance(img_watershed)
-    #img_edge=img_watershed_dist==1
-    ###################################
+    
     for i in range(img_ori_resize.shape[0]):
         for j in range(img_ori_resize.shape[1]):
             if (img_edge[i,j]):
-                img_ori_resize[i,j,0]=255
-    region2=measure.regionprops(img_label2)
-    area_list2=[]
-    for i in region2:
-        area_list2.append(i.area)
-    area_list2.sort
-    area_mean2=round(numpy.mean(area_list2[int(len(area_list2)*0):int(len(area_list2)*0.9)]))
-
-
-    image_ori_resize=Image.fromarray(img_ori_resize)
-    draw=ImageDraw.Draw(image_ori_resize)
-    font = ImageFont.truetype(settings.FONT, 20) ##uncomment to deploy on server
-    #font = ImageFont.truetype('/System/Library/Fonts/Apple Braille.ttf', img_ori.size[0] / 20)
-
+                img_ori_resize[i,j,:]=color_edge[inx,:]
+                    
+    area_list2=stats2[1:,4].copy()
+    area_list2.sort()
+    area_mean2=round(np.mean(area_list2[int(len(area_list2)*0):int(len(area_list2)*0.9)]))
+              
     cellCount=0
-    out_file=open(json_path,"w")
+    out_file = open(json_path,"w")
     #exception
-    if (numpy.isnan(area_mean2) or area_mean2<=0):
-    	font = ImageFont.truetype(settings.FONT,image_ori_resize.size[0]/20) ## uncomment to deploy on server
-        # font = ImageFont.truetype('/System/Library/Fonts/Apple Braille.ttf', img_ori.size[0] / 20)
-        draw.text((40,40),'This image can not be analyzed.',(255,255,255),font=font)
-	cellCount_result = {'count':-1}
+    font =cv2.FONT_HERSHEY_SIMPLEX
+    if (np.isnan(area_mean2) or area_mean2<=0):
+        cellCount_result = {'count': -1}
+        cv2.putText(img_ori_resize,'This image can not be analyzed.',(40,80), font, 1,(255,255,255),2)    
     else:
-    	for i in region2:
-        	if (round(i.area/area_mean2)):
-            		cellCount +=round(i.area/area_mean2)
-            		draw.text((int(i.centroid[1]),int(i.centroid[0])),str(int(round((i.area/area_mean2)))),(0,255,0),font=font)
-        	elif (i.area/area_mean2>=0.3 and i.area/area_mean2<0.5):
-            		cellCount +=1
-            		draw.text((int(i.centroid[1]),int(i.centroid[0])),'1',(0,255,0),font=font)
-    	font = ImageFont.truetype(settings.FONT, image_ori_resize.size[0]/20) ## uncomment to deplot on server
-        # font = ImageFont.truetype('/System/Library/Fonts/Apple Braille.ttf', img_ori.size[0] / 20)
-        draw.text((40,40),'counts='+str(int(cellCount)),(255,255,255),font=font)
-	cellCount_result={'count':int(cellCount)}
-    #Image.Image.show(image_ori_resize)
-    #image_ori=resize(image_ori_resize,(img_ori.shape[0],img_ori.shape[1]))
-    image_ori=image_ori_resize.resize((img_ori.shape[1],img_ori.shape[0]))
-    #io.imsave(image_output_path,image_ori)
-    Image.Image.save(image_ori,image_output_path)
+        for i in range(1,ret):
+            tmpCount=(stats2[i,4]/area_mean2)
+            if (tmpCount>=0.3 and tmpCount<1):
+                cellCount +=1
+                cv2.putText(img_ori_resize,'1',(int(centroids2[i,0]),int(centroids2[i,1])), font, 1,color_text[inx,:],1) 
+            elif (np.floor(tmpCount)):
+                cellCount +=np.floor(tmpCount)
+                cv2.putText(img_ori_resize,str(int(np.floor(tmpCount))),(int(centroids2[i,0]),int(centroids2[i,1])), font, 1,color_text[inx,:],1)
+        cv2.putText(img_ori_resize,'counts='+str(int(cellCount)),(40,80), font, 2,(255,255,255),3) 
+        cellCount_result = {'count': int(cellCount)}       
+    
+    img_ori_resize = cv2.resize(img_ori_resize,(img_ori.shape[1],img_ori.shape[0]))
+    cv2.imwrite(image_output_path,img_ori_resize)
     json.dump(cellCount_result,out_file)
     out_file.close()
-
+    
+    #tEnd=time.time() 
+    
+    #print ("It costs %f sec",tEnd-tStart)    
+    
     return
 
 ###############################################################################
-#image_path = "D:\Aaron workspace\Aaron\CellCount_Project\Image data\\CellC_One_t2.png"
-#image_output_path = "D:\Aaron workspace\Aaron\CellCount_Project\output_single\\result.jpg"
-#json_path = "D:\Aaron workspace\Aaron\CellCount_Project\output_single\\result.json"
+#image_path = "D:\\Aaron workspace\Aaron\\alpha test image\\cellc1\\task\\1d60d2fcfc2bde0024a0066a7338467f\\1d60d2fcfc2bde0024a0066a7338467f_in.jpg"
+#image_output_path = "D:\Aaron workspace\Aaron\CellCount_Project\\tiff\\result.jpg"
+#json_path = "D:\Aaron workspace\Aaron\CellCount_Project\\tiff\\result.json"
 #cellCount_singleTask(image_path,image_output_path,json_path)
-
-
-
-
-
-
+            
+            
+            
+            
+            
+            
