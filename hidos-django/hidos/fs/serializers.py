@@ -33,7 +33,7 @@ class FolderSerializer(FileSerializer):
 
     class Meta:
         model = Folder
-        read_only_fields = ['id', 'type', 'created', 'modified', 'files', 'owner']
+        read_only_fields = ['id', 'type', 'created', 'modified', 'files', 'owner', 'path']
         fields = read_only_fields + ['name', 'folder']
         # Model fields which have editable=False set, and AutoField fields will be set to read-only by default,
         # and do not need to be added to the read_only_fields option.

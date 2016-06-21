@@ -87,7 +87,7 @@ class Folder(File):
         if not self.folder:
             return self.name
         else:
-            return self.folder.path() + '/' + self.name
+            return self.folder.path + '/' + self.name
 
     class Meta(File.Meta):
         pass
