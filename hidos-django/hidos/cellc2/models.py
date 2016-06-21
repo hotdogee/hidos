@@ -36,7 +36,7 @@ class CellC2Task(CellTaskModel):
         # build command
         # args_list = [[settings.R_SCRIPT, script_path, uploaded_image_path, result_image_path, result_json_path]]
         print(uploaded_image_path, result_image_path,result_json_path)
-        run_cell_c2_task.delay(self.task_id, uploaded_image_path, result_image_path, result_json_path, path_prefix)
+        run_cell_c2_task.delay(self.task_id, input_image_viewer_path, result_image_path, result_json_path, path_prefix)
 
     def original_image(self):
         return format_html('<a href="/media/cellc2/task/{}/{}_in.jpg">Uploaded Image</a>', self.task_id,

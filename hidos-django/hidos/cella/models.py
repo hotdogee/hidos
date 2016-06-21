@@ -46,7 +46,7 @@ class CellATask(CellTaskModel):
         output_image_viewer_path = path_prefix + '_out.jpg'
         # build command
         # args_list = [[settings.R_SCRIPT, script_path, uploaded_image_path, result_image_path, result_json_path]]
-        run_cell_a_task.delay(self.task_id, uploaded_image_path, result_image_path, result_json_path, path_prefix)
+        run_cell_a_task.delay(self.task_id, input_image_viewer_path, result_image_path, result_json_path, path_prefix)
         print(uploaded_image_path, result_image_path, result_json_path)
 
     def original_image(self):
