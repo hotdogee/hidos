@@ -23,10 +23,10 @@ def img_resize(img,max_size):
     
     if (len1>=len2):
         factor = float(max_size)/len1
-        img_out = cv2.resize(img,(max_size,int(factor*len2)))
+        img_out = cv2.resize(img,(int(factor*len2),max_size))
     else:
         factor =float(max_size)/len2
-        img_out = cv2.resize(img,(int(factor*len1),max_size))
+        img_out = cv2.resize(img,(max_size,int(factor*len1)))
     return img_out
 ###############################################################################
 
@@ -125,7 +125,7 @@ def cellCount_singleTask(image_input_path, image_output_path, json_path):
     return
 
 ###############################################################################
-#image_path = "D:\\Aaron workspace\Aaron\\alpha test image\\cellc1\\task\\1d60d2fcfc2bde0024a0066a7338467f\\1d60d2fcfc2bde0024a0066a7338467f_in.jpg"
+#image_path = "C:\\Users\\Aaron.Lin\\Desktop\\cellC1_issue_image\\da7d2b9334ef3282b0d75fc03122ee86_uploaded.tiff"
 #image_output_path = "D:\Aaron workspace\Aaron\CellCount_Project\\tiff\\result.jpg"
 #json_path = "D:\Aaron workspace\Aaron\CellCount_Project\\tiff\\result.json"
 #cellCount_singleTask(image_path,image_output_path,json_path)
