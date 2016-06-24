@@ -17,16 +17,30 @@ class ContentRelatedField(serializers.RelatedField):
     """
     A custom field to use for a file's 'content' generic relationship.
     """
+    ignore_keys = set([
+        "name",
+        "created",
+        "_state",
+        "modified",
+        "file_model_id",
+        "content_type_id",
+        "folder_id",
+        "content_id",
+        "type",
+        "id",
+        "owner_id"
+    ])
 
     def to_representation(self, value):
         """
         Serialize tagged objects to a simple textual representation.
         """
         data = {}
-        if status in value:
+        if hasattr(value, 'status'):
             data.status = value.status
-        if result in value:
+        if hasattr(value, 'result'):
             data.result = value.result
+        return dict([(k, v) for k, v in value.__dict__.items() if k not in self.ignore_keys])
 
 
 class FileSerializer(serializers.ModelSerializer):
@@ -35,10 +49,11 @@ class FileSerializer(serializers.ModelSerializer):
         validators=[RegexValidator(file_re, r'File names must not contain  \ / : * ? " < > |')])
     type = serializers.CharField(max_length=32, # look up in FileType model
         validators=[RegexValidator(file_re, r'File type must not contain  \ / : * ? " < > |')])
+    content = ContentRelatedField(read_only=True)
 
     class Meta:
         model = File
-        read_only_fields = ['id', 'created', 'modified', 'owner']
+        read_only_fields = ['id', 'created', 'modified', 'owner', 'content']
         fields = read_only_fields + ['name', 'type', 'folder']
 
 
