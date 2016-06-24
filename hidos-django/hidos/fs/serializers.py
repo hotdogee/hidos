@@ -22,11 +22,11 @@ class ContentRelatedField(serializers.RelatedField):
         """
         Serialize tagged objects to a simple textual representation.
         """
-        if isinstance(value, Bookmark):
-            return 'Bookmark: ' + value.url
-        elif isinstance(value, Note):
-            return 'Note: ' + value.text
-        raise Exception('Unexpected type of tagged object')
+        data = {}
+        if status in value:
+            data.status = value.status
+        if result in value:
+            data.result = value.result
 
 
 class FileSerializer(serializers.ModelSerializer):
