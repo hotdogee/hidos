@@ -59,6 +59,9 @@ target/
 # VS Solution User Options
 **/.vs/
 
+# VS Code
+browse.VC.db
+
 # sqlite3
 *.sqlite3
 

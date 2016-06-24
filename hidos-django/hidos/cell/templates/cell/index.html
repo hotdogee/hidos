@@ -1,0 +1,140 @@
+{% extends "app/layout.html" %}
+{% load staticfiles %}
+{% block head-styles %}
+  <style type="text/css">
+    .parallax-container {
+      min-height: 350px;
+      line-height: 0;
+      height: auto;
+      color: rgba(255,255,255,.9);
+    }
+  </style>
+{% endblock %}
+{% block content-body %}
+  <div id="index-banner" class="parallax-container center valign-wrapper">
+    <div class="row center valign">
+      <h1 class="header center white-text text-lighten-2">HiDOS Cell Cloud</h1>
+      <h5 class="header col s12 light">Instant cell image analysis for modern biologists</h5>
+    </div>
+    <div class="parallax">
+      <img src="static/cell/images/parallax1.jpg" alt="Unsplashed background img 1">
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="section">
+      <div class="row">
+        <div class="col s12 m6 l4">
+          <div class="card">
+            <div class="card-image waves-effect waves-block waves-light">
+              <a href="http://cella.hotdogee.com/">
+                <img src="static/cell/images/cella-card.jpg" class="responsive-img wp-post-image">
+              </a>
+            </div>
+            <div class="card-content">
+              <p class="area"><a href="http://cella.hotdogee.com/">Angiogenesis</a><i class="right">27</i></p>
+              <a href="http://cella.hotdogee.com/"><span class="card-title activator brown-text text-darken-4">Cell A</span></a>
+            </div>
+            <div class="card-action">
+              <a href="#">View Example</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="col s12 m6 l4">
+          <div class="card">
+            <div class="card-image waves-effect waves-block waves-light">
+              <a href="http://cellc1.hotdogee.com/">
+                <img src="static/cell/images/cellc1-card.png" class="responsive-img wp-post-image">
+              </a>
+            </div>
+            <div class="card-content">
+              <p class="area"><a href="http://cellc1.hotdogee.com/">Count</a><i class="right">436</i></p>
+              <a href="http://cellc1.hotdogee.com/"><span class="card-title activator brown-text text-darken-4">Cell C1</span></a>
+            </div>
+            <div class="card-action">
+              <a href="#">View Example</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="col s12 m6 l4">
+          <div class="card">
+            <div class="card-image waves-effect waves-block waves-light">
+              <a href="c2/">
+                <img src="static/cell/images/cellc2-card.png" class="responsive-img wp-post-image">
+              </a>
+            </div>
+            <div class="card-content">
+              <p class="area"><a href="c2/">Confluency</a><i class="right">26.32%</i></p>
+              <a href="c2/"><span class="card-title activator brown-text text-darken-4">Cell C2</span></a>
+            </div>
+            <div class="card-action">
+              <a href="#">View Example</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="col s12 m6 l4">
+          <div class="card">
+            <div class="card-image waves-effect waves-block waves-light">
+              <a href="http://cellm1.hotdogee.com/">
+                <img src="static/cell/images/cellm1-card.jpg" class="responsive-img wp-post-image">
+              </a>
+            </div>
+            <div class="card-content">
+              <p class="area"><a href="http://cellm1.hotdogee.com/">Transwell Migration Assay</a><i class="right">24.96%</i></p>
+              <a href="http://cellm1.hotdogee.com/"><span class="card-title activator brown-text text-darken-4">Cell M1</span></a>
+            </div>
+            <div class="card-action">
+              <a href="#">View Example</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="col s12 m6 l4">
+          <div class="card">
+            <div class="card-image waves-effect waves-block waves-light">
+              <a href="http://cellm2.hotdogee.com/">
+                <img src="static/cell/images/cellm2-card.png" class="responsive-img wp-post-image">
+              </a>
+            </div>
+            <div class="card-content">
+              <p class="area"><a href="http://cellm2.hotdogee.com/">Migration</a><i class="right">25.42%</i></p>
+              <a href="http://cellm2.hotdogee.com/"><span class="card-title activator brown-text text-darken-4">Cell M2</span></a>
+            </div>
+            <div class="card-action">
+              <a href="#">View Example</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="col s12 m6 l4">
+          <div class="card">
+            <div class="card-image waves-effect waves-block waves-light">
+              <a href="http://cells.hotdogee.com/">
+                <img src="static/cell/images/cells-card.png" class="responsive-img wp-post-image">
+              </a>
+            </div>
+            <div class="card-content">
+              <p class="area"><a href="http://cells.hotdogee.com/">Selection</a></p>
+              <a href="http://cells.hotdogee.com/"><span class="card-title activator brown-text text-darken-4">Cell S</span></a>
+            </div>
+            <div class="card-action">
+              <a href="#">View Example</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  <script>
+    $(document).ready(function(){
+      $('.parallax').parallax();
+    });
+  </script>
+{% endblock %}

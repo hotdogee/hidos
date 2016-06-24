@@ -1,0 +1,9 @@
+{% extends "rest_framework/base.html" %}
+
+{% block title %}{% if name %}{{ name }} – {% endif %}HiDOS REST API{% endblock %}
+
+{% block branding %}
+  <a class='navbar-brand' rel="nofollow" href='#!'>
+      HiDOS REST API
+  </a>
+{% endblock %}

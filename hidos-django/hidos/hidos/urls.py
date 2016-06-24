@@ -1,12 +1,26 @@
-﻿"""
-Definition of urls for hidos.
+﻿"""hidos URL Configuration
+
+The `urlpatterns` list routes URLs to views. For more information please see:
+    https://docs.djangoproject.com/en/1.9/topics/http/urls/
+Examples:
+Function views
+    1. Add an import:  from my_app import views
+    2. Add a URL to urlpatterns:  url(r'^$', views.home, name='home')
+Class-based views
+    1. Add an import:  from other_app.views import Home
+    2. Add a URL to urlpatterns:  url(r'^$', Home.as_view(), name='home')
+Including another URLconf
+    1. Import the include() function: from django.conf.urls import url, include
+    2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 
 from datetime import datetime
+
+from django.contrib import admin
 from django.conf.urls import include, url
-from app.forms import BootstrapAuthenticationForm
 from django.contrib.auth import views as auth_views
-from app import views as app_views
+
+from app.forms import BootstrapAuthenticationForm
 
 # Uncomment the next lines to enable the admin:
 # from django.conf.urls import include
@@ -14,10 +28,9 @@ from app import views as app_views
 # admin.autodiscover()
 
 urlpatterns = [
-    url(r'^$', app_views.home, name='home'),
-    url(r'^api/v1/tasks$', app_views.tasks, name='tasks'),
-    url(r'^api/v1/tasks/status$', app_views.status, name='status'),
-    url(r'^login/$',
+    #url(r'^api/v1/tasks$', app_views.tasks, name='tasks'),
+    #url(r'^api/v1/tasks/status$', app_views.status, name='status'),
+    url(r'^login$',
         auth_views.login,
         {
             'template_name': 'app/login.html',
@@ -35,14 +48,14 @@ urlpatterns = [
             'next_page': '/',
         },
         name='logout'),
-    url(r'^accounts/', include('allauth.urls')),
-    url(r'^(?P<task_id>[0-9a-zA-Z]+)$', app_views.retrieve, name='retrieve'),
+    url(r'^accounts', include('allauth.urls')),
 
-    # Uncomment the admin/doc line below to enable admin documentation:
-    # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
+    url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
+    url(r'^admin/', admin.site.urls),
+    
+    url(r'^api/v1/fs/', include('fs.urls', namespace='fs')),
 
-    # Uncomment the next line to enable the admin:
-    # url(r'^admin/', include(admin.site.urls)),
+    url(r'^', include('cell.urls')),
 ]
 
 # Serving files uploaded by a user during development
