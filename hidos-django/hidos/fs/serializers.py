@@ -35,11 +35,6 @@ class ContentRelatedField(serializers.RelatedField):
         """
         Serialize tagged objects to a simple textual representation.
         """
-        data = {}
-        if hasattr(value, 'status'):
-            data.status = value.status
-        if hasattr(value, 'result'):
-            data.result = value.result
         return dict([(k, v) for k, v in value.__dict__.items() if k not in self.ignore_keys])
 
 
