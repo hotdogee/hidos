@@ -12,7 +12,6 @@ from .models import Folder, File
 folder_re = re.compile(r'^[^\\/:*?"<>|\.]+$', re.U)
 file_re = re.compile(r'^[^\\/:*?"<>|]+$', re.U)
 
-
 class FileSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(format='hex', read_only=True)
     name = serializers.CharField(max_length=255,  # display name
@@ -22,7 +21,7 @@ class FileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = File
-        read_only_fields = ['id', 'created', 'modified', 'content', 'owner']
+        read_only_fields = ['id', 'created', 'modified', 'owner']
         fields = read_only_fields + ['name', 'type', 'folder']
 
 
@@ -30,6 +29,7 @@ class FolderSerializer(FileSerializer):
     name = serializers.CharField(max_length=255,  # display name
         validators=[RegexValidator(folder_re, r'Folder names must not contain  \ / : * ? " < > | .')])
     type = serializers.CharField(max_length=32, read_only=True)
+    files = FileSerializer(many=True, read_only=True)
 
     class Meta:
         model = Folder
