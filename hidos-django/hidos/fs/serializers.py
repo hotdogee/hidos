@@ -12,6 +12,23 @@ from .models import Folder, File
 folder_re = re.compile(r'^[^\\/:*?"<>|\.]+$', re.U)
 file_re = re.compile(r'^[^\\/:*?"<>|]+$', re.U)
 
+
+class ContentRelatedField(serializers.RelatedField):
+    """
+    A custom field to use for a file's 'content' generic relationship.
+    """
+
+    def to_representation(self, value):
+        """
+        Serialize tagged objects to a simple textual representation.
+        """
+        if isinstance(value, Bookmark):
+            return 'Bookmark: ' + value.url
+        elif isinstance(value, Note):
+            return 'Note: ' + value.text
+        raise Exception('Unexpected type of tagged object')
+
+
 class FileSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(format='hex', read_only=True)
     name = serializers.CharField(max_length=255,  # display name
