@@ -48,10 +48,9 @@ def mask_create(image_phase):
 def cellm3(input_image_path, output_image_path, json_path):
 
 
-
-        ori_img = io.imread(input_image_path)
-        ori_img_int8 = img_as_ubyte(ori_img)
-
+        ori_img=cv2.imread(input_image_path)
+        img_gray=cv2.cvtColor(ori_img, cv2.COLOR_BGR2GRAY)
+        ori_img_int8 = img_as_ubyte(img_gray)
 
         # image resize
         scale_x_size = 512
@@ -129,7 +128,13 @@ def cellm3(input_image_path, output_image_path, json_path):
         img_hsv[..., 1] = color_mask_hsv[..., 1] * alpha
 
         img_masked = color.hsv2rgb(img_hsv)
+        
+        img_masked = (img_masked*255.9).astype(np.uint8)
+        img_masked_cv2 = cv2.cvtColor(img_masked, cv2.COLOR_RGB2BGR)
+
+        font =cv2.FONT_HERSHEY_SIMPLEX
+        cv2.putText(img_masked_cv2,str(ratio_str+'%'),(40,80), font, 2,(255,0,0),3) 
+        cv2.imwrite(output_image_path,img_masked_cv2)
 
 
-        img = Image.fromarray(img_as_ubyte(img_masked)).convert('RGB')
-        img.save(output_image_path, quality=80)
+
