@@ -44,7 +44,7 @@ def run_cell_c2_task(self, task_id, uploaded_image_path, result_image_path, resu
     record.status = 'running'
     record.save()
 
-    # slack report template
+    # slack report templatera
     slack_manager = urllib3.PoolManager(1)
     data = {"channel": "#image-bug", "username": "cellc2", \
             "text": "",
@@ -80,7 +80,7 @@ def run_cell_c2_task(self, task_id, uploaded_image_path, result_image_path, resu
         record.status = 'success'
         with open(result_json_path, 'r') as f:
             result = json.load(f)
-            record.cell_ratio = result['ratio']
+            record.cell_ratio = result['confluence']
         output_image_viewer_path = path_prefix + '_out.jpg'
         # convert to jpeg for web display
         Image.open(result_image_path).save(output_image_viewer_path)
