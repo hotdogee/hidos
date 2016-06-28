@@ -134,7 +134,7 @@ def deleteBranch(img,extremityMap,junctionMap,len_thresh):
     #    img_segmentation=img^junctionMap
     ret, img_label = cv2.connectedComponents(np.uint8(img_segmentation))
     region=measure.regionprops(img_label)
-    img_result=numpy.zeros_like(img)
+    img_result=np.zeros_like(img)
     for i in region:
         if (i.area<len_thresh):
             for j in range(i.coords.shape[0]):
