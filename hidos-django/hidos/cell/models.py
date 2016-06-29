@@ -72,8 +72,10 @@ class SingleImageUploadManager(models.Manager):
         path_prefix = path.join(settings.MEDIA_ROOT, app_name, 'task', task_id, task_id)
         # avoid exploits, don't any part of the user filename
         uploaded_image_path = path_prefix + '_uploaded.' + image_type
+        result_image_path = path_prefix + '_result.' + self.uploaded_filetype
         # jpg image for viewer
         input_image_viewer_path = path_prefix + '_in.jpg'
+        output_image_viewer_path = path_prefix + '_out.jpg'
 
 
         # create directory
@@ -102,10 +104,15 @@ class SingleImageUploadManager(models.Manager):
         # Build data dictionary
         data = {
             'id': task_id,
-            'version': app.version,
             'name': file.name,
-            'uploaded_filetype': image_type,
             'status': 'queued',
+            'progress': 0,
+            'version': app.version,
+            'uploaded_filetype': image_type,
+            'uploaded_image': uploaded_image_path,
+            'result_image': result_image_path,
+            'uploaded_display': input_image_viewer_path,
+            'result_display': output_image_viewer_path,
         }
         if owner.username:
             data['owner'] = owner
