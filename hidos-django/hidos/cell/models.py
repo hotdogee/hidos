@@ -136,13 +136,13 @@ class SingleImageUploadManager(models.Manager):
 
 # CellQ result model
 class CellTask(Task):
-    uploaded_filetype = models.CharField(max_length=10)
-    uploaded_image = models.CharField(max_length=255)
-    result_image = models.CharField(max_length=255)
-    uploaded_display = models.CharField(max_length=255)
-    result_display = models.CharField(max_length=255)
-    stdout = models.TextField(blank=True)
-    stderr = models.TextField(blank=True)
+    uploaded_filetype = models.CharField(max_length=10, blank=True)
+    uploaded_image = models.ImageField(max_length=255, blank=True)
+    result_image = models.ImageField(max_length=255, blank=True)
+    uploaded_display = models.ImageField(max_length=255, blank=True)
+    result_display = models.ImageField(max_length=255, blank=True)
+    result = models.TextField(blank=True) # use JSONField
+    error = models.TextField(blank=True)
 
     objects = SingleImageUploadManager.from_queryset(ViewableQuerySet)()
 
