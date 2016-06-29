@@ -42,7 +42,7 @@ class ViewableQuerySet(models.query.QuerySet):
 
 class SingleImageUploadManager(models.Manager):
 
-    def create(self, file, owner, **kwargs): # QuerySet, file=file, owner=user
+    def create(self, file, owner, folder, **kwargs): # QuerySet, file=file, owner=user
         """
         Create a CellTaskModel from a validated UploadedFile object
         """
@@ -105,9 +105,11 @@ class SingleImageUploadManager(models.Manager):
         data = {
             'id': task_id,
             'name': file.name,
+            'type': app_name,
+            'version': app.version,
+            'folder': folder,
             'status': 'queued',
             'progress': 0,
-            'version': app.version,
             'uploaded_filetype': image_type,
             'uploaded_image': uploaded_image_path,
             'result_image': result_image_path,
@@ -116,7 +118,10 @@ class SingleImageUploadManager(models.Manager):
         }
         if owner.username:
             data['owner'] = owner
-        return super(SingleImageUploadManager, self).create(**data)
+        obj = super(SingleImageUploadManager, self).create(**data)
+        obj.content = obj
+        obj.save()
+        return obj
 
     # built-in
     # run create(file=UploadedFile object)
