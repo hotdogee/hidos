@@ -1,6 +1,7 @@
 ﻿from __future__ import absolute_import, unicode_literals
 import json
 import time
+import urllib3
 from pytz import utc
 from os import path, stat
 from itertools import groupby
@@ -17,6 +18,8 @@ from celery.signals import task_sent, task_success, task_failure
 
 from django.conf import settings
 from django.core.cache import cache
+
+from .bin import process_image
 
 logger = get_task_logger(__name__)
 
@@ -43,16 +46,24 @@ def run_cell_c2_task(self, task_id, args_list, path_prefix):
     record.save()
 
     # run
-    out = ''
-    err = ''
-    for args in args_list:
-        stdoutdata, stderrdata = Popen(args, stdin=PIPE, stdout=PIPE, stderr=PIPE).communicate()
-        out += stdoutdata
-        err += stderrdata
-        result_image_path = args[3]
-        result_json_path = args[4]
-    record.stdout = out
-    record.stderr = err
+    try:
+        process_image(uploaded_image_path, result_image_path, result_json_path)
+    except Exception as e:
+        record.stderr = e
+        # slack report templatera
+        import urllib3
+        slack_manager = urllib3.PoolManager(1)
+        data = {"channel": "#image-bug", "username": "cellc2", \
+                "text": "",
+                "icon_emoji": ":desktop_computer:"}
+
+        from django.contrib.auth.models import User
+        user = User.objects.get(id__exact=record.user_id)
+        username = user.username
+        uploaded_image_name = uploaded_image_path.split('/')[-1]
+        data["text"] = username + '\n' + record.uploaded_filename + '\n' + e.args[0]  + '\n' + '`' + uploaded_image_name + '`'
+        slack_manager.request('POST','https://hooks.slack.com/services/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',body = json.dumps(data),headers={'Content-Type': 'application/json'})
+        logger.info(e.args)
 
     # update result state
     record.status = 'failed'
