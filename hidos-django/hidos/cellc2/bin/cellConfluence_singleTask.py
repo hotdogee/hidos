@@ -95,7 +95,6 @@ def cellConfluence_singleTask(image_input_path, image_output_path, json_path):
 #filename = file_list[7]
 #filename=image_path +'\\'+filename         
 #cellConfluence_singleTask(filename,image_output_path,json_path)
-
         
 
 import cv2

@@ -24,6 +24,7 @@ class Task(File):
     file_model = models.OneToOneField(File, models.CASCADE,
         parent_link=True, related_name='+') # explicit parent link with no related name
     status = models.CharField(max_length=32, default='queued') # queued, running, success, failed
+    progress = models.FloatField(null=True, blank=True) # 0.00 to 1.00
     dequeued = models.DateTimeField(null=True, blank=True)
     finished = models.DateTimeField(null=True, blank=True)
     version = models.CharField(max_length=32)
@@ -135,8 +136,11 @@ class SingleImageUploadManager(models.Manager):
 
 # CellQ result model
 class CellTask(Task):
-    # uploaded image file type
     uploaded_filetype = models.CharField(max_length=10)
+    uploaded_image = models.CharField(max_length=255)
+    result_image = models.CharField(max_length=255)
+    uploaded_display = models.CharField(max_length=255)
+    result_display = models.CharField(max_length=255)
     stdout = models.TextField(blank=True)
     stderr = models.TextField(blank=True)
 
