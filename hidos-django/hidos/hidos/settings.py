@@ -273,7 +273,7 @@ LOGGING = {
             'handlers': ['django_log'],
             'level': 'INFO',
         },
-        'celery': {
+        'celery.task': {
             'handlers': ['celery_log'],
             'level': 'INFO',
             'propagate': True,
@@ -302,7 +302,7 @@ CELERY_QUEUES = (
     Queue('cell', Exchange('hidos'), routing_key='cell'),
 )
 CELERY_ROUTES = {
-    'cellc2.tasks.run_cell_c2_task': {
+    'cellc2.tasks.process_image': {
         'queue': 'cell',
         'routing_key': 'cell',
     },

@@ -19,7 +19,7 @@ from celery.signals import task_sent, task_success, task_failure
 from django.conf import settings
 from django.core.cache import cache
 
-from .bin import process_image
+from .bin import process_image as process_image_bin
 
 logger = get_task_logger(__name__)
 
@@ -30,64 +30,60 @@ if settings.USE_CACHE:
     acquire_lock = lambda: cache.add(LOCK_ID, 'true', LOCK_EXPIRE)
     release_lock = lambda: cache.delete(LOCK_ID)
 
-@shared_task(bind=True) # ignore_result=True
-def run_cell_c2_task(self, task_id, args_list, path_prefix):
+@shared_task() # ignore_result=True
+def process_image(task_id):
     import django
     django.setup()
 
-    self.app.log.redirect_stdouts_to_logger(logger)
     logger.info('image_analysis task_id: %s' % (task_id,))
 
     # update dequeue time
-    from .models import CellC2Task
-    record = CellC2Task.objects.get(id__exact=task_id)
-    record.dequeued = datetime.utcnow().replace(tzinfo=utc)
-    record.status = 'running'
-    record.save()
+    from .models import Task
+    task_record = Task.objects.get(id__exact=task_id)
+    task_record.dequeued = datetime.utcnow().replace(tzinfo=utc)
+    task_record.status = 'running'
+    task_record.progress = 0.1
+    task_record.save()
 
     # run
     try:
-        process_image(uploaded_image_path, result_image_path, result_json_path)
+        task_record.result = process_image_bin(task_record.uploaded_image, task_record.result_image)
     except Exception as e:
-        record.stderr = e
+        task_record.stderr = e
         # slack report templatera
         import urllib3
         slack_manager = urllib3.PoolManager(1)
-        data = {"channel": "#image-bug", "username": "cellc2", \
+        data = {"channel": "#image-bug", "username": "cellc2",
                 "text": "",
                 "icon_emoji": ":desktop_computer:"}
-
-        from django.contrib.auth.models import User
-        user = User.objects.get(id__exact=record.user_id)
-        username = user.username
-        uploaded_image_name = uploaded_image_path.split('/')[-1]
-        data["text"] = username + '\n' + record.uploaded_filename + '\n' + e.args[0]  + '\n' + '`' + uploaded_image_name + '`'
+        data["text"] = task_record.owner.username + '\n' + task_record.name + '\n' + e.args[0]  + '\n' + '`' + task_record.uploaded_image.split('/')[-1] + '`'
         slack_manager.request('POST','https://hooks.slack.com/services/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',body = json.dumps(data),headers={'Content-Type': 'application/json'})
         logger.info(e.args)
 
     # update result state
-    record.status = 'failed'
+    task_record.status = 'failed'
     if not path.isfile(result_image_path):
-        record.status = 'NO_OUT_JPG'
+        task_record.status = 'NO_OUT_JPG'
     elif stat(result_image_path)[6] == 0:
-        record.status = 'OUT_JPG_EMPTY'
+        task_record.status = 'OUT_JPG_EMPTY'
     elif not path.isfile(result_json_path):
-        record.status = 'NO_OUT_JSON'
+        task_record.status = 'NO_OUT_JSON'
     elif stat(result_json_path)[6] == 0:
-        record.status = 'OUT_JSON_EMPTY'
+        task_record.status = 'OUT_JSON_EMPTY'
     else:
-        record.status = 'success'
+        task_record.status = 'success'
         with open(result_json_path, 'r') as f:
             result = json.load(f)
-            record.cell_ratio = result['ratio']
-            record.count_min = result['count_min']
-            record.count_max = result['count_max']
+            task_record.cell_ratio = result['ratio']
+            task_record.count_min = result['count_min']
+            task_record.count_max = result['count_max']
         output_image_viewer_path = path_prefix + '_out.jpg'
         # convert to jpeg for web display
         Image.open(result_image_path).save(output_image_viewer_path)
 
-    record.finished = datetime.utcnow().replace(tzinfo=utc)
-    record.save()
+    task_record.progress = 1.0
+    task_record.finished = datetime.utcnow().replace(tzinfo=utc)
+    task_record.save()
 
     return task_id # passed to 'result' argument of task_success_handler
 
