@@ -14,6 +14,10 @@ Setting up the development environment on Windows
      * Run `C:\Python27\python get-pip.py`
      * `pip.exe` should now be in `C:\Python27\Scripts`
    * Make sure `C:\Python27` and `C:\Python27\Scripts` are in your PATH. If you didn't choose "Add python.exe to Path" during Python Setup, you can run a script included with python that automatically does this: `C:\Python27\Tools\Scripts\win_add2path.py`
+   * Update `pip`
+     * `python -m pip install -U pip`
+   * Update `setuptools`
+     * `pip install -U setuptools`
    * Install `virtualenv`
      * `pip install virtualenv`
        * Learn more: http://docs.python-guide.org/en/latest/dev/virtualenvs/
