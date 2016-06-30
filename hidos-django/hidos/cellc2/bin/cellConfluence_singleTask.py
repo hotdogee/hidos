@@ -31,16 +31,15 @@ def img_resize(img,max_size):
 ###############################################################################
 
 
-def cellConfluence_singleTask(image_input_path, image_output_path, json_path):
-    
-    #tStart = time.time()
-    
-    img_ori=cv2.imread(image_input_path)    
-    img_ori_resize=img_resize(img_ori,1024)  #resize
+def cellConfluence_singleTask(task_record):
+    """Benchmark:
+    """
+    img_ori=cv2.imread(task_record.uploaded_image)    
+    img_ori_resize=img_resize(img_ori, 1024)  #resize
      
     #如果先resize再取gray~效果會比較差
     img_gray=cv2.cvtColor(img_ori, cv2.COLOR_BGR2GRAY)
-    img_gray=img_resize(img_gray,1024)  #resize    
+    img_gray=img_resize(img_gray, 1024)  #resize    
      
     img_prewitt=filters.prewitt(img_gray)    #detect edge
     #enhance
@@ -70,21 +69,22 @@ def cellConfluence_singleTask(image_input_path, image_output_path, json_path):
     confluence = '%.2f' % confluence 
     ### embed result to image
     font =cv2.FONT_HERSHEY_SIMPLEX
-    cv2.putText(img_ori_resize,str(confluence+'%'),(40,80), font, 2,(255,0,0),3)  
+    cv2.putText(img_ori_resize, str(confluence + '%'), (40, 80), font, 2, (255, 0, 0), 3)  
+    img_ori_resize = cv2.resize(img_ori_resize, (img_ori.shape[1], img_ori.shape[0]))
     
-    img_ori_resize = cv2.resize(img_ori_resize,(img_ori.shape[1],img_ori.shape[0]))
-    cv2.imwrite(image_output_path,img_ori_resize)
+    cv2.imwrite(task_record.result_image, img_ori_resize)
+    cv2.imwrite(task_record.result_display, img_ori_resize)
     
-    out_file = open(json_path,"w")
-    confluence_result = {'confluence': confluence}    
+    #out_file = open(json_path,"w")
+    #confluence_result = {'confluence': confluence}    
     
-    json.dump(confluence_result,out_file)
-    out_file.close()    
+    #json.dump(confluence_result,out_file)
+    #out_file.close()    
     
     #tEnd = time.time()
     #print ("It costs %f sec",tEnd-tStart)    
     
-    return
+    return json.dumps({'confluence': confluence})
 ###############################################################################
 #
 #image_path = u"C:\\Users\\Aaron.Lin\\Desktop\\cellC2_issue"
