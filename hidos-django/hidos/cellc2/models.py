@@ -15,7 +15,7 @@ class Task(CellTask):
     count_max = models.FloatField(null=True, blank=True)
 
     def get_absolute_url(self):
-        return reverse('c2:detail', kwargs={'id': self.id}, current_app=app_name)
+        return reverse('c2:detail', kwargs={'id': self.id.hex}, current_app=app_name)
 
     class Meta(CellTask.Meta):
         verbose_name = '{0} {1}'.format(verbose_name, 'Task')
@@ -23,7 +23,7 @@ class Task(CellTask):
     def enqueue(self):
         """Insert task into task queue
         """
-        process_image.delay(self.id)
+        process_image.delay(self.id.hex)
 
     # def save(self, force_insert=False, force_update=False, using=None, update_fields=None)
     # def save(self, *args, **kwargs):
