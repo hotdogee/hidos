@@ -72,7 +72,7 @@ class SingleImageUploadManager(models.Manager):
         path_prefix = path.join(settings.MEDIA_ROOT, app_name, 'task', task_id, task_id)
         # avoid exploits, don't any part of the user filename
         uploaded_image_path = path_prefix + '_uploaded.' + image_type
-        result_image_path = path_prefix + '_result.' + self.uploaded_filetype
+        result_image_path = path_prefix + '_result.' + image_type
         # jpg image for viewer
         input_image_viewer_path = path_prefix + '_in.jpg'
         output_image_viewer_path = path_prefix + '_out.jpg'
