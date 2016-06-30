@@ -1,6 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 import re
 import sys
+import uuid
 import hashlib
 import imghdr
 import stat as Perm
@@ -103,7 +104,7 @@ class SingleImageUploadManager(models.Manager):
 
         # Build data dictionary
         data = {
-            'id': task_id,
+            'id': uuid.UUID(task_id),
             'name': file.name,
             'type': app_name,
             'version': app.version,
