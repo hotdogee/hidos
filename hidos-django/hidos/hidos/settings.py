@@ -22,7 +22,7 @@ MANAGERS = ADMINS
 
 APPEND_SLASH = False
 
-LOGIN_URL = '/accounts/login'
+LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/a/'
 
 # Make this unique, and don't share it with anybody.
