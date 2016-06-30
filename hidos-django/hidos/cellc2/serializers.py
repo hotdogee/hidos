@@ -11,6 +11,8 @@ from .models import Task
 class TaskSerializer(FileSerializer):
     file = serializers.ImageField(write_only=True, max_length=None, allow_empty_file=False, use_url=False)
     url = serializers.URLField(source='get_absolute_url', read_only=True)
+    type = serializers.CharField(max_length=32, read_only=True)
+    name = serializers.CharField(max_length=255, read_only=True)
 
     class Meta:
         model = Task
