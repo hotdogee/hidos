@@ -22,7 +22,7 @@ MANAGERS = ADMINS
 
 APPEND_SLASH = False
 
-LOGIN_URL = '/login'
+LOGIN_URL = '/accounts/login'
 LOGIN_REDIRECT_URL = '/a/'
 
 # Make this unique, and don't share it with anybody.
@@ -39,9 +39,13 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 # allauth email setting
 
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = LOGIN_URL
 ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = LOGIN_URL
-
+SOCIALACCOUNT_QUERY_EMAIL = False
+SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
+SOCIALACCOUNT_EMAIL_REQUIRED = False
 
 
 # Database

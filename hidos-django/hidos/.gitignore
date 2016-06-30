@@ -38,3 +38,5 @@ jspm_packages
 
 # migration
 migrations/
+
+db.sqlite3_backup

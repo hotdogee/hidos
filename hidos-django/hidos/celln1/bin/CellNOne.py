@@ -25,8 +25,7 @@ from skimage import exposure
 from skimage import measure
 from skimage.segmentation import clear_border
 import skimage
-
-
+import cv2
 
 
 
@@ -98,8 +97,13 @@ def CellNOne(img_input_path, img_output_path, json_output_path):
     # --------------------------------------------------------------------------------------------
     # read input image
     # tran image type as uint8
+    
 
-    ori_img = io.imread(img_input_path)
+
+    ori_img=cv2.imread(input_image_path)
+    img_gray=cv2.cvtColor(ori_img, cv2.COLOR_BGR2GRAY)
+    ori_img = img_as_ubyte(img_gray)
+
     ori_img_int8_norm = (ori_img - ori_img.min())/float(ori_img.max() - ori_img.min())*255.0
     ori_img_int8_norm = ori_img_int8_norm.astype('uint8')
     img = img_as_ubyte(ori_img_int8_norm)

@@ -13,6 +13,7 @@ from skimage.filters import gabor, laplace, gaussian
 from skimage.util import img_as_ubyte
 from skimage.morphology import erosion, dilation, opening, closing, white_tophat, skeletonize, disk
 import json
+import cv2
 
 def mask_create(image_phase):
 
@@ -126,7 +127,9 @@ def cellm3(input_image_path, output_image_path, json_path):
         # with that of the color mask
         img_hsv[..., 0] = color_mask_hsv[..., 0]
         img_hsv[..., 1] = color_mask_hsv[..., 1] * alpha
+        
 
+        ratio_str = "%.2f" % ratio
         img_masked = color.hsv2rgb(img_hsv)
         
         img_masked = (img_masked*255.9).astype(np.uint8)
