@@ -39,12 +39,12 @@ Setting up the development environment on Windows
      * `install.packages('RJSONIO')`
    * Add RScript to PATH environment variable
      * C:\Program Files\R\R-3.x.x\bin\
-1. Clone the repo, initialize Python virtualenv(`init_venv.cmd`), and setup the database schema(`run_migrate.cmd`)
+1. Clone the repo, initialize Python virtualenv(`init_venv.cmd`), and initialize the database tables(`reset_datadb.cmd`)
    ```
 git clone https://github.com/hotdogee/hidos.git
 cd hidos\hidos
 init_venv.cmd
-run_migrate.cmd
+reset_datadb.cmd
 ```
 
 1. Run development web server
