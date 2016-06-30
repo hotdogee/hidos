@@ -1,6 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 import re
 
+from django.db.models.fields.files import FieldFile
 from django.core.validators import RegexValidator
 
 from rest_framework import serializers
@@ -35,7 +36,15 @@ class ContentRelatedField(serializers.RelatedField):
         """
         Serialize tagged objects to a simple textual representation.
         """
-        return dict([(k, v) for k, v in value.__dict__.items() if k not in self.ignore_keys])
+        content = {}
+        for k in value.__dict__:
+            if k not in self.ignore_keys:
+                v = getattr(value, k)
+                if isinstance(v, FieldFile):
+                    content[k] = v.url
+                else:
+                    content[k] = v
+        return content
 
 
 class FileSerializer(serializers.ModelSerializer):
