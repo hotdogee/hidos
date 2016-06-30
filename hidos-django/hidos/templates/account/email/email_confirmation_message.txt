@@ -1,8 +1,29 @@
-{% load account %}{% user_display user as user_display %}{% load i18n %}{% autoescape off %}{% blocktrans with site_name=current_site.name site_domain=current_site.domain %}Hello from {{ site_name }}!
+{% load account %}
+{% user_display user as user_display %}
+{% load i18n %}
+{% autoescape off %}
+{% blocktrans with site_name=current_site.name site_domain=current_site.domain %}
 
-You're receiving this e-mail because user {{ user_display }} at {{ site_domain }} has given yours as an e-mail address to connect their account.
+Hi {{ user_display }},
 
-To confirm this is correct, go to {{ activate_url }}
+Welcome to {{ site_name }}!
+
+To get started, please click the following link to verify your email address.
+{{ activate_url }}
+
+By the way, we are eager to get your feedback.
+
+If you have any suggestions during using our services,
+feel free to send us an email at cellcloud@meridigen.com,
+so that we can keep optimizing our services :)
+
+Thanks again for your registration!
 {% endblocktrans %}{% endautoescape %}
-{% blocktrans with site_name=current_site.name site_domain=current_site.domain %}Thank you from {{ site_name }}!
-{{ site_domain }}{% endblocktrans %}
+{% blocktrans with site_name=current_site.name site_domain=current_site.domain %}
+
+Sincerely yours,
+The {{ site_name }} Team
+
+- This email is sent by the system, please do not reply.
+
+{% endblocktrans %}

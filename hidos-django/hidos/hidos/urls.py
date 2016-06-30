@@ -31,26 +31,26 @@ import cell.views as cell_view
 urlpatterns = [
     #url(r'^api/v1/tasks$', app_views.tasks, name='tasks'),
     #url(r'^api/v1/tasks/status$', app_views.status, name='status'),
-    url(r'^login$',
-        auth_views.login,
-        {
-            'template_name': 'app/login_material.html',
-            'authentication_form': LoginForm,
-            'extra_context':
-            {
-                'title': 'Log in',
-                'year': datetime.now().year,
-            },
-        },
-        name='login'),
+    # url(r'^login$',
+    #     auth_views.login,
+    #     {
+    #         'template_name': 'app/login_material.html',
+    #         'authentication_form': LoginForm,
+    #         'extra_context':
+    #         {
+    #             'title': 'Log in',
+    #             'year': datetime.now().year,
+    #         },
+    #     },
+    #     name='login'),
     url(r'^logout$',
         auth_views.logout,
         {
             'next_page': '/',
         },
         name='logout'),
-    url(r'^register/', cell_view.RegisterView.as_view()),
-    url(r'^accounts/confirm-email/', cell_view.EmailConfirmationView.as_view()),
+    # url(r'^register/', cell_view.RegisterView.as_view()),
+    # url(r'^accounts/confirm-email/', cell_view.EmailConfirmationView.as_view()),
     url(r'^accounts/', include('allauth.urls')),
     url(r'^', include('cell.urls')),
 
