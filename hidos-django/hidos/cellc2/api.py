@@ -9,8 +9,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import list_route
 
 
-from .models import CellC2Task
-from .serializers import CellC2TaskSerializer
+from .models import Task
+from .serializers import TaskSerializer
 
 class TaskViewSet(viewsets.ModelViewSet):
     """
@@ -25,8 +25,8 @@ class TaskViewSet(viewsets.ModelViewSet):
     @detail_route
      * move(destination)
     """
-    queryset = CellC2Task.objects.all()
-    serializer_class = CellC2TaskSerializer
+    queryset = Task.objects.all()
+    serializer_class = TaskSerializer
     lookup_field = 'id'
     filter_backends = (filters.DjangoFilterBackend,)
     filter_fields = ('id', )
@@ -45,9 +45,9 @@ class TaskViewSet(viewsets.ModelViewSet):
         (Eg. return a list of items that is specific to the user)
         """
         if self.request.user.username:
-            return CellC2Task.objects.filter(owner=self.request.user)
+            return Task.objects.filter(owner=self.request.user)
         else:
-            return CellC2Task.objects.none()
+            return Task.objects.none()
 
     # def list(self, request, *args, **kwargs):
     #     queryset = self.filter_queryset(self.get_queryset())
@@ -62,7 +62,7 @@ class TaskViewSet(viewsets.ModelViewSet):
 
     @list_route()
     def running(self, request, *args, **kwargs):
-        running_tasks = CellC2Task.objects.filter(owner=request.user, status__in=['queued', 'running'])
+        running_tasks = Task.objects.filter(owner=request.user, status__in=['queued', 'running'])
         serializer = self.get_serializer(running_tasks, many=True)
         return Response(serializer.data)
 
