@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{% block head_title %}{% endblock %}</title>
+
+
+    {% load material_form %}
+    {% load static %}
+
+    <!-- django material -->
+    {% include 'material/includes/material_css.html' %}
+    <script src="{% static 'material/js/jquery-2.2.0.js' %}"></script>
+    {% include 'material/includes/material_js.html' %}
+
+    <!-- MDL -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.1.3/material.indigo-pink.min.css">
+    <script defer src="https://code.getmdl.io/1.1.3/material.min.js"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
+
+
+
+
+    <style>
+      .fix-content{
+        bottom: 10%;
+        top: 10%;
+        left: 20%;
+        right: 20%;
+        position: absolute;
+      }
+
+      .mdl-card{
+        width: 500px;
+        min-height:600px;
+      }
+
+      .mdl-card__supporting-text{
+        width:100%;
+        padding:0 16px;
+      }
+
+      .background{
+        background-image:url("{% static 'cell/images/cell.jpg' %}");
+        background-postion:center;
+        background-size: cover;
+        height:100%;
+      }
+
+      .overlay{
+        background: rgba(0,0,0,0.6);
+        overflow:hidden;
+        height:100%;
+        z-index:2;
+      }
+
+    </style>
+
+    {% block extra_head %}{% endblock %}
+
+
+  </head>
+  <body>
+    {% block body %}
+
+    {% if messages %}
+    <div>
+      <strong>Messages:</strong>
+      <ul>
+        {% for message in messages %}
+        <li>{{message}}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+    <!-- from allauth
+    <div>
+      <strong>Menu:</strong>
+      <ul>
+        {% if user.is_authenticated %}
+        <li><a href="{% url 'account_email' %}">Change E-mail</a></li>
+        <li><a href="{% url 'account_logout' %}">Sign Out</a></li>
+        {% else %}
+        <li><a href="{% url 'account_login' %}">Sign In</a></li>
+        <li><a href="{% url 'account_signup' %}">Sign Up</a></li>
+        {% endif %}
+      </ul>
+    </div>
+    -->
+
+    <div class="mdl-layout mdl-js-layout" style="display:flex">
+      <div class="background">
+        <div class="overlay"></div>
+      </div>
+      <div class="fix-content">
+      <div class="mdl-card" style="margin:auto">
+        {% block content %}{% endblock %}
+      </div>
+        {% block extra_content %}{% endblock %}
+      </div>
+    </div>
+    {% endblock %}
+    {% block extra_body %}
+    {% endblock %}
+
+  </body>
+</html>
