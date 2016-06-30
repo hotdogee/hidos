@@ -1,5 +1,6 @@
 celery>=3.1.20
 docutils>=0.12
+urllib3>=1.16
 numpy>=1.11.0
 matplotlib>=1.5.1
 Markdown>=2.6.6
@@ -13,7 +14,7 @@ django-filter>=0.13.0
 django-material>=0.7.0
 djangorestframework>=3.3.3
 
-scikit-image==0.12.3
-scipy==0.17.0
-mahotas==1.4.1
-pymorph==0.96
+scikit-image>=0.12.3
+scipy>=0.17.0
+mahotas>=1.4.1
+pymorph>=0.96
