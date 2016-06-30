@@ -3,21 +3,19 @@ from __future__ import absolute_import, unicode_literals
 from rest_framework import serializers
 from rest_framework import filters
 
-from .models import CellC2Task
+from fs.serializers import FileSerializer
+
+from .models import Task
 
 
-class CellC2TaskSerializer(serializers.ModelSerializer):
+class TaskSerializer(FileSerializer):
     file = serializers.ImageField(write_only=True, max_length=None, allow_empty_file=False, use_url=False)
     url = serializers.URLField(source='get_absolute_url', read_only=True)
 
     class Meta:
-        model = CellC2Task
-        read_only_fields = ['url',
-            'cell_ratio', 'count_min', 'count_max',
-            'name', 'uploaded_filetype', 'stdout', 'stderr',
-            'id', 'status', 'dequeued', 'finished', 'owner', 'parent_folder', 'version',
-            'created', 'modified']
-        fields = read_only_fields + ['file']
+        model = Task
+        read_only_fields = ['url', 'id', 'name', 'type', 'created', 'modified', 'owner', 'content']
+        fields = read_only_fields + ['file', 'folder']
 
     # def create(self, validated_data):
     #    return CellC2Task.objects.create(**validated_data)
