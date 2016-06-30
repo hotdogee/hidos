@@ -19,7 +19,7 @@
 
   <form method="post" action="{% url 'account_confirm_email' confirmation.key %}">
   {% csrf_token %}
-      <button type="submit">{% trans 'Confirm' %}</button>
+      <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="submit-button" type="submit">{% trans 'Confirm' %}</button>
   </form>
 </div>
 {% else %}
@@ -30,4 +30,19 @@
 </div>
 {% endif %}
 
+{% endblock %}
+
+
+{% block extra_head %}
+<style>
+.signup{
+  padding: 16px 16px 0 16px;
+}
+
+#submit-button{
+  width:100%;
+  margin-top:20px;
+}
+
+</style>
 {% endblock %}
