@@ -8,7 +8,7 @@ from vanilla import TemplateView
 from vanilla import GenericModelView
 
 from . import app_name, verbose_name, version
-from .models import CellC2Task
+from .models import Task
 
 logger = logging.getLogger(__name__) # __name__ == cellc2.views
 
@@ -25,7 +25,7 @@ class IndexView(TemplateView):
 
 class DetailView(GenericModelView):
     template_name = 'cellc2/result.html'
-    model = CellC2Task
+    model = Task
     lookup_field = 'id'
 
     def get_context_data(self, **context):
