@@ -23,13 +23,6 @@ from .bin import process_image as process_image_bin
 
 logger = get_task_logger(__name__)
 
-if settings.USE_CACHE:
-    LOCK_EXPIRE = 30
-    LOCK_ID = 'task_list_cache_lock'
-    CACHE_ID = 'task_list_cache'
-    acquire_lock = lambda: cache.add(LOCK_ID, 'true', LOCK_EXPIRE)
-    release_lock = lambda: cache.delete(LOCK_ID)
-
 @shared_task() # ignore_result=True
 def process_image(task_id):
     import django
@@ -47,7 +40,7 @@ def process_image(task_id):
 
     # run
     try:
-        task_record.result = process_image_bin(task_record.uploaded_image, task_record.result_image)
+        task_record.result = process_image_bin(task_record)
     except Exception as e:
         task_record.stderr = e
         # slack report templatera
@@ -66,10 +59,6 @@ def process_image(task_id):
         task_record.status = 'NO_OUT_JPG'
     elif stat(result_image_path)[6] == 0:
         task_record.status = 'OUT_JPG_EMPTY'
-    elif not path.isfile(result_json_path):
-        task_record.status = 'NO_OUT_JSON'
-    elif stat(result_json_path)[6] == 0:
-        task_record.status = 'OUT_JSON_EMPTY'
     else:
         task_record.status = 'success'
         with open(result_json_path, 'r') as f:
@@ -86,6 +75,14 @@ def process_image(task_id):
     task_record.save()
 
     return task_id # passed to 'result' argument of task_success_handler
+
+
+if settings.USE_CACHE:
+    LOCK_EXPIRE = 30
+    LOCK_ID = 'task_list_cache_lock'
+    CACHE_ID = 'task_list_cache'
+    acquire_lock = lambda: cache.add(LOCK_ID, 'true', LOCK_EXPIRE)
+    release_lock = lambda: cache.delete(LOCK_ID)
 
 @task_sent.connect
 def task_sent_handler(sender=None, task_id=None, task=None, args=None, kwargs=None, **kwds):
