@@ -15,13 +15,13 @@ By the way, we are eager to get your feedback.
 
 If you have any suggestions during using our services,
 feel free to send us an email at cellcloud@meridigen.com,
-so that we can keep optimizing our services :)
+so that we can keep optimizing our services. :)
 
 Thanks again for your registration!
 {% endblocktrans %}{% endautoescape %}
 {% blocktrans with site_name=current_site.name site_domain=current_site.domain %}
 
-Sincerely yours,
+Best regards,
 The {{ site_name }} Team
 
 - This email is sent by the system, please do not reply.

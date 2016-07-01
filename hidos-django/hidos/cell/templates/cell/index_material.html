@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 {% load staticfiles %}
+{% load static %}
 
 <html lang="en">
 <head>
@@ -10,7 +11,8 @@
   <link rel="stylesheet" href="https://code.getmdl.io/1.1.3/material.teal-red.min.css" />
   <script defer src="https://code.getmdl.io/1.1.3/material.min.js"></script>
   <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
-
+  <link href="https://fonts.googleapis.com/css?family=Alegreya+Sans" rel="stylesheet">
+  <script  src="https://code.jquery.com/jquery-2.2.4.min.js" ></script>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
 
@@ -18,55 +20,55 @@
   <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">
   <link href='https://fonts.googleapis.com/css?family=Rufina' rel='stylesheet' type='text/css'>
   <link href='https://fonts.googleapis.com/css?family=Oleo+Script:700' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Libre+Baskerville' rel='stylesheet' type='text/css'>
+
+
+
+
 
 
 </head>
 
 <body>
 
-  <div class="mdl-layout mdl-js-layout">
+  <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
     <header class="mdl-layout__header mdl-layout__header--transparent">
       <div class="mdl-layout__header-row">
-        <span class="mdl-layout-title header-title">CellCloud</span>
+        <span class="mdl-layout-title Oleo">CellCloud</span>
         <div class="mdl-layout-spacer"></div>
         <nav class="mdl-navigation">
-          <a class="mdl-navigation__link">Features</a>
-          <a class="mdl-navigation__link">Services</a>
-          <a class="mdl-navigation__link">Contact us</a>
+          <a class="mdl-navigation__link" href="#about">Features</a>
+          <a class="mdl-navigation__link" href="#service">Services</a>
+          <a class="mdl-navigation__link" href="#contact">Contact us</a>
+          {% if user.is_authenticated %}
+          <a class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect ghost-button" href="/logout">logout</a>
+          {% else %}
+          <a class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect ghost-button" href="{% url 'account_login' %}">login</a>
+          {% endif %}
         </nav>
       </div>
     </header>
-
-
-    <div class="page-content">
-      <main class="mdl-layout__content">
+    <main class="mdl-layout__content">
+      <div class="page-content">
         <div class="cellcloud-layout">
           <div class="hero">
-            <p class="mdl-typography--display-2">HiDOS CellCloud</p>
-            <p class="mdl-typography--headline">Instant cell image analysis without any parameter setting for modern biologists</p>
-            {% if user.is_authenticated %}
-            <a class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent mdl-typography--display-1" href="/logout">logout</a>
-            {% else %}
-            <a class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent mdl-typography--display-1" href="{% url 'account_login' %}">login</a>
-            {% endif %}
+            <p class="mdl-typography--display-2"><span class="Oleo">CellCloud</span></p>
+            <p class="mdl-typography--headline Baskerville">Instant cell image analysis without any parameter setting</p>
           </div>
         </div>
 
         <!-- about section -->
-        <section class="mdl-shadow--4dp" id="about">
+        <section  id="about">
           <div class="mdl-layout mdl-layout-js">
               <!-- about -->
             <div class="mdl-grid">
               <div class="mdl-cell mdl-cell--8-col about">
                 <h3 class="mdl-typography--display-1">About CellCloud</h3>
                 <p>
-                  CellCloud is a cloud-base cell image analysis service for modern biologists.
+                  CellCloud is a cloud-based cell image analysis service for modern biologists.
                 </p>
                 <p>
-                  Quantify the experimental images is no more annoying and time counsuming, what we are doing is to save your precious time and speed up your research
-                </p>
-                <p>
-                  Our team focus on image analysis. We provide the fastest and the most user friendly platform for you. You don’t need to install the software, set lots of parameters, or wait for hours. Just drag and drop the images into CellCloud interface, and get the report instantly.
+                  Quantify the experimental images is no more annoying and time counsuming, what we are doing is to save your precious time and speed up your research.
                 </p>
               </div>
             </div>
@@ -85,7 +87,7 @@
                             Real Time
                           </p>
                           <p>
-                            You don’t need to wait for several hours or even days anymore. We process the image analysis in seconds.
+                            You don’t need to wait for several hours or even days anymore. We process the image analysis in seconds, and capable to analysis multiple tasks simultaneously.
                           </p>
                         </div>
                       </div>
@@ -98,7 +100,7 @@
                             <i class="fa fa-compass feature-icon" aria-hidden="true"></i>
                           </p>
                           <p class="mdl-typography--headline mdl-typography--text-center">
-                            No parameters
+                            No Parameters
                           </p>
                           <p>
                             We set all parameters automatically for you. You can easily analyze images and get the report without having any image analysis skills.
@@ -114,10 +116,10 @@
                             <i class="material-icons feature-icon">cloud_circle</i>
                           </p>
                           <p class="mdl-typography--headline mdl-typography--text-center">
-                            Online file management
+                            Cloud Box
                           </p>
                           <p>
-                            We set all parameters automatically for you. You can easily analyze images and get the report without having any image analysis skills.
+                            You do not only download the results, but also use our online manage system to check and manage your research findings anytime, anywhere.
                           </p>
                         </div>
                       </div>
@@ -131,22 +133,22 @@
         </section>
 
         <!-- Service section-->
-        <section id="service">
+        <section class="mdl-shadow-up mdl-color--blue-grey-500" id="service">
           <div class="mdl-layout mdl-layout-js">
             <div class="mdl-grid">
               <div class="mdl-cell mdl-cell--8-col service">
                 <div class="mdl-grid">
                   <div class="mdl-cell mdl-cell--12-col">
-                    <h3 class="mdl-typography--display-1">Service</h3>
+                    <h3 class="mdl-typography--display-1 mdl-color-text--white">Service</h3>
+                    <p class="mdl-color-text--white">Our team focus on image analysis. We provide the fastest and the most user friendly platform for you. You don’t need to install the software, set lots of parameters, or wait for hours. Just drag and drop the images into CellCloud interface, and get the report instantly.
+               </p>
+                    <p class="mdl-color-text--white"> We now provide following six pipelines for your research demands.</p>
                   </div>
                   <div class="mdl-cell mdl-cell--4-col-desktop mdl-cell--12-col-tablet mdl-cell--12-col-phone">
                     <div class="mdl-card mdl-shadow--2dp" id="cella">
                       <div class="mdl-card__title">
                         <h2 class="mdl-card__title-text">Cell A: Angiogenesis</h2>
                         <h4 class="mdl-card__title-text"></h4>
-                      </div>
-                      <div class="mdl-card__actions mdl-card--border">
-                        <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" href="a/">Analysis</a>
                       </div>
                     </div>
                   </div>
@@ -156,9 +158,6 @@
                       <div class="mdl-card__title">
                         <h2 class="mdl-card__title-text">Cell C1: Count</h2>
                       </div>
-                      <div class="mdl-card__actions mdl-card--border">
-                        <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" href="c1/">Analysis</a>
-                      </div>
                     </div>
                   </div>
 
@@ -166,9 +165,6 @@
                     <div class="mdl-card mdl-shadow--2dp" id="cellc2">
                       <div class="mdl-card__title">
                         <h2 class="mdl-card__title-text">Cell C2: Confluence</h2>
-                      </div>
-                      <div class="mdl-card__actions mdl-card--border">
-                        <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" href="c2/">Analysis</a>
                       </div>
                     </div>
                   </div>
@@ -178,9 +174,6 @@
                       <div class="mdl-card__title">
                         <h2 class="mdl-card__title-text">Cell M1: Transwell Migration</h2>
                       </div>
-                      <div class="mdl-card__actions mdl-card--border">
-                        <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" href="m1/">Analysis</a>
-                      </div>
                     </div>
                   </div>
 
@@ -189,9 +182,6 @@
                       <div class="mdl-card__title">
                         <h2 class="mdl-card__title-text">Cell M3: Wound Healing Migration</h2>
                       </div>
-                      <div class="mdl-card__actions mdl-card--border">
-                        <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" href="m3/">Analysis</a>
-                      </div>
                     </div>
                   </div>
 
@@ -199,9 +189,6 @@
                     <div class="mdl-card mdl-shadow--2dp" id="celln1">
                       <div class="mdl-card__title">
                         <h2 class="mdl-card__title-text">Cell N1: Neurite analysis</h2>
-                      </div>
-                      <div class="mdl-card__actions mdl-card--border">
-                        <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" href="n1/">Analysis</a>
                       </div>
                     </div>
                   </div>
@@ -216,19 +203,28 @@
         <!-- contact section -->
         <section id="contact">
           <div class="mdl-layout mdl-layout-js">
-            <div class="mdl-grid contact">
-              <div class="mdl-cell mdl-cell--8-col">
-                <!--
-                <div class="company-section">
-                  <p class="mdl-typography--display-2">宣捷生物科技股份有限公司</p>
-                  <p class="mdl-typography--display-1">高通量平台研究處</p>
+            <div class="mdl-grid">
+              <div class="mdl-cell mdl-cell--8-col contact">
+                <div class="mdl-grid ">
+                  <div class="mdl-cell mdl-cell--12-col">
+                    <h3 class="mdl-typography--display-1 R">Contact</h3>
+                    <h5>Meridigen Biotechnology - HiDOS depart.</h5>
+                  </div>
+                 <div class="mdl-cell mdl-cell--6-col">
+                    <div class="mdl-card mdl-shadow--2dp">
+                      <div class="map">
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1806.7687020071917!2d121.5616604164869!3d25.083663598784963!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3442ac0e19449ce3%3A0x462392b239e7fcab!2z5a6j5o2355Sf54mp56eR5oqA6IKh5Lu95pyJ6ZmQ5YWs5Y-4!5e0!3m2!1szh-TW!2stw!4v1465285052274" width="100%" height="300px" frameborder="0" style="border:0" allowfullscreen></iframe>
+                      </div>
+                    </div>
+                 </div>
+                   <div class="mdl-cell mdl-cell--6-col">
+                    <div class="contact-info">
+                      <p><i class="material-icons">location_on</i> Location: 114, Taiwan, Taipei City, Neihu District, Section 1, Neihu Rd, No.66, 4F.</p>
+                      <p><i class="material-icons">email</i> Email: cellcloud@meridigen.com</p>
+                      <p><i class="material-icons">phone</i> Phone: +886-2-2627-5175</p>
+                    </div>
+                  </div>
                 </div>
-                <div class="map-section">
-                  <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1806.7687020071917!2d121.5616604164869!3d25.083663598784963!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3442ac0e19449ce3%3A0x462392b239e7fcab!2z5a6j5o2355Sf54mp56eR5oqA6IKh5Lu95pyJ6ZmQ5YWs5Y-4!5e0!3m2!1szh-TW!2stw!4v1465285052274" width="100%" height="600" frameborder="0" style="border:0" allowfullscreen></iframe>
-                </div>
-
-                -->
-                 <!-- register -->
               </div>
             </div>
           </div>
@@ -239,7 +235,7 @@
            <div class="register-section">
              <div class="mdl-grid mdl-typography--text-center">
               <div class="mdl-cell mdl-cell--12-col">
-                  <p class="mdl-typography--display-1">Save Your Time Now</p>
+                  <p class="mdl-typography--display-1">Save Your Time and enjoy your tea now</p>
                 </div>
                 <div class="mdl-cell mdl-cell--12-col">
                   <a class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--primary mdl-typography--display-1" href="/accounts/login/">Register</a>
@@ -247,29 +243,49 @@
               </div>
             </div>
 
-            <!-- company -->
+            <!-- company
             <footer>
               <p class="mdl-typography--text-right">Copyright © 2016 Meridigen Biotechnology. All rights reserved.</p>
             </footer>
+
+            -->
         </section>
-
-
-
+        </div>
       </main>
-    </div>
   </div>
 </body>
 
 
+
+
+
+
 <style>
 
-  .header-title{
+  .Baskerville{
+    font-family: 'Libre Baskerville', serif;
+  }
+
+  .Oleo{
     font-family: 'Oleo Script', cursive;
+  }
+
+  .Alegreya{
+    font-family: 'Alegreya Sans', sans-serif;
+  }
+
+  .Rufina{
+    font-family: 'Rufina', serif;
   }
 
   .mdl-layout__header-row > span, .mdl-layout__header-row > nav > .mdl-navigation__link {
     color:white;
   }
+
+  .mdl-shadow-up{
+      box-shadow: 0 -6px 10px 0 rgba(0,0,0,.14),0 1px 18px 0 rgba(0,0,0,.12),4px 3px 5px -1px rgba(0,0,0,.2);
+  }
+
 
 
   .cellcloud-layout{
@@ -295,11 +311,23 @@
     margin-top:20px;
   }
 
+  .ghost-button{
+    border: white;
+    border-style:solid;
+    border-width: 1px;
+    background-color: transparent;
+    color: white;
+  }
+
+  .mdl-grid{
+    width:100%;
+  }
+
   .mdl-card{
     width: auto;
   }
 
-  .page-content{
+  .mdl-layout__content{
     margin-top: -64px;
   }
 
@@ -333,8 +361,13 @@
     margin:auto
   }
 
-  .service h3{
+  .service h3, .service p{
     font-family: 'Rufina', serif;
+  }
+
+  .service p{
+    font-size:18px;
+    line-height: 1.6em;
   }
 
   #service{
@@ -373,24 +406,49 @@
   }
 
 
+  .mdl-card__title > h2 {
+    color: white;
+  }
+
+
+
   .contact{
-    margin: 0 0;
+    margin: auto;
     display: flex;
+    padding: 5% 0 0 0;
+    height:100%;
   }
 
   .contact > .mdl-cell{
     margin: auto;
   }
 
+  .contact h3, .contact h5, .contact p{
+    font-family: 'Rufina', serif;
+  }
+
+  .contact-info i{
+    position: relative;
+    top: 5px;
+    right: 5px;
+  }
+
+  .map{
+    padding:2%;
+  }
+
+
 
   .register-section{
-    background:indianred;
-    height: 70vh;
-    margin-top: -30vh;
+    background-image: url("https://static.pexels.com/photos/69726/pexels-photo-69726.jpeg");
+    background-position: center;
+    background-size:cover;
+    height: 80vh;
+    margin-top: -10vh;
   }
 
   .register-section > .mdl-grid{
-    padding-top: 25%;
+    padding-top: 35vh;
   }
 
   .register-section p{
@@ -404,6 +462,27 @@
 
 
 </style>
+
+
+<script>
+var a = $(".cellcloud-layout").height();
+
+$(".mdl-layout__content").scroll(function(){
+  console.log($(this).scrollTop());
+   if($(this).scrollTop() > a)
+    {
+       $('.mdl-layout__header').css({"background":"red"});
+    } else {
+       $('.mdl-layout__header').css({"background":"transparent"});
+    }
+});
+
+
+
+</script>
+
+
+
 
 
 
