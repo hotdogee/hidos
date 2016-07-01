@@ -53,7 +53,7 @@
         <div class="cellcloud-layout">
           <div class="hero">
             <p class="mdl-typography--display-2"><span class="Oleo">CellCloud</span></p>
-            <p class="mdl-typography--headline Baskerville">Instant cell image analysis without any parameter settings</p>
+            <p class="mdl-typography--headline">Instant cell image analysis without any parameter settings</p>
           </div>
         </div>
 
@@ -136,16 +136,14 @@
         </section>
 
         <!-- Service section-->
-        <section class="mdl-shadow-up mdl-color--blue-grey-500" id="service">
+        <section class="mdl-shadow-up mdl-color--blue-grey-100" id="service">
           <div class="mdl-layout mdl-layout-js">
             <div class="mdl-grid">
               <div class="mdl-cell mdl-cell--8-col service">
                 <div class="mdl-grid">
                   <div class="mdl-cell mdl-cell--12-col">
-                    <h3 class="mdl-typography--display-1 mdl-color-text--white">Service</h3>
-                    <p class="mdl-color-text--white">Our team focus on image analysis. We provide the fastest and the most user friendly platform for you. You don’t need to install the software, set lots of parameters, or wait for hours. Just drag and drop the images into CellCloud interface, and get the report instantly.
-               </p>
-                    <p class="mdl-color-text--white"> We now provide following six pipelines for your research demands.</p>
+                    <h3 class="mdl-typography--display-1">Service</h3>
+                    <p > We now provide following six pipelines for your research demands.</p>
                   </div>
                   <div class="mdl-cell mdl-cell--4-col-desktop mdl-cell--12-col-tablet mdl-cell--12-col-phone">
                     <div class="mdl-card mdl-shadow--2dp service-card" onclick="javascript:location.href='/a/'" id="cella">
@@ -222,7 +220,7 @@
                  </div>
                    <div class="mdl-cell mdl-cell--6-col">
                     <div class="contact-info">
-                      <p><i class="material-icons">location_on</i> Location: 114, Taiwan, Taipei City, Neihu District, Section 1, Neihu Rd, No.66, 4F.</p>
+                      <p><i class="material-icons">location_on</i> Location: 4F., No.66, Sec. 1, Neihu Rd., Neihu Dist., Taipei City 114, Taiwan (R.O.C.)</p>
                       <p><i class="material-icons">email</i> Email: cellcloud@meridigen.com</p>
                       <p><i class="material-icons">phone</i> Phone: +886-2-2627-5175</p>
                     </div>
@@ -238,11 +236,14 @@
            <div class="register-section">
              <div class="mdl-grid mdl-typography--text-center">
               <div class="mdl-cell mdl-cell--12-col">
-                  <p class="mdl-typography--display-1">Save Your Time and enjoy your tea now</p>
-                </div>
-                <div class="mdl-cell mdl-cell--12-col">
-                  <a class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-typography--display-1 ghost-button" href="/accounts/signup/">Register</a>
-                </div>
+                  <p class="mdl-typography--display-1">Save your time and enjoy your tea now</p>
+              </div>
+              <div class="mdl-cell mdl-cell--12-col">
+                <a class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-typography--display-1 ghost-button" href="/accounts/signup/">Register</a>
+              </div>
+              <div class="mdl-cell mdl-cell--12-col ">
+                <p class="copyright mdl-typography--text-right">Copyright © 2016 Meridigen Biotechnology. All rights reserved.</p>
+              </div>
               </div>
             </div>
 
@@ -374,7 +375,7 @@
   }
 
   #service{
-    padding: 5% 0;
+    padding: 3% 0;
   }
 
   .service-card{
@@ -450,6 +451,7 @@
     background-position: center;
     background-size:cover;
     height: 60vh;
+    position: relative;
   }
 
   .register-section > .mdl-grid{
@@ -460,8 +462,10 @@
     color:white;
   }
 
-  footer{
-    padding-right:5%;
+  .copyright{
+    position:absolute;
+    bottom:2px;
+    right:2%;
   }
 
 
@@ -474,7 +478,7 @@ var a = $(".cellcloud-layout").height() - 10;
 
 $(".mdl-layout__content").scroll(function(){
   console.log($(this).scrollTop());
-   if($(this).scrollTop() > a)
+   if($(this).scrollTop() > 0)
     {
        $('.mdl-layout__header').css({"background":"red"});
     } else {
