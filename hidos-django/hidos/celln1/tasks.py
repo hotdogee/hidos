@@ -70,13 +70,13 @@ def run_cell_n1_task(self, task_id,uploaded_image_path, result_image_path, resul
     # update result state
     record.status = 'failed'
     if not path.isfile(result_image_path):
-        record.status = 'NO_OUT_JPG'
+        record.stderr += '(NO_OUT_JPG)'
     elif stat(result_image_path)[6] == 0:
-        record.status = 'OUT_JPG_EMPTY'
+        record.stderr += '(OUT_JPG_EMPTY)'
     elif not path.isfile(result_json_path):
-        record.status = 'NO_OUT_JSON'
+        record.stderr += '(NO_OUT_JSON)'
     elif stat(result_json_path)[6] == 0:
-        record.status = 'OUT_JSON_EMPTY'
+        record.stderr += '(OUT_JSON_EMPTY)'
     else:
         record.status = 'success'
         with open(result_json_path, 'r') as f:
