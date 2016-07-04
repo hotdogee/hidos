@@ -18,7 +18,7 @@ import json
 from django.conf import settings
 
 
-version = '0.5'
+version = '0.2'
 
        
 
