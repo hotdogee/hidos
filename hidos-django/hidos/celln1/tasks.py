@@ -60,7 +60,7 @@ def run_cell_n1_task(self, task_id,uploaded_image_path, result_image_path, resul
     try:
        CellNOne(uploaded_image_path, result_image_path, result_json_path)
     except Exception as e:
-        record.stderr = e
+        record.stderr = str(e)
         uploaded_image_name = uploaded_image_path.split('/')[-1]
         data["text"] = username + '\n' + record.uploaded_filename + '\n' + e.args[0] + '\n' + '`' + uploaded_image_name + '`'
         slack_manager.request('POST','https://hooks.slack.com/services/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',body = json.dumps(data),headers={'Content-Type': 'application/json'})

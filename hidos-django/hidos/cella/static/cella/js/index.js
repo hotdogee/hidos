@@ -32,7 +32,7 @@ $(document).ready(function () {
           name: 'file-name', data: 'uploaded_filename',
           render: function (data, type, row, meta) {
             if (type === 'display')
-              return cellq_name_compiled({ name: data });
+                  return cellq_name_compiled({ name: data });
             else
               return data;
           }
@@ -40,7 +40,6 @@ $(document).ready(function () {
         {
           name: 'mesh', type: 'num', data: 'mesh', defaultContent: running_template, width: '100px', className: 'dt-center',
           render: function (data, type, row, meta) {
-              console.log(data);
             if (data === null)
               return running_template;
             else
