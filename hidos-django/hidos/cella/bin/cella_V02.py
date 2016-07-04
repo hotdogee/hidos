@@ -493,7 +493,7 @@ def cellAngiogenesis(image_input_path, image_output_path, json_path, add_boarder
                            '#Branch':total_num_of_branch,'Tot. branch length':tot_branch_len,'Mean branch length':round(mean_branch,3),'Std. branch Length':round(std_branch,3),
                            '#Segment':total_num_of_seg,'Tot. segment length':tot_seg_len,'Mean segment length':round(mean_seg,3),'Std. segment length':round(std_seg,3),                           
                            '#Mesh':num_mesh,'Tot. mesh area':tot_mesh_area,'Mean mesh area':round(mean_mesh_area,3),'Std. mesh area':round(std_mesh_area,3),                           
-                           'Tot. mesh perimeter':tot_mesh_perimeter,'Mean mesh perimeter':round(mean_mesh_perimeter,3),'Std. mesh area':round(std_mesh_perimeter,3)
+                           'Tot. mesh perimeter':tot_mesh_perimeter,'Mean mesh perimeter':round(mean_mesh_perimeter,3),'Std. mesh perimeter':round(std_mesh_perimeter,3)
                            }
     json.dump(angiogenesis_result,out_file)
     out_file.close()     
