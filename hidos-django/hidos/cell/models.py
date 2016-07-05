@@ -8,7 +8,8 @@ import stat as Perm
 import posixpath as path
 from os import makedirs, chmod
 
-from PIL import Image
+import cv2
+import numpy as np
 
 from django.db import models
 from django.conf import settings
@@ -76,8 +77,8 @@ class SingleImageUploadManager(models.Manager):
         uploaded_image_path = path_prefix + '_uploaded.' + image_type
         result_image_path = path_prefix + '_result.' + image_type
         # jpg image for viewer
-        input_image_viewer_path = path_prefix + '_in.jpg'
-        output_image_viewer_path = path_prefix + '_out.jpg'
+        uploaded_display_path = path_prefix + '_uploaded_display.jpg'
+        result_display_path = path_prefix + '_result_display.jpg'
 
         # Build data dictionary
         data = {
@@ -91,8 +92,8 @@ class SingleImageUploadManager(models.Manager):
             'uploaded_filetype': image_type,
             'uploaded_image': uploaded_image_path,
             'result_image': result_image_path,
-            'uploaded_display': input_image_viewer_path,
-            'result_display': output_image_viewer_path,
+            'uploaded_display': uploaded_display_path,
+            'result_display': result_display_path,
         }
         if owner.username:
             data['owner'] = owner
@@ -102,17 +103,13 @@ class SingleImageUploadManager(models.Manager):
         obj.uploaded_image.save(uploaded_image_path, uploaded_file_data, save=False)
 
         # convert to jpeg for web display
-        p = Image.open(uploaded_image_path)
-        if p.mode.split(';')[1:2] == ['16']:
-            p = p.point(lambda x: x*(float(1)/256))
-        if p.mode != 'RGB':
-            p = p.convert('RGB')
-        p.save(input_image_viewer_path)
-        chmod(input_image_viewer_path, Perm.S_IRWXU | Perm.S_IRWXG | Perm.S_IRWXO)
+        uploaded_img_array = np.asarray(bytearray(uploaded_file_data), dtype=np.uint8)
+        flag, uploaded_display_data = cv2.imencode('.jpg', cv2.imdecode(uploaded_img_array, cv2.IMREAD_COLOR))
+        obj.uploaded_display.save(uploaded_display_path, uploaded_display_data, save=False)
 
-        # Make input jpg
-        # Make thumbnail
-
+        # TODO: Make thumbnail
+        
+        # save to database
         obj.save()
         return obj
 
