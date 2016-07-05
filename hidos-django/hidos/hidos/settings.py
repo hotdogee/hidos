@@ -97,6 +97,10 @@ USE_L10N = True
 # If you set this to False, Django will not use timezone-aware datetimes.
 USE_TZ = True
 
+# File Permissions
+FILE_UPLOAD_PERMISSION = 0o644
+FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o644
+
 # Media files
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
