@@ -49,20 +49,22 @@ def process_image(task_id):
         data = {"channel": "#image-bug", "username": "cellc2",
                 "text": "",
                 "icon_emoji": ":desktop_computer:"}
-        data["text"] = task_record.owner.username + '\n' + task_record.name + '\n' + e.args[0]  + '\n' + '`' + task_record.uploaded_image.name.split('/')[-1] + '`'
+        data["text"] = task_record.owner.username + '\n' + task_record.name + '\n' + e.args[0]  + '\n' + '`' + task_record.uploaded_image.path.split('/')[-1] + '`'
         slack_manager.request('POST','https://hooks.slack.com/services/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',body = json.dumps(data),headers={'Content-Type': 'application/json'})
         logger.info(e.args)
+        raise
+        
 
     # update result state
     task_record.status = 'failed'
-    if not path.isfile(task_record.result_image.name):
+    if not path.isfile(task_record.result_image.path):
         task_record.status = 'NO_OUT_JPG'
-    elif stat(task_record.result_image.name)[6] == 0:
+    elif stat(task_record.result_image.path)[6] == 0:
         task_record.status = 'OUT_JPG_EMPTY'
     else:
         task_record.status = 'success'
         # convert to jpeg for web display
-        #Image.open(task_record.result_image.name).save(task_record.result_display.name)
+        #Image.open(task_record.result_image.path).save(task_record.result_display.path)
 
     task_record.progress = 1.0
     task_record.finished = datetime.utcnow().replace(tzinfo=utc)

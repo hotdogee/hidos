@@ -36,7 +36,7 @@ def img_resize(img, max_size):
 def cellConfluence_singleTask(task_record):
     """Benchmark:
     """
-    img_ori = cv2.imread(task_record.uploaded_image.name)
+    img_ori = cv2.imread(task_record.uploaded_image.path)
     img_ori_resize = img_resize(img_ori, 1024)  # resize
 
     #
@@ -80,8 +80,8 @@ def cellConfluence_singleTask(task_record):
     img_ori_resize = cv2.resize(
         img_ori_resize, (img_ori.shape[1], img_ori.shape[0]))
 
-    cv2.imwrite(task_record.result_image.name, img_ori_resize)
-    cv2.imwrite(task_record.result_display.name, img_ori_resize)
+    cv2.imwrite(task_record.result_image.path, img_ori_resize)
+    cv2.imwrite(task_record.result_display.path, img_ori_resize)
 
     #out_file = open(json_path,"w")
     #confluence_result = {'confluence': confluence}
