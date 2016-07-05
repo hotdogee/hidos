@@ -19,8 +19,6 @@ from django.utils.html import format_html
 class CellM1Task(CellTaskModel):
     cell_count = models.IntegerField(null=True, blank=True)
 
-
-
     def get_absolute_url(self):
         return reverse('m1:detail', kwargs={'task_id': self.task_id}, current_app=app_name)
 

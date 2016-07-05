@@ -14,7 +14,6 @@ from skimage.util import img_as_ubyte
 from skimage.morphology import erosion, dilation, disk
 from PIL import ImageFont, ImageDraw
 import json
-
 from django.conf import settings
 
 
@@ -82,7 +81,7 @@ def cellm1(input_image_path, output_image_path, json_path):
 
 
         img = Image.fromarray(img_as_ubyte(img_masked_rs)).convert('RGB')
-        font = ImageFont.truetype('arial.ttf',ori_img_int8.shape[0]/20)
+        font = ImageFont.truetype(settings.FONT,ori_img_int8.shape[0]/20)
         draw = ImageDraw.Draw(img)
         draw.text((100, 80), ratio_str + '%', (255,255,0), font = font)
 
