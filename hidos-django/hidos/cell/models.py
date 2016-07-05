@@ -70,38 +70,14 @@ class SingleImageUploadManager(models.Manager):
 
         # get image format
         image_type = imghdr.what('', uploaded_file_data)
-        # Generate args_list and path_prefix
-        path_prefix = path.join(settings.MEDIA_ROOT, app_name, 'task', task_id, task_id)
+        # path_prefix relative to MEDIA_ROOT
+        path_prefix = path.join(app_name, 'task', task_id, task_id)
         # avoid exploits, don't any part of the user filename
         uploaded_image_path = path_prefix + '_uploaded.' + image_type
         result_image_path = path_prefix + '_result.' + image_type
         # jpg image for viewer
         input_image_viewer_path = path_prefix + '_in.jpg'
         output_image_viewer_path = path_prefix + '_out.jpg'
-
-
-        # create directory
-        if not path.exists(path.dirname(path_prefix)):
-            makedirs(path.dirname(path_prefix))
-        # ensure the standalone dequeuing process can open files in the directory
-        chmod(path.dirname(path_prefix), Perm.S_IRWXU | Perm.S_IRWXG | Perm.S_IRWXO)
-
-        # write original image data to file
-        with open(uploaded_image_path, 'wb') as uploaded_image_f:
-            uploaded_image_f.write(uploaded_file_data)
-        chmod(uploaded_image_path, Perm.S_IRWXU | Perm.S_IRWXG | Perm.S_IRWXO)
-
-        # convert to jpeg for web display
-        p = Image.open(uploaded_image_path)
-        if p.mode.split(';')[1:2] == ['16']:
-            p = p.point(lambda x: x*(float(1)/256))
-        if p.mode != 'RGB':
-            p = p.convert('RGB')
-        p.save(input_image_viewer_path)
-        chmod(input_image_viewer_path, Perm.S_IRWXU | Perm.S_IRWXG | Perm.S_IRWXO)
-
-        # Make input jpg
-        # Make thumbnail
 
         # Build data dictionary
         data = {
@@ -122,6 +98,21 @@ class SingleImageUploadManager(models.Manager):
             data['owner'] = owner
         obj = super(SingleImageUploadManager, self).create(**data)
         obj.content = obj
+
+        obj.uploaded_image.save(uploaded_image_path, uploaded_file_data, save=False)
+
+        # convert to jpeg for web display
+        p = Image.open(uploaded_image_path)
+        if p.mode.split(';')[1:2] == ['16']:
+            p = p.point(lambda x: x*(float(1)/256))
+        if p.mode != 'RGB':
+            p = p.convert('RGB')
+        p.save(input_image_viewer_path)
+        chmod(input_image_viewer_path, Perm.S_IRWXU | Perm.S_IRWXG | Perm.S_IRWXO)
+
+        # Make input jpg
+        # Make thumbnail
+
         obj.save()
         return obj
 
