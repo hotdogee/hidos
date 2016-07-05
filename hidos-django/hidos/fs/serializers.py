@@ -38,7 +38,7 @@ class ContentRelatedField(serializers.RelatedField):
         """
         content = {}
         for k in value.__dict__:
-            if k not in self.ignore_keys:
+            if k not in self.ignore_keys and k[-6:] != '_cache':
                 v = getattr(value, k)
                 if isinstance(v, FieldFile):
                     content[k] = v.url
