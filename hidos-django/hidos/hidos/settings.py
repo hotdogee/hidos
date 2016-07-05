@@ -97,6 +97,10 @@ USE_L10N = True
 # If you set this to False, Django will not use timezone-aware datetimes.
 USE_TZ = True
 
+# File Permissions
+FILE_UPLOAD_PERMISSION = 0o666
+FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o666
+
 # Media files
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
@@ -273,7 +277,7 @@ LOGGING = {
             'handlers': ['django_log'],
             'level': 'INFO',
         },
-        'celery': {
+        'celery.task': {
             'handlers': ['celery_log'],
             'level': 'INFO',
             'propagate': True,
@@ -302,7 +306,7 @@ CELERY_QUEUES = (
     Queue('cell', Exchange('hidos'), routing_key='cell'),
 )
 CELERY_ROUTES = {
-    'cellc2.tasks.run_cell_c2_task': {
+    'cellc2.tasks.process_image': {
         'queue': 'cell',
         'routing_key': 'cell',
     },

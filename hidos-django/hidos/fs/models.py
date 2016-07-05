@@ -89,6 +89,19 @@ class Folder(File):
         else:
             return self.folder.path + '/' + self.name
 
+    #@property
+    def breadcrumbs(self, folder_list=None):
+        """returns folder_list, with the first item being the parent folder, 
+        the second item being the grandparent folder, and so on.
+        """
+        if not folder_list:
+            folder_list = [] 
+        if not self.folder:
+            return folder_list
+        else:
+            folder_list.append([self.folder.id.hex, self.folder.name])
+            return self.folder.breadcrumbs(folder_list)
+
     class Meta(File.Meta):
         pass
 

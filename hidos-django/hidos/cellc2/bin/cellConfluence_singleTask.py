@@ -1,120 +1,112 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Apr 22 17:59:21 2016
+Created on Tue Jun 21 16:02:34 2016
 
 @author: Aaron.Lin
 """
-#get_ipython().magic(u'matplotlib qt')
-from skimage import io
-from skimage import color
-from skimage import filters
-from skimage.transform import resize
-from skimage import morphology
-from skimage.morphology import disk
-#from skimage.measure import label
-#from os import listdir
-from PIL import Image,ImageDraw,ImageFont
-#import numpy
-import json
-from django.conf import settings
 
-def img_resize(img,max_size):
+#get_ipython().magic(u'matplotlib qt')
+import cv2
+import numpy as np
+from skimage import filters
+import json
+#import time
+#from os import listdir
+
+###############################################################################
+
+
+def img_resize(img, max_size):
     len1 = img.shape[0]
     len2 = img.shape[1]
-    if (len1>=len2):
-        factor = float(max_size)/len1
-        img_out = resize(img,(max_size,int(factor*len2)))
+
+    if(len1 < max_size and len2 < max_size):
+        return img
+
+    if (len1 >= len2):
+        factor = float(max_size) / len1
+        img_out = cv2.resize(img, (int(factor * len2), max_size))
     else:
-        factor =float(max_size)/len2
-        img_out = resize(img,(int(factor*len1),max_size))
+        factor = float(max_size) / len2
+        img_out = cv2.resize(img, (max_size, int(factor * len1)))
     return img_out
 ###############################################################################
 
 
-def cellConfluence_singleTask(image_input_path, image_output_path, json_path):
+def cellConfluence_singleTask(task_record):
+    """Benchmark:
+    """
+    img_ori = cv2.imread(task_record.uploaded_image.path)
+    img_ori_resize = img_resize(img_ori, 1024)  # resize
 
-    img_ori=io.imread(image_input_path)
+    #
+    img_gray = cv2.cvtColor(img_ori, cv2.COLOR_BGR2GRAY)
+    img_gray = img_resize(img_gray, 1024)  # resize
 
-    if(img_ori.shape[0]>1024 or img_ori.shape[1]>1024):
-        img_ori_resize=img_resize(img_ori,1024)  #resize
-    else:
-        img_ori_resize=img_ori
+    img_prewitt = filters.prewitt(img_gray)  # detect edge
+    # enhance
+    img_enhance = filters.rank.enhance_contrast(
+        img_prewitt, np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]], np.ubyte))
+    # binarization
+    thresh, img_thresh = cv2.threshold(
+        img_enhance, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    img_thresh = img_enhance >= thresh
+    img_thresh = np.uint8(img_thresh)
+    # print thresh
+    if (thresh < 5):
+        kernel = np.ones((2, 2), np.uint8)
+        img_thresh = cv2.morphologyEx(
+            img_thresh, cv2.MORPH_OPEN, kernel)  # remove salt
 
-    img_gray=color.rgb2gray(img_ori_resize)  #rgb2gray
-    #io.imshow(img_gray)
-    #io.show()
-    img_prewitt=filters.prewitt(img_gray)    #detect edge
-    #io.imshow(img_prewitt)
-    #io.show()
-    #enhance
-    img_enhance=filters.rank.enhance_contrast(img_prewitt,disk(5))
-    #binarization
-    thresh=filters.threshold_otsu(img_enhance)
-    img_thresh=img_enhance>=thresh
+    kernel = np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]], np.ubyte)
+    img_dilation = cv2.dilate(img_thresh, kernel, iterations=4)
+    img_erosion = cv2.erode(img_dilation, kernel, iterations=2)
+    img_opening = cv2.morphologyEx(
+        img_erosion, cv2.MORPH_OPEN, kernel)  # remove salt
 
-    #local binarization
-#    thresh1=filters.threshold_otsu(img_enhance[:img_enhance.shape[0]/2,:img_enhance.shape[1]/2])
-#    thresh2=filters.threshold_otsu(img_enhance[:img_enhance.shape[0]/2,img_enhance.shape[1]/2+1:])
-#    thresh3=filters.threshold_otsu(img_enhance[img_enhance.shape[0]/2+1:,:img_enhance.shape[1]/2])
-#    thresh4=filters.threshold_otsu(img_enhance[img_enhance.shape[0]/2+1:,img_enhance.shape[1]/2+1:])
-#    i1=img_enhance[:img_enhance.shape[0]/2,:img_enhance.shape[1]/2]>=thresh1
-#    i2=img_enhance[:img_enhance.shape[0]/2,img_enhance.shape[1]/2+1:]>=thresh2
-#    i3=img_enhance[img_enhance.shape[0]/2+1:,:img_enhance.shape[1]/2]>=thresh3
-#    i4=img_enhance[img_enhance.shape[0]/2+1:,img_enhance.shape[1]/2+1:]>=thresh4
-#    ii1 = numpy.concatenate((i1,i2),axis=1)
-#    ii2 = numpy.concatenate((i3,i4),axis=1)
-#    img_thresh = numpy.concatenate((ii1,ii2),axis=0)
+    for i in range(img_opening.shape[0]):
+        for j in range(img_opening.shape[1]):
+            if (img_opening[i, j]):
+                img_ori_resize[i, j, 2] = 200
 
-    #io.imshow_collection([img_gray,img_prewitt,img_enhance,img_thresh])
-    #img_closing=morphology.binary_closing(img_thresh)
-    #img_label=label(img_closing,neighbors=8)
-    img_dilation=morphology.binary_dilation(img_thresh)
-    img_dilation=morphology.binary_dilation(img_dilation)
-    img_dilation=morphology.binary_dilation(img_dilation)
-    img_dilation=morphology.binary_dilation(img_dilation)
-
-    img_erosion=morphology.binary_erosion(img_dilation)
-    img_erosion=morphology.binary_erosion(img_erosion)
-    #img_erosion=morphology.binary_erosion(img_erosion)
-    #img_erosion=morphology.binary_erosion(img_erosion)
-    img_opening=morphology.binary_opening(img_erosion)
-    img_opening_ori_size =  resize(img_opening,(img_ori.shape[0],img_ori.shape[1]))
-
-    for i in range(img_opening_ori_size.shape[0]):
-        for j in range(img_opening_ori_size.shape[1]):
-            if (img_opening_ori_size[i,j]):
-                img_ori[i,j,0]=200
-
-    #io.imshow(img_ori_resize_result)
-    #io.show()
-    #compute confluence
-    confluence = 100*float(img_opening_ori_size.sum())/img_opening_ori_size.size
+    # compute confluence
+    confluence = 100 * float(img_opening.sum()) / img_opening.size
 
     confluence = '%.2f' % confluence
-    ### embed result to image
-    img_ori=Image.fromarray(img_ori)
-    font=ImageFont.truetype(settings.FONT,img_ori.size[0]/20)  ## uncomment to deploy on server
-    #font=ImageFont.truetype('/System/Library/Fonts/Apple Braille.ttf', img_ori.size[0]/20)
-    draw = ImageDraw.Draw(img_ori)
-    draw.text((100, 80), str(confluence+'%'), (0, 0, 255), font=font)
-    ###
-    #io.imsave(image_output_path,img_ori)
-    Image.Image.save(img_ori,image_output_path)
+    # embed result to image
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    cv2.putText(img_ori_resize, str(confluence + '%'),
+                (40, 80), font, 2, (255, 0, 0), 3)
+    img_ori_resize = cv2.resize(
+        img_ori_resize, (img_ori.shape[1], img_ori.shape[0]))
 
-    out_file = open(json_path,"w")
-    confluence_result = {'ratio': confluence}
+    cv2.imwrite(task_record.result_image.path, img_ori_resize)
+    cv2.imwrite(task_record.result_display.path, img_ori_resize)
 
-    json.dump(confluence_result,out_file)
-    out_file.close()
+    #out_file = open(json_path,"w")
+    #confluence_result = {'confluence': confluence}
 
-    return
+    # json.dump(confluence_result,out_file)
+    # out_file.close()
+
+    #tEnd = time.time()
+    #print ("It costs %f sec",tEnd-tStart)
+
+    return json.dumps({'confluence': confluence})
 ###############################################################################
-# image_path = u"D:\Aaron workspace\Aaron\CellConfluence_Project\CellC MSC Images\\11d7909a9593cbea6e4179f36ba04640_in.jpg"
-# image_output_path = u"D:\Aaron workspace\Aaron\CellConfluence_Project\output_test\\result.jpg"
-# json_path = u"D:\Aaron workspace\Aaron\CellConfluence_Project\output_test\\result.json"
-# cellConfluence_singleTask(image_path,image_output_path,json_path)
+#
+#image_path = u"C:\\Users\\Aaron.Lin\\Desktop\\cellC2_issue"
+#image_output_path = u"D:\Aaron workspace\Aaron\CellConfluence_Project\output_test\\result.jpg"
+#json_path = u"D:\Aaron workspace\Aaron\CellConfluence_Project\output_test\\result.json"
+#
+#file_list = listdir(image_path)
+#filename = file_list[7]
+#filename=image_path +'\\'+filename
+# cellConfluence_singleTask(filename,image_output_path,json_path)
+
 
 import cv2
+
 
 def cell_confluency_cv2(image_input_path, image_output_path, json_path):
     # load image
@@ -123,7 +115,8 @@ def cell_confluency_cv2(image_input_path, image_output_path, json_path):
 
     # resize
     max_size = 1024.
-    img_s = cv2.resize(img, tuple([int(max_size / max(img.shape[:2]) * d) for d in img.shape[:2]]))
+    img_s = cv2.resize(img, tuple(
+        [int(max_size / max(img.shape[:2]) * d) for d in img.shape[:2]]))
 
     # to gray
     img_g = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)

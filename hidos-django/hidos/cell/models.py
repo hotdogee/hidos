@@ -1,16 +1,20 @@
 from __future__ import absolute_import, unicode_literals
 import re
 import sys
+import uuid
 import hashlib
 import imghdr
 import stat as Perm
-from os import path, makedirs, chmod
+import posixpath as path
+from os import makedirs, chmod
 
-from PIL import Image
+import cv2
+import numpy as np
 
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.files.base import ContentFile
 from django.core.validators import RegexValidator
 
 from django_extensions.db.models import TimeStampedModel
@@ -24,6 +28,7 @@ class Task(File):
     file_model = models.OneToOneField(File, models.CASCADE,
         parent_link=True, related_name='+') # explicit parent link with no related name
     status = models.CharField(max_length=32, default='queued') # queued, running, success, failed
+    progress = models.FloatField(null=True, blank=True) # 0.00 to 1.00
     dequeued = models.DateTimeField(null=True, blank=True)
     finished = models.DateTimeField(null=True, blank=True)
     version = models.CharField(max_length=32)
@@ -41,7 +46,7 @@ class ViewableQuerySet(models.query.QuerySet):
 
 class SingleImageUploadManager(models.Manager):
 
-    def create(self, file, owner, **kwargs): # QuerySet, file=file, owner=user
+    def create(self, file, owner, folder, **kwargs): # QuerySet, file=file, owner=user
         """
         Create a CellTaskModel from a validated UploadedFile object
         """
@@ -67,48 +72,48 @@ class SingleImageUploadManager(models.Manager):
 
         # get image format
         image_type = imghdr.what('', uploaded_file_data)
-        # Generate args_list and path_prefix
-        path_prefix = path.join(settings.MEDIA_ROOT, app_name, 'task', task_id, task_id)
+        # path_prefix relative to MEDIA_ROOT
+        path_prefix = path.join(app_name, 'task', task_id, task_id)
         # avoid exploits, don't any part of the user filename
         uploaded_image_path = path_prefix + '_uploaded.' + image_type
+        result_image_path = path_prefix + '_result.' + image_type
         # jpg image for viewer
-        input_image_viewer_path = path_prefix + '_in.jpg'
+        uploaded_display_path = path_prefix + '_uploaded_display.jpg'
+        result_display_path = path_prefix + '_result_display.jpg'
 
-
-        # create directory
-        if not path.exists(path.dirname(path_prefix)):
-            makedirs(path.dirname(path_prefix))
-        # ensure the standalone dequeuing process can open files in the directory
-        chmod(path.dirname(path_prefix), Perm.S_IRWXU | Perm.S_IRWXG | Perm.S_IRWXO)
-
-        # write original image data to file
-        with open(uploaded_image_path, 'wb') as uploaded_image_f:
-            uploaded_image_f.write(uploaded_file_data)
-        chmod(uploaded_image_path, Perm.S_IRWXU | Perm.S_IRWXG | Perm.S_IRWXO)
-
-        # convert to jpeg for web display
-        p = Image.open(uploaded_image_path)
-        if p.mode.split(';')[1:2] == ['16']:
-            p = p.point(lambda x: x*(float(1)/256))
-        if p.mode != 'RGB':
-            p = p.convert('RGB')
-        p.save(input_image_viewer_path)
-        chmod(input_image_viewer_path, Perm.S_IRWXU | Perm.S_IRWXG | Perm.S_IRWXO)
-
-        # Make input jpg
-        # Make thumbnail
-
-        # Build data dictionary
+        # build data dictionary
         data = {
-            'id': task_id,
-            'version': app.version,
+            'id': uuid.UUID(task_id),
             'name': file.name,
-            'uploaded_filetype': image_type,
+            'type': app_name,
+            'version': app.version,
+            'folder': folder,
             'status': 'queued',
+            'progress': 0,
+            'uploaded_filetype': image_type,
+            'uploaded_image': uploaded_image_path,
+            'result_image': result_image_path,
+            'uploaded_display': uploaded_display_path,
+            'result_display': result_display_path,
         }
         if owner.username:
             data['owner'] = owner
-        return super(SingleImageUploadManager, self).create(**data)
+        obj = super(SingleImageUploadManager, self).create(**data)
+        obj.content = obj
+
+        # save uploaded image data to file
+        obj.uploaded_image.save(uploaded_image_path, file, save=False)
+
+        # convert to jpeg for web display
+        uploaded_image_array = np.asarray(bytearray(uploaded_file_data), dtype=np.uint8)
+        flag, uploaded_display_array = cv2.imencode('.jpg', cv2.imdecode(uploaded_image_array, cv2.IMREAD_COLOR))
+        obj.uploaded_display.save(uploaded_display_path, ContentFile(bytearray(uploaded_display_array)), save=False)
+
+        # TODO: Make thumbnail
+        
+        # save to database
+        obj.save()
+        return obj
 
     # built-in
     # run create(file=UploadedFile object)
@@ -135,10 +140,13 @@ class SingleImageUploadManager(models.Manager):
 
 # CellQ result model
 class CellTask(Task):
-    # uploaded image file type
-    uploaded_filetype = models.CharField(max_length=10)
-    stdout = models.TextField(blank=True)
-    stderr = models.TextField(blank=True)
+    uploaded_filetype = models.CharField(max_length=10, blank=True)
+    uploaded_image = models.ImageField(max_length=255, blank=True)
+    result_image = models.ImageField(max_length=255, blank=True)
+    uploaded_display = models.ImageField(max_length=255, blank=True)
+    result_display = models.ImageField(max_length=255, blank=True)
+    result = models.TextField(blank=True) # use JSONField
+    error = models.TextField(blank=True)
 
     objects = SingleImageUploadManager.from_queryset(ViewableQuerySet)()
 

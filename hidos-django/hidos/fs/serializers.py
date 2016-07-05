@@ -1,6 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 import re
 
+from django.db.models.fields.files import FieldFile
 from django.core.validators import RegexValidator
 
 from rest_framework import serializers
@@ -13,16 +14,50 @@ folder_re = re.compile(r'^[^\\/:*?"<>|\.]+$', re.U)
 file_re = re.compile(r'^[^\\/:*?"<>|]+$', re.U)
 
 
+class ContentRelatedField(serializers.RelatedField):
+    """
+    A custom field to use for a file's 'content' generic relationship.
+    """
+    ignore_keys = set([
+        "name",
+        "created",
+        "_state",
+        "modified",
+        "file_model_id",
+        "content_type_id",
+        "folder_id",
+        "content_id",
+        "type",
+        "id",
+        "owner_id"
+    ])
+
+    def to_representation(self, value):
+        """
+        Serialize tagged objects to a simple textual representation.
+        """
+        content = {}
+        for k in value.__dict__:
+            if k not in self.ignore_keys and k[-6:] != '_cache':
+                v = getattr(value, k)
+                if isinstance(v, FieldFile):
+                    content[k] = v.url
+                else:
+                    content[k] = v
+        return content
+
+
 class FileSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(format='hex', read_only=True)
     name = serializers.CharField(max_length=255,  # display name
         validators=[RegexValidator(file_re, r'File names must not contain  \ / : * ? " < > |')])
     type = serializers.CharField(max_length=32, # look up in FileType model
         validators=[RegexValidator(file_re, r'File type must not contain  \ / : * ? " < > |')])
+    content = ContentRelatedField(read_only=True)
 
     class Meta:
         model = File
-        read_only_fields = ['id', 'created', 'modified', 'content', 'owner']
+        read_only_fields = ['id', 'created', 'modified', 'owner', 'content']
         fields = read_only_fields + ['name', 'type', 'folder']
 
 
@@ -30,10 +65,11 @@ class FolderSerializer(FileSerializer):
     name = serializers.CharField(max_length=255,  # display name
         validators=[RegexValidator(folder_re, r'Folder names must not contain  \ / : * ? " < > | .')])
     type = serializers.CharField(max_length=32, read_only=True)
+    files = FileSerializer(many=True, read_only=True)
 
     class Meta:
         model = Folder
-        read_only_fields = ['id', 'type', 'created', 'modified', 'files', 'owner', 'path']
+        read_only_fields = ['id', 'type', 'created', 'modified', 'files', 'owner', 'path', 'breadcrumbs']
         fields = read_only_fields + ['name', 'folder']
         # Model fields which have editable=False set, and AutoField fields will be set to read-only by default,
         # and do not need to be added to the read_only_fields option.
