@@ -14,6 +14,7 @@ import numpy as np
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.files.base import ContentFile
 from django.core.validators import RegexValidator
 
 from django_extensions.db.models import TimeStampedModel
@@ -80,7 +81,7 @@ class SingleImageUploadManager(models.Manager):
         uploaded_display_path = path_prefix + '_uploaded_display.jpg'
         result_display_path = path_prefix + '_result_display.jpg'
 
-        # Build data dictionary
+        # build data dictionary
         data = {
             'id': uuid.UUID(task_id),
             'name': file.name,
@@ -100,12 +101,13 @@ class SingleImageUploadManager(models.Manager):
         obj = super(SingleImageUploadManager, self).create(**data)
         obj.content = obj
 
-        obj.uploaded_image.save(uploaded_image_path, uploaded_file_data, save=False)
+        # save uploaded image data to file
+        obj.uploaded_image.save(uploaded_image_path, file, save=False)
 
         # convert to jpeg for web display
-        uploaded_img_array = np.asarray(bytearray(uploaded_file_data), dtype=np.uint8)
-        flag, uploaded_display_data = cv2.imencode('.jpg', cv2.imdecode(uploaded_img_array, cv2.IMREAD_COLOR))
-        obj.uploaded_display.save(uploaded_display_path, uploaded_display_data, save=False)
+        uploaded_image_array = np.asarray(bytearray(uploaded_file_data), dtype=np.uint8)
+        flag, uploaded_display_array = cv2.imencode('.jpg', cv2.imdecode(uploaded_image_array, cv2.IMREAD_COLOR))
+        obj.uploaded_display.save(uploaded_display_path, ContentFile(bytearray(uploaded_display_array)), save=False)
 
         # TODO: Make thumbnail
         
