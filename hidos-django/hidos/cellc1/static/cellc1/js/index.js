@@ -40,10 +40,10 @@ $(document).ready(function () {
         {
           name: 'count', type: 'num', data: 'cell_count', defaultContent: running_template, width: '100px', className: 'dt-center',
           render: function (data, type, row, meta) {
-              console.log(data, type, row);
-              console.log(running_template);
-            if (data === null)
+           if (row.status === 'running')
               return running_template;
+            else if (row.status === 'failed')
+              return row.status
             else
               return type === 'display' ? data  : data;
           }

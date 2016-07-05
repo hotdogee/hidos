@@ -15,7 +15,7 @@ from celery.decorators import periodic_task
 from celery.utils.log import get_task_logger
 from celery.signals import task_sent, task_success, task_failure
 
-from cella.bin.cellAngiogenesis import cellAngiogenesis
+from cella.bin.cella_V02 import cellAngiogenesis
 
 from django.conf import settings
 from django.core.cache import cache
@@ -81,13 +81,25 @@ def run_cell_a_task(self, task_id,uploaded_image_path, result_image_path, result
         record.status = 'success'
         with open(result_json_path, 'r') as f:
             result = json.load(f)
-            record.extremity = result['extremity']
-            record.junction = result['junction']
-            record.mesh = result['mesh']
-            record.total_branch_length = result['total_branch_length']
-            record.total_segment_length = result['total_segment_length']
-            record.total_network_length = result['total_network_length']
-            record.total_mesh_area = result['total_mesh_area']
+            record.extremity = result['#Extremity']
+            record.junction = result['#Junction']
+            record.connectivity = result['Connectivity']
+            record.total_network_length = result['Tot. network length']
+            record.branch = result['#Branch']
+            record.total_branch_length = result['Tot. branch length']
+            record.mean_branch_length = result['Mean branch length']
+            record.std_branch_length = result['Std. branch length']
+            record.segment = result['#Segment']
+            record.total_segment_length = result['Tot. segment length']
+            record.mean_segment_length = result['Tot. segment length']
+            record.std_segment_length = result['Std. segment length']
+            record.mesh = result['#Mesh']
+            record.total_mesh_area = result['Tot. mesh area']
+            record.mean_mesh_area = result['Mean mesh area']
+            record.std_mesh_area = result['Std. mesh area']
+            record.total_mesh_perimeter = result['Tot. mesh perimeter']
+            record.mean_mesh_perimeter = result['Mean mesh perimeter']
+            record.std_mesh_perimeter = result['Std. mesh perimeter']
 
         output_image_viewer_path = path_prefix + '_out.jpg'
         # convert to jpeg for web display

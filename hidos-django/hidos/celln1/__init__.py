@@ -1,8 +1,10 @@
 """
 Package for the cellc1.
 """
+from .bin.CellN_v3 import version
 
-version = '1.0'
+
+version = version
 app_name = __name__
 verbose_name = 'Cell N1'
 default_app_config = app_name + '.apps.CellN1Config'

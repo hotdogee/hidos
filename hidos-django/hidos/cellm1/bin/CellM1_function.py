@@ -5,9 +5,9 @@
 
 from PIL import Image
 import numpy as np
-import pylab
+# import pylab
 import mahotas as mh
-from matplotlib import pyplot as plt
+# from matplotlib import pyplot as plt
 from skimage import io, morphology, data, color, img_as_ubyte
 from skimage.transform import resize
 from skimage.filters import gabor, laplace, gaussian, threshold_otsu

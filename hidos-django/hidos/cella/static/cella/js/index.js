@@ -13,6 +13,7 @@ $(document).ready(function () {
       deferRender: true,
       scroller: true,
       scrollY: 500,
+      responsive: true,
       order: [[5, 'desc']],
       dom: 'Bfrtip',
       columns: [
@@ -38,34 +39,201 @@ $(document).ready(function () {
           }
         },
         {
-          name: 'mesh', type: 'num', data: 'mesh', defaultContent: running_template, width: '100px', className: 'dt-center',
+          name: 'extremity', type: 'num', data: 'extremity', defaultContent: running_template, className: 'dt-center',
           render: function (data, type, row, meta) {
-            if (data === null)
+          console.log(type);
+            if (row.status === 'running')
               return running_template;
+            else if (row.status === 'failed')
+              return row.status
             else
               return type === 'display' ? data  : data;
           }
         },
           {
-          name: 'junction', type: 'num', data: 'junction', defaultContent: running_template, width: '100px', className: 'dt-center',
+          name: 'junction', type: 'num', data: 'junction', defaultContent: running_template, className: 'dt-center',
           render: function (data, type, row, meta) {
-            if (data === null)
+            if (row.status === 'running')
               return running_template;
+            else if (row.status === 'failed')
+              return row.status
             else
               return type === 'display' ? data  : data;
           }
         },
           {
-          name: 'extremity', type: 'num', data: 'extremity', defaultContent: running_template, width: '100px', className: 'dt-center',
+          name: 'connectivity', type: 'num', data: 'connectivity', defaultContent: running_template, className: 'dt-center',
           render: function (data, type, row, meta) {
-            if (data === null)
+            if (row.status === 'running')
               return running_template;
+            else if (row.status === 'failed')
+              return row.status
+            else
+              return type === 'display' ? data  : data;
+          }
+        },          {
+          name: 'total_network_length', type: 'num', data: 'total_network_length', defaultContent: running_template, className: 'dt-center',
+          render: function (data, type, row, meta) {
+            if (row.status === 'running')
+              return running_template;
+            else if (row.status === 'failed')
+              return row.status
+            else
+              return type === 'display' ? data  : data;
+          }
+        },          {
+          name: 'branch', type: 'num', data: 'branch', defaultContent: running_template, className: 'dt-center',
+          render: function (data, type, row, meta) {
+            if (row.status === 'running')
+              return running_template;
+            else if (row.status === 'failed')
+              return row.status
+            else
+              return type === 'display' ? data  : data;
+          }
+        },          {
+          name: 'total_branch_length', type: 'num', data: 'total_branch_length', defaultContent: running_template, className: 'dt-center',
+          render: function (data, type, row, meta) {
+            if (row.status === 'running')
+              return running_template;
+            else if (row.status === 'failed')
+              return row.status
+            else
+              return type === 'display' ? data  : data;
+          }
+        },          {
+          name: 'mean_branch_length', type: 'num', data: 'mean_branch_length', defaultContent: running_template, className: 'dt-center',
+          render: function (data, type, row, meta) {
+            if (row.status === 'running')
+              return running_template;
+            else if (row.status === 'failed')
+              return row.status
+            else
+              return type === 'display' ? data  : data;
+          }
+        },          {
+          name: 'std_branch_length', type: 'num', data: 'std_branch_length', defaultContent: running_template, className: 'dt-center',
+          render: function (data, type, row, meta) {
+            if (row.status === 'running')
+              return running_template;
+            else if (row.status === 'failed')
+              return row.status
+            else
+              return type === 'display' ? data  : data;
+          }
+        },          {
+          name: 'segment', type: 'num', data: 'segment', defaultContent: running_template, className: 'dt-center',
+          render: function (data, type, row, meta) {
+            if (row.status === 'running')
+              return running_template;
+            else if (row.status === 'failed')
+              return row.status
+            else
+              return type === 'display' ? data  : data;
+          }
+        },          {
+          name: 'total_segment_length', type: 'num', data: 'total_segment_length', defaultContent: running_template, className: 'dt-center',
+          render: function (data, type, row, meta) {
+            if (row.status === 'running')
+              return running_template;
+            else if (row.status === 'failed')
+              return row.status
+            else
+              return type === 'display' ? data  : data;
+          }
+        },          {
+          name: 'mean_segment_length', type: 'num', data: 'mean_segment_length', defaultContent: running_template, className: 'dt-center',
+          render: function (data, type, row, meta) {
+            if (row.status === 'running')
+              return running_template;
+            else if (row.status === 'failed')
+              return row.status
+            else
+              return type === 'display' ? data  : data;
+          }
+        },          {
+          name: 'std_segment_length', type: 'num', data: 'std_segment_length', defaultContent: running_template, className: 'dt-center',
+          render: function (data, type, row, meta) {
+            if (row.status === 'running')
+              return running_template;
+            else if (row.status === 'failed')
+              return row.status
+            else
+              return type === 'display' ? data  : data;
+          }
+        },          {
+          name: 'mesh', type: 'num', data: 'mesh', defaultContent: running_template, className: 'dt-center',
+          render: function (data, type, row, meta) {
+            if (row.status === 'running')
+              return running_template;
+            else if (row.status === 'failed')
+              return row.status
+            else
+              return type === 'display' ? data  : data;
+          }
+        },          {
+          name: 'total_mesh_area', type: 'num', data: 'total_mesh_area', defaultContent: running_template, className: 'dt-center',
+          render: function (data, type, row, meta) {
+            if (row.status === 'running')
+              return running_template;
+            else if (row.status === 'failed')
+              return row.status
+            else
+              return type === 'display' ? data  : data;
+          }
+        },          {
+          name: 'mean_mesh_area', type: 'num', data: 'mean_mesh_area', defaultContent: running_template, className: 'dt-center',
+          render: function (data, type, row, meta) {
+            if (row.status === 'running')
+              return running_template;
+            else if (row.status === 'failed')
+              return row.status
+            else
+              return type === 'display' ? data  : data;
+          }
+        },          {
+          name: 'std_mesh_area', type: 'num', data: 'std_mesh_area', defaultContent: running_template, className: 'dt-center',
+          render: function (data, type, row, meta) {
+            if (row.status === 'running')
+              return running_template;
+            else if (row.status === 'failed')
+              return row.status
+            else
+              return type === 'display' ? data  : data;
+          }
+        },          {
+          name: 'total_mesh_perimeter', type: 'num', data: 'total_mesh_perimeter', defaultContent: running_template, className: 'dt-center',
+          render: function (data, type, row, meta) {
+            if (row.status === 'running')
+              return running_template;
+            else if (row.status === 'failed')
+              return row.status
+            else
+              return type === 'display' ? data  : data;
+          }
+        },         {
+          name: 'mean_mesh_perimeter', type: 'num', data: 'mean_mesh_perimeter', defaultContent: running_template, className: 'dt-center',
+          render: function (data, type, row, meta) {
+            if (row.status === 'running')
+              return running_template;
+            else if (row.status === 'failed')
+              return row.status
+            else
+              return type === 'display' ? data  : data;
+          }
+        },         {
+          name: 'std_mesh_perimeter', type: 'num', data: 'std_mesh_perimeter', defaultContent: running_template, className: 'dt-center',
+          render: function (data, type, row, meta) {
+            if (row.status === 'running')
+              return running_template;
+            else if (row.status === 'failed')
+              return row.status
             else
               return type === 'display' ? data  : data;
           }
         },
         {
-          name: 'created', type: 'date', data: 'created', width: '100px',
+          name: 'created', type: 'date', data: 'created',
           render: function (data, type, row, meta) {
             var date = (new Date(data));
             if (type === 'display') {
@@ -116,6 +284,12 @@ $(document).ready(function () {
           ]
         },
       ],
+      columnDefs: [
+            {
+                "targets": [2,5,7,8,9,10,11,12,13,14,15,16,17,18,19,20],
+                "visible": false,
+            },
+        ]
     });
     var unfinished = ['queued', 'running'];
     var unfinished_task_ids;

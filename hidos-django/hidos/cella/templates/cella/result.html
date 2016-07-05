@@ -21,20 +21,21 @@
   </div>
 
   <div class="result-info">
-    <div class="mdl-card mdl-shadow--4dp">
-      <div class="mdl-grid">
-        <div class="mdl-cell mdl-cell--8-col mdl-cell--8-tablet mdl-cell--8-phone">
-          <div class="mdl-card__title">Mesh Count</div>
-        </div>
-        <div class="mdl-cell mdl-cell--4-col mdl-cell--4-tablet mdl-cell--4-phone">
-          <div class="mdl-card__supporting-text"><span id="mesh"></span></div>
-        </div>
-      </div>
-    </div>
     <div class="mdl-card mdl-shadow--2dp">
       <div class="mdl-grid">
         <div class="mdl-cell mdl-cell--8-col mdl-cell--8-tablet mdl-cell--8-phone">
-          <div class="mdl-card__title">Junction count</div>
+          <div class="mdl-card__title">Extremity</div>
+        </div>
+        <div class="mdl-cell mdl-cell--4-col mdl-cell--4-tablet mdl-cell--4-phone">
+          <div class="mdl-card__supporting-text"><span id="extremity"></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mdl-card mdl-shadow--2dp">
+      <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--8-col mdl-cell--8-tablet mdl-cell--8-phone">
+          <div class="mdl-card__title">Junction</div>
         </div>
         <div class="mdl-cell mdl-cell--4-col mdl-cell--4-tablet mdl-cell--4-phone">
           <div class="mdl-card__supporting-text"><span id="junction"></span></div>
@@ -44,10 +45,30 @@
     <div class="mdl-card mdl-shadow--2dp">
       <div class="mdl-grid">
         <div class="mdl-cell mdl-cell--8-col mdl-cell--8-tablet mdl-cell--8-phone">
-          <div class="mdl-card__title">Extremity count</div>
+          <div class="mdl-card__title">Connectivity</div>
         </div>
         <div class="mdl-cell mdl-cell--4-col mdl-cell--4-tablet mdl-cell--4-phone">
-          <div class="mdl-card__supporting-text"><span id="extremity"></span></div>
+          <div class="mdl-card__supporting-text"><span id="connectivity"></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="mdl-card mdl-shadow--2dp">
+      <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--8-col mdl-cell--8-tablet mdl-cell--8-phone">
+          <div class="mdl-card__title">Total networklength</div>
+        </div>
+        <div class="mdl-cell mdl-cell--4-col mdl-cell--4-tablet mdl-cell--4-phone">
+          <div class="mdl-card__supporting-text"><span id="total_network_length"></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="mdl-card mdl-shadow--2dp">
+      <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--8-col mdl-cell--8-tablet mdl-cell--8-phone">
+          <div class="mdl-card__title">Branch</div>
+        </div>
+        <div class="mdl-cell mdl-cell--4-col mdl-cell--4-tablet mdl-cell--4-phone">
+          <div class="mdl-card__supporting-text"><span id="branch"></span></div>
         </div>
       </div>
     </div>
@@ -64,6 +85,36 @@
     <div class="mdl-card mdl-shadow--2dp">
       <div class="mdl-grid">
         <div class="mdl-cell mdl-cell--8-col mdl-cell--8-tablet mdl-cell--8-phone">
+          <div class="mdl-card__title">Mean branch length</div>
+        </div>
+        <div class="mdl-cell mdl-cell--4-col mdl-cell--4-tablet mdl-cell--4-phone">
+          <div class="mdl-card__supporting-text"><span id="mean_branch_length"></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="mdl-card mdl-shadow--2dp">
+      <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--8-col mdl-cell--8-tablet mdl-cell--8-phone">
+          <div class="mdl-card__title">Std. branch length</div>
+        </div>
+        <div class="mdl-cell mdl-cell--4-col mdl-cell--4-tablet mdl-cell--4-phone">
+          <div class="mdl-card__supporting-text"><span id="std_branch_length"></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="mdl-card mdl-shadow--2dp">
+      <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--8-col mdl-cell--8-tablet mdl-cell--8-phone">
+          <div class="mdl-card__title">Segment</div>
+        </div>
+        <div class="mdl-cell mdl-cell--4-col mdl-cell--4-tablet mdl-cell--4-phone">
+          <div class="mdl-card__supporting-text"><span id="segment"></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="mdl-card mdl-shadow--2dp">
+      <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--8-col mdl-cell--8-tablet mdl-cell--8-phone">
           <div class="mdl-card__title">Total segment length</div>
         </div>
         <div class="mdl-cell mdl-cell--4-col mdl-cell--4-tablet mdl-cell--4-phone">
@@ -74,14 +125,33 @@
     <div class="mdl-card mdl-shadow--2dp">
       <div class="mdl-grid">
         <div class="mdl-cell mdl-cell--8-col mdl-cell--8-tablet mdl-cell--8-phone">
-          <div class="mdl-card__title">Total network length</div>
+          <div class="mdl-card__title">Mean segment length</div>
         </div>
         <div class="mdl-cell mdl-cell--4-col mdl-cell--4-tablet mdl-cell--4-phone">
-          <div class="mdl-card__supporting-text"><span id="total_network_length"></span></div>
+          <div class="mdl-card__supporting-text"><span id="mean_segment_length"></span></div>
         </div>
       </div>
     </div>
-
+    <div class="mdl-card mdl-shadow--2dp">
+      <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--8-col mdl-cell--8-tablet mdl-cell--8-phone">
+          <div class="mdl-card__title">Std segment length</div>
+        </div>
+        <div class="mdl-cell mdl-cell--4-col mdl-cell--4-tablet mdl-cell--4-phone">
+          <div class="mdl-card__supporting-text"><span id="std_segment_length"></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="mdl-card mdl-shadow--2dp">
+      <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--8-col mdl-cell--8-tablet mdl-cell--8-phone">
+          <div class="mdl-card__title">Mesh</div>
+        </div>
+        <div class="mdl-cell mdl-cell--4-col mdl-cell--4-tablet mdl-cell--4-phone">
+          <div class="mdl-card__supporting-text"><span id="mesh"></span></div>
+        </div>
+      </div>
+    </div>
     <div class="mdl-card mdl-shadow--2dp">
       <div class="mdl-grid">
         <div class="mdl-cell mdl-cell--8-col mdl-cell--8-tablet mdl-cell--8-phone">
@@ -92,6 +162,58 @@
         </div>
       </div>
     </div>
+    <div class="mdl-card mdl-shadow--2dp">
+      <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--8-col mdl-cell--8-tablet mdl-cell--8-phone">
+          <div class="mdl-card__title">Mean mesh area</div>
+        </div>
+        <div class="mdl-cell mdl-cell--4-col mdl-cell--4-tablet mdl-cell--4-phone">
+          <div class="mdl-card__supporting-text"><span id="mean_mesh_area"></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="mdl-card mdl-shadow--2dp">
+      <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--8-col mdl-cell--8-tablet mdl-cell--8-phone">
+          <div class="mdl-card__title">Std mesh area</div>
+        </div>
+        <div class="mdl-cell mdl-cell--4-col mdl-cell--4-tablet mdl-cell--4-phone">
+          <div class="mdl-card__supporting-text"><span id="std_mesh_area"></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="mdl-card mdl-shadow--2dp">
+      <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--8-col mdl-cell--8-tablet mdl-cell--8-phone">
+          <div class="mdl-card__title">Total mesh perimenter</div>
+        </div>
+        <div class="mdl-cell mdl-cell--4-col mdl-cell--4-tablet mdl-cell--4-phone">
+          <div class="mdl-card__supporting-text"><span id="total_mesh_perimeter"></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="mdl-card mdl-shadow--2dp">
+      <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--8-col mdl-cell--8-tablet mdl-cell--8-phone">
+          <div class="mdl-card__title">Mean mesh perimeter</div>
+        </div>
+        <div class="mdl-cell mdl-cell--4-col mdl-cell--4-tablet mdl-cell--4-phone">
+          <div class="mdl-card__supporting-text"><span id="mean_mesh_perimeter"></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="mdl-card mdl-shadow--2dp">
+      <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--8-col mdl-cell--8-tablet mdl-cell--8-phone">
+          <div class="mdl-card__title">Std mesh perimeter</div>
+        </div>
+        <div class="mdl-cell mdl-cell--4-col mdl-cell--4-tablet mdl-cell--4-phone">
+          <div class="mdl-card__supporting-text"><span id="std_mesh_perimeter"></span></div>
+        </div>
+      </div>
+    </div>
+
+
   </div>
 
 

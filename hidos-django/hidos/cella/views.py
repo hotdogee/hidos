@@ -10,6 +10,7 @@ from vanilla import GenericModelView
 from . import app_name, verbose_name, version
 from .models import CellATask
 
+
 logger = logging.getLogger(__name__) # __name__ == cellc1.views
 
 

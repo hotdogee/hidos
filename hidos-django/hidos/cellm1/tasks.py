@@ -20,7 +20,7 @@ from celery.signals import task_sent, task_success, task_failure
 from django.conf import settings
 from django.core.cache import cache
 import urllib3
-from cellm1.bin.CellM1_function import cellm1
+from .bin.cellm1_V02 import cellm1
 
 
 logger = get_task_logger(__name__)

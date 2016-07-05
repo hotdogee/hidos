@@ -11,7 +11,7 @@ import mahotas as ma
 import copy
 
 from PIL import Image, ImageDraw, ImageFont, ImageEnhance
-from matplotlib import pyplot as plt
+# from matplotlib import pyplot as plt
 from skimage import io, morphology
 from skimage.util import img_as_ubyte
 from scipy import ndimage
@@ -27,6 +27,8 @@ from skimage.segmentation import clear_border
 import skimage
 from scipy import ndimage
 
+
+version = '0.3'
 
 # In[5]:
 

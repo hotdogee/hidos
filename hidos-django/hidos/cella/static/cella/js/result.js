@@ -17,13 +17,25 @@ $(function () {
           setTimeout(poll, 3000);
         else {
           // get result json data
-          $('#extremity').text(data.extremity);
-          $('#junction').text(data.junction);
-          $('#mesh').text(data.mesh);
-          $('#total_branch_length').text(data.total_branch_length);
-          $('#total_segment_length').text(data.total_segment_length);
-          $('#total_network_length').text(data.total_network_length);
-          $('#total_mesh_area').text(data.total_mesh_area);
+            $('#extremity').text(data.extremity);
+            $('#junction').text(data.junction);
+            $('#connectivity').text(data.connectivity);
+            $('#total_network_length').text(data.total_network_length);
+            $('#branch').text(data.branch);
+            $('#total_branch_length').text(data.total_branch_length);
+            $('#mean_branch_length').text(data.mean_branch_length);
+            $('#std_branch_length').text(data.std_branch_length);
+            $('#segment').text(data.segment);
+            $('#total_segment_length').text(data.total_segment_length);
+            $('#mean_segment_length').text(data.mean_segment_length);
+            $('#std_segment_length').text(data.std_segment_length);
+            $('#mesh').text(data.mesh);
+            $('#total_mesh_area').text(data.total_mesh_area);
+            $('#mean_mesh_area').text(data.mean_mesh_area);
+            $('#std_mesh_area').text(data.std_mesh_area);
+            $('#total_mesh_perimeter').text(data.total_mesh_perimeter);
+            $('#mean_mesh_perimeter').text(data.mean_mesh_perimeter);
+            $('#std_mesh_perimeter').text(data.std_mesh_perimeter);
 
           // display image
           // /media/image_analysis/task/7ef4f4782fc840738f67a43edafc9683/7ef4f4782fc840738f67a43edafc9683_in.jpg

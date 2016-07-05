@@ -43,24 +43,30 @@ $(document).ready(function () {
         {
           name: 'count', type: 'num', data: 'cell_body', defaultContent: running_template, width: '100px', className:'dt-center',
           render: function (data, type, row, meta) {
-            if (!data)
+            if (row.status === 'running')
               return running_template;
+            else if (row.status === 'failed')
+              return row.status
             else
               return type === 'display' ? data  : data;
           }
         },{
           name: 'body_attachments', type: 'num', data: 'mean_length', defaultContent: running_template, width: '100px',className:'dt-center',
           render: function (data, type, row, meta) {
-            if (!data)
+            if (row.status === 'running')
               return running_template;
+            else if (row.status === 'failed')
+              return row.status
             else
-              return type === 'display' ? data  : data.status;
+              return type === 'display' ? data  : data;
            }
         },{
           name: 'endpoints', type: 'num', data: 'mean_branch', defaultContent: running_template, width: '100px',className:'dt-center',
           render: function (data, type, row, meta) {
-            if (!data)
+            if (row.status === 'running')
               return running_template;
+            else if (row.status === 'failed')
+              return row.status
             else
               return type === 'display' ? data  : data;
           }

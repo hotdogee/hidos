@@ -40,10 +40,12 @@ $(document).ready(function () {
         {
           name: 'count', type: 'num', data: 'ratio', defaultContent: running_template, width: '100px', className: 'dt-center',
           render: function (data, type, row, meta) {
-            if (!data)
+            if (row.status === 'running')
               return running_template;
+            else if (row.status === 'failed')
+              return row.status
             else
-              return type === 'display' ? data  + '%' : data;
+              return type === 'display' ? data  : data;
           }
         },
         {
