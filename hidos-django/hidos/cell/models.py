@@ -5,7 +5,8 @@ import uuid
 import hashlib
 import imghdr
 import stat as Perm
-from os import path, makedirs, chmod
+import posixpath as path
+from os import makedirs, chmod
 
 from PIL import Image
 
