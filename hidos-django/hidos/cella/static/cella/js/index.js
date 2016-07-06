@@ -16,6 +16,9 @@ $(document).ready(function () {
       responsive: true,
       order: [[5, 'desc']],
       dom: 'Bfrtip',
+      oLanguage:{
+        "sSearch": "<span>Search File: </span>"
+      },
       columns: [
         {
           name: 'viewer', data: 'url', width: '50px', orderable: false,
@@ -288,6 +291,9 @@ $(document).ready(function () {
             {
                 "targets": [2,5,6,7,8,9,10,11,12,13,15,16,17,18,19,20],
                 "visible": false,
+            },
+            {
+                "searchable": false, "targets": [0,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
             },
         ]
     });

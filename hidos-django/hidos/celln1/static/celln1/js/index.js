@@ -18,6 +18,9 @@ $(document).ready(function () {
       scrollY: 500,
       order: [[5, 'desc']],
       dom: 'Bfrtip',
+      oLanguage:{
+        "sSearch": "<span>Search File: </span>"
+      },
       columns: [
         {
           name: 'viewer', data: 'url', width: '50px', orderable: false,
@@ -41,7 +44,7 @@ $(document).ready(function () {
           }
         },
         {
-          name: 'count', type: 'num', data: 'cell_body', defaultContent: running_template, width: '100px', className:'dt-center',
+          name: 'cell_body', type: 'num', data: 'cell_body', defaultContent: running_template, width: '100px', className:'dt-center',
           render: function (data, type, row, meta) {
             if (row.status === 'running')
               return running_template;
@@ -51,7 +54,7 @@ $(document).ready(function () {
               return type === 'display' ? data  : data;
           }
         },{
-          name: 'body_attachments', type: 'num', data: 'mean_length', defaultContent: running_template, width: '100px',className:'dt-center',
+          name: 'total_outgrowth_length', type: 'num', data: 'outgrow_length', defaultContent: running_template, width: '100px',className:'dt-center',
           render: function (data, type, row, meta) {
             if (row.status === 'running')
               return running_template;
@@ -61,7 +64,47 @@ $(document).ready(function () {
               return type === 'display' ? data  : data;
            }
         },{
-          name: 'endpoints', type: 'num', data: 'mean_branch', defaultContent: running_template, width: '100px',className:'dt-center',
+          name: 'mean_outgrowth_length', type: 'num', data: 'mean_length', defaultContent: running_template, width: '100px',className:'dt-center',
+          render: function (data, type, row, meta) {
+            if (row.status === 'running')
+              return running_template;
+            else if (row.status === 'failed')
+              return row.status
+            else
+              return type === 'display' ? data  : data;
+          }
+        },{
+          name: 'number_of_branch', type: 'num', data: 'number_of_branch', defaultContent: running_template, width: '100px',className:'dt-center',
+          render: function (data, type, row, meta) {
+            if (row.status === 'running')
+              return running_template;
+            else if (row.status === 'failed')
+              return row.status
+            else
+              return type === 'display' ? data  : data;
+          }
+        },{
+          name: 'mean_branch', type: 'num', data: 'mean_branch', defaultContent: running_template, width: '100px',className:'dt-center',
+          render: function (data, type, row, meta) {
+            if (row.status === 'running')
+              return running_template;
+            else if (row.status === 'failed')
+              return row.status
+            else
+              return type === 'display' ? data  : data;
+          }
+        },{
+          name: 'total_neurite_outgrowth', type: 'num', data: 'neurite_outgrowth', defaultContent: running_template, width: '100px',className:'dt-center',
+          render: function (data, type, row, meta) {
+            if (row.status === 'running')
+              return running_template;
+            else if (row.status === 'failed')
+              return row.status
+            else
+              return type === 'display' ? data  : data;
+          }
+        },{
+          name: 'mean_outgrowth', type: 'num', data: 'mean_outgrowth', defaultContent: running_template, width: '100px',className:'dt-center',
           render: function (data, type, row, meta) {
             if (row.status === 'running')
               return running_template;
@@ -91,6 +134,15 @@ $(document).ready(function () {
         // initialize bootstrap tooltip
         $('.viewer-btn', row);
       },
+      columnDefs: [
+            {
+                "targets": [3,5,7,8],
+                "visible": false,
+            },
+            {
+                "searchable": false, "targets": [0,2,3,4,5,6,7,8,9],
+            },
+      ],
       buttons: [
         {
           extend: 'collection',

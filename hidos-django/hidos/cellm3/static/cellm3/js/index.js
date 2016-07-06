@@ -15,6 +15,9 @@ $(document).ready(function () {
       scrollY: 500,
       order: [[3, 'desc']],
       dom: 'Bfrtip',
+      oLanguage:{
+        "sSearch": "<span>Search File: </span>"
+      },
       columns: [
         {
           name: 'viewer', data: 'url', width: '50px', orderable: false,
@@ -68,6 +71,9 @@ $(document).ready(function () {
         // initialize bootstrap tooltip
         $('.viewer-btn', row);
       },
+      columnDefs: [
+         { "searchable": false, "targets": [0,2,3] }
+      ],
       buttons: [
         {
           extend: 'collection',
