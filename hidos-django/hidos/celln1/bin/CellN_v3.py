@@ -323,11 +323,11 @@ def CellNOne(img_input_path, img_output_path, json_output_path):
 #     tEnd=time.time()
 #     print ("It costs %f sec",tEnd-tStart)
 
-    PlotOne(img, 'img')
-    PlotOne(edge, 'edge')
-    PlotOne(img_p3, 'img_p3')
-    PlotOne(result, 'result')
-    plt.show()
+    # PlotOne(img, 'img')
+    # PlotOne(edge, 'edge')
+    # PlotOne(img_p3, 'img_p3')
+    # PlotOne(result, 'result')
+    # plt.show()
 
 
 # In[69]:
