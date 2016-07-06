@@ -5,7 +5,11 @@ from .models import CellATask
 class CellATaskAdmin(admin.ModelAdmin):
     date_hierarchy = 'modified'
     fields = ('task_id', 'status', 'user', 'parent_folder', 'version',
-            'extremity','junction','mesh','total_branch_length','total_segment_length','total_network_length','total_mesh_area',
+            'extremity','junction','connectivity','total_network_length',
+            'branch', 'total_branch_length', 'mean_branch_length','std_branch_length',
+            'segment','total_segment_length','mean_segment_length', 'std_segment_length',
+            'mesh','total_mesh_area','mean_mesh_area', 'std_mesh_area',
+            'total_mesh_perimeter', 'mean_mesh_perimeter', 'std_mesh_perimeter',
             'uploaded_filename', 'uploaded_filetype', 'stdout', 'stderr',
             'dequeued', 'finished',
             'created', 'modified')
