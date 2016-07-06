@@ -28,7 +28,7 @@ import skimage
 from scipy import ndimage
 
 
-version = '0.3
+version = '0.3'
 
 # In[5]:
 
