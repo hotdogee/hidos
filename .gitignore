@@ -68,4 +68,6 @@ browse.VC.db
 # Pycharm
 *.idea
 
-
+# Django setup enviroments
+static/
+*.ini
