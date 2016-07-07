@@ -246,7 +246,7 @@ $(document).ready(function () {
         url: 'api/v1/tasks', // Set the url
         thumbnailWidth: 100,
         thumbnailHeight: 100,
-        parallelUploads: 2,
+        parallelUploads: 4,
         autoDiscover: false,
         previewTemplate: previewTemplate,
         autoQueue: true, // Make sure the files aren't queued until manually added
