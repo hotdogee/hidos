@@ -286,9 +286,6 @@ $(document).ready(function () {
             });
         }
      });
-
-
-
   } else {
     Dropzone.options.addPhotos = {
       maxFilesize: 256, // MB

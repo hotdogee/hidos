@@ -28,6 +28,8 @@ from django.contrib import admin
 import cell.views as cell_view
 # admin.autodiscover()
 
+
+
 urlpatterns = [
     #url(r'^api/v1/tasks$', app_views.tasks, name='tasks'),
     #url(r'^api/v1/tasks/status$', app_views.status, name='status'),
@@ -59,7 +61,6 @@ urlpatterns = [
 
     # Uncomment the next line to enable the admin:
     url(r'^admin/', admin.site.urls),
-
 ]
 
 # Serving files uploaded by a user during development

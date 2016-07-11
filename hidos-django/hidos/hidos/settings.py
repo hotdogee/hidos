@@ -402,5 +402,3 @@ SOCIALACCOUNT_PROVIDERS ={
         'VERIFIED_EMAIL': False,
         'VERSION': 'v2.4'}}
 
-
-
