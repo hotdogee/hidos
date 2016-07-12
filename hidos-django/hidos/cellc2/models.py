@@ -10,12 +10,9 @@ from .tasks import process_image
 from . import app_name, verbose_name, version
 
 class Task(CellTask):
-    cell_ratio = models.FloatField(null=True, blank=True)
-    count_min = models.FloatField(null=True, blank=True)
-    count_max = models.FloatField(null=True, blank=True)
 
     def get_absolute_url(self):
-        return reverse('c2:detail', kwargs={'id': self.id.hex}, current_app=app_name)
+        return reverse(app_name + ':detail', kwargs={'id': self.id.hex}, current_app=app_name)
 
     class Meta(CellTask.Meta):
         verbose_name = '{0} {1}'.format(verbose_name, 'Task')
