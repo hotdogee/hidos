@@ -47,7 +47,7 @@ def process_image(task_id):
         import urllib3
         slack_manager = urllib3.PoolManager(1)
         data = {
-            'channel': '#image-bug', 'username': 'cellc2',
+            'channel': '#image-bug', 'username': app_name,
             'icon_emoji': ':desktop_computer:',
             'text': '{0}\n{1}\n{2}\n`{3}`'.format(
                 task_record.owner.username, task_record.name, e.args[0], task_record.uploaded_image.path.split('/')[-1]
