@@ -21,10 +21,3 @@ class Task(CellTask):
         """Insert task into task queue
         """
         process_image.delay(self.id.hex)
-
-    # def save(self, force_insert=False, force_update=False, using=None, update_fields=None)
-    # def save(self, *args, **kwargs):
-    #     if self.name == "Yoko Ono's blog":
-    #         return # Yoko shall never have her own blog!
-    #     else:
-    #         super(CellC2Task, self).save(*args, **kwargs) # Call the "real" save() method.
