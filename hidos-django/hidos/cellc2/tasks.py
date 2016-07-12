@@ -55,7 +55,7 @@ def process_image(task_id):
         }
         slack_manager.request('POST', 'https://hooks.slack.com/services/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', 
             body=json.dumps(data), headers={'Content-Type': 'application/json'})
-        logger.error('{0} worker error: {1}'.format(app_name, data.text))
+        logger.error('{0} worker error: {1}'.format(app_name, data['text']))
         raise
         
 
