@@ -1,6 +1,7 @@
 """
 Package for the cellc2.
 """
+from .bin import run
 
 version = '0.8'
 app_name = __name__ # cellc2

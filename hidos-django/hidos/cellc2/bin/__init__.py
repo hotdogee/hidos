@@ -1,1 +1,1 @@
-from .cellConfluence_singleTask import cellConfluence_singleTask as process_image
+from .cellConfluence_singleTask import cellConfluence_singleTask as run

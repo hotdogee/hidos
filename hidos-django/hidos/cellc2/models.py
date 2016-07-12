@@ -6,7 +6,7 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 
 from cell.models import File, CellTask, ViewableQuerySet, SingleImageUploadManager
-from .tasks import process_image
+from .tasks import analysis
 from . import app_name, verbose_name, version
 
 class Task(CellTask):
@@ -20,4 +20,4 @@ class Task(CellTask):
     def enqueue(self):
         """Insert task into task queue
         """
-        process_image.delay(self.id.hex)
+        analysis.delay(self.id.hex)
