@@ -19,6 +19,7 @@ from celery.signals import task_sent, task_success, task_failure
 from django.conf import settings
 from django.core.cache import cache
 
+from . import app_name, verbose_name, version
 from .bin import process_image as process_image_bin
 
 logger = get_task_logger(__name__)
@@ -28,15 +29,14 @@ def process_image(task_id):
     import django
     django.setup()
 
-    logger.info('image_analysis task_id: %s' % (task_id,))
-
-    # update dequeue time
+    # update dequeue time, status and progress bar
     from .models import Task
     task_record = Task.objects.get(id__exact=task_id)
     task_record.dequeued = datetime.utcnow().replace(tzinfo=utc)
     task_record.status = 'running'
     task_record.progress = 0.1
     task_record.save()
+    logger.info('{0} worker {1}: {2}'.format(app_name, task_record.status, task_id))
 
     # run
     try:
@@ -46,12 +46,16 @@ def process_image(task_id):
         # slack report templatera
         import urllib3
         slack_manager = urllib3.PoolManager(1)
-        data = {"channel": "#image-bug", "username": "cellc2",
-                "text": "",
-                "icon_emoji": ":desktop_computer:"}
-        data["text"] = task_record.owner.username + '\n' + task_record.name + '\n' + e.args[0]  + '\n' + '`' + task_record.uploaded_image.path.split('/')[-1] + '`'
-        slack_manager.request('POST','https://hooks.slack.com/services/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',body = json.dumps(data),headers={'Content-Type': 'application/json'})
-        logger.info(e.args)
+        data = {
+            'channel': '#image-bug', 'username': 'cellc2',
+            'icon_emoji': ':desktop_computer:',
+            'text': '{0}\n{1}\n{2}\n`{3}`'.format(
+                task_record.owner.username, task_record.name, e.args[0], task_record.uploaded_image.path.split('/')[-1]
+            ),
+        }
+        slack_manager.request('POST', 'https://hooks.slack.com/services/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', 
+            body=json.dumps(data), headers={'Content-Type': 'application/json'})
+        logger.error('{0} worker error: {1}'.format(app_name, data.text))
         raise
         
 
@@ -69,6 +73,7 @@ def process_image(task_id):
     task_record.progress = 1.0
     task_record.finished = datetime.utcnow().replace(tzinfo=utc)
     task_record.save()
+    logger.info('{0} worker {1}: {2}'.format(app_name, task_record.status, task_id))
 
     return task_id # passed to 'result' argument of task_success_handler
 
