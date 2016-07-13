@@ -32,11 +32,12 @@
 <body>
 
   <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
-    <header class="mdl-layout__header mdl-layout__header--transparent">
+    <header class="mdl-layout__header mdl-layout__header--transparent ">
       <div class="mdl-layout__header-row">
+        <div class="mdl-layout-spacer mdl-layout--small-screen-only"></div>
         <span class="mdl-layout-title Oleo">CellCloud</span>
-        <div class="mdl-layout-spacer"></div>
-        <nav class="mdl-navigation">
+        <div class="mdl-layout-spacer mdl-layout--large-screen-only"></div>
+        <nav class="mdl-navigation mdl-layout--large-screen-only">
           <a class="mdl-navigation__link" href="#feature">Features</a>
           <a class="mdl-navigation__link" href="#service">Services</a>
           <a class="mdl-navigation__link" href="#contact">Contact us</a>
@@ -48,6 +49,18 @@
         </nav>
       </div>
     </header>
+    <div class="mdl-layout__drawer mdl-layout--small-screen-only">
+      <span class="mdl-layout-title Oleo">CellCloud</span>
+      <nav class="mdl-navigation">
+        <a class="mdl-navigation__link" href="#feature">Features</a>
+        <a class="mdl-navigation__link" href="#service">Services</a>
+        <a class="mdl-navigation__link" href="#contact">Contact us</a>
+      </nav>
+    </div>
+
+
+
+
     <main class="mdl-layout__content">
       <div class="page-content">
         <div class="cellcloud-layout">
@@ -209,7 +222,7 @@
                 <div class="mdl-grid ">
                   <div class="mdl-cell mdl-cell--12-col">
                     <h3 class="mdl-typography--display-1 R">Contact us</h3>
-                    <h5>Meridigen Biotechnology - HiDOS Dept.</h5>
+                    <h5>Meridigen Biotechnology - Big Data Research Dept.</h5>
                   </div>
                  <div class="mdl-cell mdl-cell--6-col">
                     <div class="mdl-card mdl-shadow--2dp">
@@ -302,6 +315,8 @@
   .hero{
     margin: auto;
   }
+
+
 
   .hero > h2 {
     color: white;
@@ -469,6 +484,22 @@
   }
 
 
+   @media (max-width: 479px){
+    .hero {
+      margin:auto 5%;
+    }
+
+    .mdl-grid{
+      padding: 0px;
+    }
+
+    .register-section{
+      height:80vh;
+    }
+  }
+
+
+
 
 </style>
 
@@ -477,7 +508,6 @@
 var a = $(".cellcloud-layout").height() - 10;
 
 $(".mdl-layout__content").scroll(function(){
-  console.log($(this).scrollTop());
    if($(this).scrollTop() > 0)
     {
        $('.mdl-layout__header').css({"background":"red"});
