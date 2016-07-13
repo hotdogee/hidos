@@ -1,10 +1,8 @@
 {%  load staticfiles %}
 
 <div class="section--center mdl-grid mdl-grid--no-spacing mdl-shadow--2dp">
-    <div class="mdl-cell mdl-cell--6-col">
-        <img src="{% static 'cellm1/images/Example.jpg' %}" id='example-img' style="width:100%">
-    </div>
-    <div class="mdl-cell mdl-cell--6-col">
+   <div class="mdl-cell mdl-cell--6-col mdl-cell--12-col-tablet mdl-cell--12-col-phone example-img" id="example-img"></div>
+    <div class="mdl-cell mdl-cell--6-col mdl-cell--12-col-tablet mdl-cell--12-col-phone">
       <div class="mdl-layout">
         <div class="mdl-card__title">
             <div class="mdl-card__title-text">Transwell migration quatification</div>
@@ -23,7 +21,7 @@
            </button>
         </div>
         <div class="mdl-card__menu">
-          <button class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect" onclick="javascript:location.href='http://hidos.io/cellcloud-docs/CellM1.html'">
+          <button class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect" onclick="javascript:window.open('http://hidos.io/cellcloud-docs/CellM1.html')">
             <i class="material-icons">help_outline</i>
           </button>
         </div>
@@ -32,15 +30,52 @@
     </div>
 </div>
 
+<style>
+.example-img{
+    background-image: url("{% static 'cellm1/images/Example.jpg' %}");
+    background-size: cover;
+    background-position: center;
+    height:400px;
+  }
+
+  @media (max-width: 479px){
+  .example-img{
+    height:300px;
+  }
+  }
+
+  @media (max-width: 839px) and (min-width: 480px){
+  .example-img{
+    height:300px;
+  }
+  }
+
+
+
+  .result{
+    background-image: url("{% static 'cellm1/images/Example_r.jpg' %}");
+    background-size: cover;
+    background-position: center;
+  }
+
+</style>
+
+
+
 <script>
 var example_click_time = 0;
-$("#preview-example").click(function(){
+var preview = function(){
     if(example_click_time === 0){
-        $("#example-img").attr("src", '{% static 'cellm1/images/Example_r.jpg' %}');
+        $("#example-img").addClass('result');
         example_click_time = 1;
     }else{
-        $("#example-img").attr("src", '{% static 'cellm1/images/Example.jpg' %}');
+        $("#example-img").removeClass('result');
         example_click_time = 0;
     }
-})
+}
+
+
+
+$("#preview-example").click(preview);
+$("#example-img").click(preview);
 </script>
