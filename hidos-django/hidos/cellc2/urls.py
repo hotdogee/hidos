@@ -1,13 +1,13 @@
 ﻿from django.conf.urls import url
 
 from . import api
-from . import views
+#from . import views
 from . import app_name # application namespace
 
 
 urlpatterns = [
-    url(r'^$', views.IndexView.as_view(), name='index'),
-    url(r'^(?P<id>[0-9a-zA-Z]+)$', views.DetailView.as_view(), name='detail'),
+    #url(r'^$', views.IndexView.as_view(), name='index'),
+    #url(r'^(?P<id>[0-9a-zA-Z]+)$', views.DetailView.as_view(), name='detail'),
     # {% url "cellc2:tasks" %}
     url(r'^api/v1/tasks$', api.TaskViewSet.as_view({
         'get': 'list',

@@ -16,6 +16,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
 from django.core.validators import RegexValidator
+from django.contrib.postgres.fields import JSONField
 
 from django_extensions.db.models import TimeStampedModel
 
@@ -145,7 +146,7 @@ class CellTask(Task):
     result_image = models.ImageField(max_length=255, blank=True)
     uploaded_display = models.ImageField(max_length=255, blank=True)
     result_display = models.ImageField(max_length=255, blank=True)
-    result = models.TextField(blank=True) # use JSONField
+    result = JSONField(default=dict, blank=True) # requires postgres
     error = models.TextField(blank=True)
 
     objects = SingleImageUploadManager.from_queryset(ViewableQuerySet)()

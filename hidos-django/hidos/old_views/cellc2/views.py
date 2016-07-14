@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__) # __name__ == cellc2.views
 
 
 class IndexView(TemplateView):
-    template_name = 'cellc2/index.html'
+    template_name = app_name + '/index.html'
 
     def get_context_data(self, **context):
         context['title'] = verbose_name
@@ -24,7 +24,7 @@ class IndexView(TemplateView):
 
 
 class DetailView(GenericModelView):
-    template_name = 'cellc2/result.html'
+    template_name =  app_name + '/result.html'
     model = Task
     lookup_field = 'id'
 
