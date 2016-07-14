@@ -45,8 +45,13 @@ class TaskViewSet(viewsets.ModelViewSet):
         querysets depending on the incoming request.
         (Eg. return a list of items that is specific to the user)
         """
-        if self.request.user.username:
-            return CellM3Task.objects.filter(user=self.request.user)
+        user = self.request.user
+        if user.username:
+            ## superuser can retrieve the result page
+            if user.is_superuser:
+                return CellM3Task.objects.all()
+            else:
+                return CellM3Task.objects.filter(user=self.request.user)
         else:
             return CellM3Task.objects.none()
 
