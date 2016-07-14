@@ -93,7 +93,7 @@ def cellCount_singleTask(image_input_path, image_output_path, json_path):
     
     area_list=stats[1:,4].copy()
     area_list.sort()
-    area_mean=round(np.mean(area_list[int(len(area_list)*0.1):int(len(area_list)*0.9)]))
+    area_mean=round(np.mean(area_list[int(len(area_list)*0.1):int(len(area_list)*0.9)+1]))
     
     #remove small object          
     img_prepro2=remove_small_objects(np.bool_(img_opening),area_mean/5)
@@ -110,8 +110,10 @@ def cellCount_singleTask(image_input_path, image_output_path, json_path):
                     
     area_list2=stats2[1:,4].copy()
     area_list2.sort()
-    area_mean2=round(np.mean(area_list2[int(len(area_list2)*0.1):int(len(area_list2)*0.9)]))
-              
+    if (len(area_list2)<40):
+        area_mean2=round(np.mean(area_list2[int(len(area_list2)*0.2):int(len(area_list2)*0.8)+1]))
+    else:
+        area_mean2=round(np.mean(area_list2[int(len(area_list2)*0.3):int(len(area_list2)*0.7)+1]))            
     cellCount=0
     out_file = open(json_path,"w")
     #exception
@@ -126,10 +128,12 @@ def cellCount_singleTask(image_input_path, image_output_path, json_path):
                 cellCount +=1
                 cv2.putText(img_ori_resize,'1',(int(centroids2[i,0]),int(centroids2[i,1])), font, 1,color_text[inx,:],1) 
             elif (np.floor(tmpCount)):
-                if (stats2[i,2]*stats[i,3]/float(stats[i,4])<2):
-                    cellSubCount=np.floor(tmpCount)
-                else:
+                if (float((max(stats2[i,2:4])))/min(stats2[i,2:4])>1.5):    #長條形
+                    cellSubCount=np.round(tmpCount)                    
+                elif (stats2[i,2]*stats[i,3]/float(stats[i,4])>1.5):    #矩形區域面積/實際面積 (值越大表示留白越多)
                     cellSubCount=np.round(tmpCount)
+                else:
+                    cellSubCount=np.floor(tmpCount)
 #                cellCount +=np.floor(tmpCount)
                 cellCount+=cellSubCount
                 cv2.putText(img_ori_resize,str(int(cellSubCount)),(int(centroids2[i,0]),int(centroids2[i,1])), font, 1,color_text[inx,:],1)
@@ -164,12 +168,48 @@ def cellCount_singleTask(image_input_path, image_output_path, json_path):
 
 
 
-#image_path = "C:\\Users\\Aaron.Lin\\Desktop\\cellC1_issue_image\\9cd0c9a064cfbda9f937565f440d6ccf_in.jpg"
+#image_path = "D:\Benchmark\BBBC005_v1_images\BBBC005_v1_images\SIMCEPImages_A24_C100_F1_s19_w1.TIF"
 #image_output_path = "D:\Aaron workspace\Aaron\CellCount_Project\\tiff\\result.jpg"
 #json_path = "D:\Aaron workspace\Aaron\CellCount_Project\\tiff\\result.json"
 #cellCount_singleTask(image_path,image_output_path,json_path)
-            
-            
+
+
+#for BBBC validation test
+#import re
+#from scipy import stats
+#img_input_path=u'D:\Benchmark\BBBC005_v1_images\BBBC005_v1_images\F1'
+#img_output_path=u'D:\Benchmark\BBBC005_v1_images\BBBC005_v1_images\F1_result'
+#file_list = listdir(img_input_path)
+#img_count=0
+#result=np.empty([1,2])
+#for filename in file_list:
+#    searchObj=re.search('w1',filename)
+#    if (filename[0]!='.' and searchObj):
+#        tmp=re.search('_C[0-9]+',filename)
+#        tmpStr=tmp.group()
+#        inx=tmpStr.find('C')
+#        ground_truth=int(tmpStr[inx+1:])
+#        print('Cell count analyzing for %s'%filename)
+#        Img_filename=img_input_path+'\\'+filename
+#        Img_output_filename=img_output_path+'\\'+filename
+#        inx=Img_output_filename.rfind('.')
+#        json_filename=Img_output_filename[0:inx]+'.json'
+#        cellCount=cellCount_singleTask(Img_filename,Img_output_filename,json_filename)
+#        result=np.append(result,[[ground_truth,cellCount]],axis=0)
+#        img_count+=1
+#
+#slope, intercept, r_value, p_value, std_err = stats.linregress(result[1:,1],result[1:,0])
+#plt.figure()
+#plt.scatter(result[1:,1],result[1:,0],color='blue')
+#x=np.array(range(1,101),float)
+#y=intercept+x*slope
+#plt.plot(x,y,color='r',linewidth=3)
+#plt.xlim([0,100])
+#plt.ylim([0,100])
+#plt.xlabel('CellC1',fontsize=14)
+#plt.ylabel('Ground truth',fontsize=14)
+#plt.text(5, 80,('y=%f+%f*x'%(intercept,slope)),fontsize=14)
+#plt.text(5,72,'correlation coefficient=%f'%r_value,fontsize=14)    
             
             
             
