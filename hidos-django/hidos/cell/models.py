@@ -5,7 +5,8 @@ import hashlib
 import imghdr
 import stat as Perm
 from os import path, makedirs, chmod
-
+import cv2
+import numpy as np
 from PIL import Image
 
 from django.db import models
@@ -137,12 +138,19 @@ class SingleImageUploadManager(models.Manager):
         chmod(uploaded_image_path, Perm.S_IRWXU | Perm.S_IRWXG | Perm.S_IRWXO)
 
         # convert to jpeg for web display
-        p = Image.open(uploaded_image_path)
-        if p.mode.split(';')[1:2] == ['16']:
-            p = p.point(lambda x: x*(float(1)/256))
-        if p.mode != 'RGB':
-            p = p.convert('RGB')
-        p.save(input_image_viewer_path)
+        p = cv2.imread(uploaded_image_path,cv2.IMREAD_ANYDEPTH)
+        if p.dtype == 'uint16':
+            p = cv2.imread(uploaded_image_path)
+            p = np.uint16(p)
+            p = p*255/p.max()
+            p = np.uint8(p)
+            print('this is 16bit')
+        # if p.mode.split(';')[1:2] == ['16']:
+        #     p = p.point(lambda x: x*(float(1)/256))
+        # if p.mode != 'RGB':
+        #     p = p.convert('RGB')
+        cv2.imwrite(input_image_viewer_path,p)
+
         chmod(input_image_viewer_path, Perm.S_IRWXU | Perm.S_IRWXG | Perm.S_IRWXO)
 
         # Make input jpg
