@@ -138,7 +138,7 @@ class SingleImageUploadManager(models.Manager):
         chmod(uploaded_image_path, Perm.S_IRWXU | Perm.S_IRWXG | Perm.S_IRWXO)
 
         # convert to jpeg for web display
-        p = cv2.imread(uploaded_image_path,cv2.IMREAD_ANYDEPTH)
+        p = cv2.imread(uploaded_image_path,cv2.IMREAD_ANYDEPTH|cv2.IMREAD_ANYCOLOR)
         if p.dtype == 'uint16':
             p = cv2.imread(uploaded_image_path)
             p = np.uint16(p)
