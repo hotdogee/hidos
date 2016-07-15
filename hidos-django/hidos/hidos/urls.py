@@ -53,9 +53,8 @@ urlpatterns = [
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^admin/', admin.site.urls),
     
+    url(r'^api/v1/cell/', include('cell.urls')),
     url(r'^api/v1/fs/', include('fs.urls', namespace='fs')),
-
-    url(r'^', include('cell.urls')),
 ]
 
 # Serving files uploaded by a user during development
