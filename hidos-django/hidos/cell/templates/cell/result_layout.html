@@ -28,7 +28,7 @@
 
 {% block content %}{% endblock %}
 
-
+{% if not feedbacked %}
   <div class="mdl-card mdl-shadow--6dp mdl-typography--text-right" id="feedback">
 
     <div class="mdl-card__supporting-text">
@@ -46,7 +46,7 @@
     </div>
   </div>
 
-
+{% endif %}
 
 
 
