@@ -393,6 +393,7 @@ $(document).ready(function () {
             });
             this.on("dragleave", function(event){
                document.querySelector(".mdl-layout__content").style.border= "0px solid";
+
             });
             this.on("drop", function(event){
                 document.querySelector(".mdl-layout__content").style.border= "0px solid";

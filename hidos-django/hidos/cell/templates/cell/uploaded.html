@@ -1,27 +1,24 @@
 <div class="section--center mdl-grid mdl-grid--no-spacing mdl-shadow--2dp">
-    <div class="mdl-card__title">
-        <div class="mdl-card__title-text">Image Uploaded</div>
-    </div>
 
-    <div class="mdl-card__supporting-text">
-        <div class="mdl-grid" id="dz-preview">
-
-            <div class="mdl-cell mdl-cell--6-col" id="dz-template">
-                <div class="mdl-grid mdl-grid--no-spacing mdl-shadow--3dp dz-preview dz-file-preview">
-                    <div class="mdl-cell mdl-cell--3-col">
-                        <img data-dz-thumbnail />
-                    </div>
-                    <div class="mdl-cell mdl-cell--8-col">
-                        <div class="dz-filename"><span data-dz-name></span></div>
-                        <div class="dz-size"><span data-dz-size></span></div>
-                        <div style="height:5px; background:gainsboro; margin-top:59px;" data-dz-uploadprogress></div>
-                    </div>
-                    <div class="mdl-cell mdl-cell--1-col" style="display: flex;background: gainsboro;">
-                        <div class="dz-success-mark dz-status"><span>✔</span></div>
-                        <div class="dz-error-mark dz-status"><span>✘</span></div>
-                    </div>
-                </div>
-            </div>
-        </div>
+  <div class="mdl-card__supporting-text" id="upload-zone">
+      <p class="mdl-card__title-text" id="drop-text">Drop images here to upload</p>
+      <div class="mdl-grid" id="dz-preview">
+          <div class="mdl-cell mdl-cell--6-col" id="dz-template">
+              <div class="mdl-grid mdl-grid--no-spacing mdl-shadow--3dp dz-preview dz-file-preview">
+                  <div class="mdl-cell mdl-cell--3-col">
+                      <img data-dz-thumbnail />
+                  </div>
+                  <div class="mdl-cell mdl-cell--8-col">
+                      <div class="dz-filename"><span data-dz-name></span></div>
+                      <div class="dz-size"><span data-dz-size></span></div>
+                      <div style="height:5px; background:gainsboro; margin-top:59px;" data-dz-uploadprogress></div>
+                  </div>
+                  <div class="mdl-cell mdl-cell--1-col" style="display: flex;background: gainsboro;">
+                      <div class="dz-success-mark dz-status"><span>✔</span></div>
+                      <div class="dz-error-mark dz-status"><span>✘</span></div>
+                  </div>
+              </div>
+          </div>
+      </div>
     </div>
 </div>
