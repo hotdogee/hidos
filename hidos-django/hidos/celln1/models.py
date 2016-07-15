@@ -47,7 +47,7 @@ class CellN1Task(CellTaskModel):
         input_image_viewer_path = path_prefix + '_in.jpg'
         output_image_viewer_path = path_prefix + '_out.jpg'
         # build command
-        run_cell_n1_task.delay(self.task_id, uploaded_image_path, result_image_path, result_json_path, path_prefix)
+        run_cell_n1_task.delay(self.task_id, input_image_viewer_path, result_image_path, result_json_path, path_prefix)
         print(uploaded_image_path, input_image_viewer_path, result_json_path)
 
     def original_image(self):
