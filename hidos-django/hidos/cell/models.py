@@ -72,6 +72,8 @@ class TaskModel(TimeStampedModel):
     finished = models.DateTimeField(null=True, blank=True)
     user = models.ForeignKey(User, null=True, blank=True)
     parent_folder = models.ForeignKey(Folder, models.CASCADE, null=True, blank=True)
+    feedback_satisfied = models.CharField(max_length=32, null=True, blank=True)
+    feedback_opinions = models.CharField(max_length=32, null=True, blank=True)
     version = models.CharField(max_length=32)
     #cell_ratio = models.FloatField()
 

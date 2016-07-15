@@ -8,6 +8,8 @@ from django.contrib.auth.decorators import login_required
 urlpatterns = [
     url(r'^$', login_required(views.IndexView.as_view(), login_url='/accounts/login/'), name='index'),
     url(r'^(?P<task_id>[0-9a-zA-Z]+)$', views.DetailView2.as_view(), name='detail'),
+    url(r'^(?P<task_id>[0-9a-zA-Z]+)/submit-feedback-satisfied/', views.feedback, name='feedback-satisfied'),
+    url(r'^(?P<task_id>[0-9a-zA-Z]+)/submit-feedback-opinions/', views.feedback_opinions, name='feedback-opinions'),
     # {% url "cellc1:tasks" %}
     url(r'^api/v1/tasks$', api.TaskViewSet.as_view({
         'get': 'list',
@@ -23,4 +25,5 @@ urlpatterns = [
         #'patch': 'partial_update',
         'delete': 'destroy'
     }), name='task-detail'),
+
 ]

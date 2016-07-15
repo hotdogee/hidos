@@ -2,7 +2,7 @@ from datetime import datetime
 import logging
 
 from django.shortcuts import render
-from django.http import Http404
+from django.http import Http404, HttpResponse
 
 from vanilla import TemplateView
 from vanilla import GenericModelView
@@ -33,6 +33,11 @@ class DetailView2(GenericModelView):
         context['year'] = datetime.now().year
         context['version'] = version
         context['user_filename'] = self.object.uploaded_filename
+        if self.object.feedback_satisfied:
+            context['feedbacked'] = True
+        else:
+            context['feedbacked'] = False
+
         return context
 
     def get(self, request, *args, **kwargs):
@@ -58,3 +63,23 @@ class DetailView2(GenericModelView):
                 'version': version,
                 'message': message,
             })
+
+
+def feedback(request, task_id):
+    try:
+        task = CellN1Task.objects.get(task_id = task_id)
+        task.feedback_satisfied = request.POST.get('answer')
+        task.save()
+        return HttpResponse('success')
+    except Http404:
+        return HttpResponse('error')
+
+
+def feedback_opinions(request, task_id):
+    try:
+        task = CellN1Task.objects.get(task_id = task_id)
+        task.feedback_opinions = request.POST.get('opinions')
+        task.save()
+        return HttpResponse('success')
+    except Http404:
+        return HttpResponse('error')

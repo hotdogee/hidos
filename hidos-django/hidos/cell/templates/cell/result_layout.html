@@ -28,7 +28,147 @@
 
 {% block content %}{% endblock %}
 
+
+  <div class="mdl-card mdl-shadow--6dp mdl-typography--text-right" id="feedback">
+
+    <div class="mdl-card__supporting-text">
+      <p class="mdl-typography--text-left mdl-typography--body" id="feedback-title">Fit your expectation?</p>
+      <form id="feedback-satisfied">
+        <input class="mdl-button mdl-button--colored mdl-button--raised mdl-js-button mdl-js-ripple-effect" id="feedback-yes" type="submit" value="yes" />
+        <input class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" id="feedback-no" type="submit" value="no" />
+      </form>
+      <form id="feedback-opinions">
+        <div class="mdl-textfield mdl-js-textfield">
+          <input class="mdl-textfield__input" type="text" id="opinions">
+          <label class="mdl-textfield__label" for="opinions">Tell us more! (press enter to send)</label>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+
+
+
+
 {% block scripts %}{% endblock %}
 
 </body>
+
+<style>
+  #feedback{
+    position: fixed;
+    right: -20%;
+    bottom: 3%;
+    }
+
+  #feedback-opinions{
+    display: none;
+  }
+
+  #feedback-satisfied{
+    display:inline;
+  }
+
+  #feedback-title{
+    font-size:18px;
+  }
+
+
+</style>
+
+
+<script>
+
+
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+var csrftoken = getCookie('csrftoken');
+
+function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+$.ajaxSetup({
+    beforeSend: function(xhr, settings) {
+        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        }
+    }
+});
+
+$(document).ready(function(){
+    $("#feedback").delay(5000).animate({right: "3%"},"slow");
+
+    var task_id = window.location.pathname.match(/\/([0-9a-zA-Z]+)\/?$/)[1];
+
+    $("#feedback-no").click(function(){
+      event.preventDefault();
+
+      $.ajax({
+        url: task_id +'/submit-feedback-satisfied/',
+        type: 'post',
+        data: {"answer":"no"},
+        success: function(data,textStatus, xhr){
+          console.log("success")
+        },
+      });
+
+
+      $("#feedback-satisfied").slideUp("fast");
+      $("#feedback-opinions").slideDown();
+    });
+
+    $("#feedback-yes").click(function(){
+      event.preventDefault();
+
+      $.ajax({
+        url: task_id +'/submit-feedback-satisfied/',
+        type: 'post',
+        data: {"answer":"yes"},
+        success: function(data,textStatus, xhr){
+          console.log("success")
+        },
+      });
+
+      $("#feedback-satisfied").slideUp();
+      $("#feedback-title").html("Thank you for replying!");
+      $("#feedback").delay(2500).animate({right:"-24%"});
+    });
+
+    $("#feedback-opinions").submit(function(){
+      event.preventDefault();
+      var opinions = $('input[id=opinions]').val()
+
+      $.ajax({
+        url: task_id +'/submit-feedback-opinions/',
+        type: 'post',
+        data: {"opinions":opinions},
+        success: function(data,textStatus, xhr){
+          console.log("success")
+        },
+      });
+
+      $("#feedback-opinions").slideUp();
+      $("#feedback-title").html("Thank you for replying!");
+      $("#feedback").delay(2500).animate({right:"-24%"});
+    });
+});
+
+
+</script>
+
 </html>

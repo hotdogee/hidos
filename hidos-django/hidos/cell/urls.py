@@ -11,4 +11,5 @@ urlpatterns = [
     url(r'^n1/', include('celln1.urls', namespace='n1')),
     url(r'^m1/', include('cellm1.urls', namespace='m1')),
     url(r'^a/', include('cella.urls', namespace='a')),
+
 ]

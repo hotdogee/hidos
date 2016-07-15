@@ -85,6 +85,7 @@ $(function () {
               $(window).resize(lazyLayout);
             });
           $('#result').fadeIn(1000);
+          $('#feedback:hidden:first').fadeIn(3000);
           $('#cover').fadeOut(1000);
         }
       }
