@@ -1,1 +1,1 @@
-from .cellConfluence_singleTask import cellConfluence_singleTask as run
+from .cellConfluence_singleTask import cell_confluency_cv2 as run
