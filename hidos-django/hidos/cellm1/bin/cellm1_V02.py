@@ -7,7 +7,6 @@ from skimage.transform import resize
 from skimage.util import img_as_ubyte
 from skimage.morphology import erosion, dilation, disk
 from PIL import ImageFont, ImageDraw
-import json
 from django.conf import settings
 
 

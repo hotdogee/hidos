@@ -11,11 +11,6 @@ import pymorph as m
 from skimage import feature, color, morphology, measure
 from skimage import img_as_ubyte
 import numpy as np
-import json
-#import time
-#from os import listdir
-#import matplotlib.pyplot as plt
-#from skimage import io
 import mahotas
 
 version = '0.2'
