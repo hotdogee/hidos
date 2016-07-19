@@ -18,25 +18,6 @@ import json
 
 version = '0.3'
 
-###############################################################################
-
-
-def img_resize(img, max_size):
-    len1 = img.shape[0]
-    len2 = img.shape[1]
-
-    if(len1 < max_size and len2 < max_size):
-        return img
-
-    if (len1 >= len2):
-        factor = float(max_size) / len1
-        img_out = cv2.resize(img, (int(factor * len2), max_size))
-    else:
-        factor = float(max_size) / len2
-        img_out = cv2.resize(img, (max_size, int(factor * len1)))
-    return img_out
-###############################################################################
-
 
 def cellCount_singleTask(task_record):
 
