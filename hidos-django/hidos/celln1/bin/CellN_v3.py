@@ -5,7 +5,6 @@
 
 import cv2
 import numpy as np
-import json
 import pymorph
 import mahotas as ma
 import copy
@@ -32,8 +31,9 @@ version = '0.3'
 
 # In[5]:
 
+
 def PlotOut(img, title, img2, title2):
-    fig = plt.figure(figsize=(30,30))
+    fig = plt.figure(figsize=(30, 30))
     ax0 = fig.add_subplot(121)
     ax0.imshow(img, cmap=plt.cm.spectral)
     ax0.set_title(title)
@@ -47,25 +47,23 @@ def PlotOut(img, title, img2, title2):
     # cmap='Greys'
 
 
-
 # In[6]:
 
 def PlotOne(img, title):
-    fig = plt.figure(figsize=(30,30))
+    fig = plt.figure(figsize=(30, 30))
     ax0 = fig.add_subplot(111)
     ax0.imshow(img, cmap=plt.cm.spectral)
     ax0.set_title(title)
     ax0.axis('off')
 
 
-
 # In[7]:
 
 def endPoints(skel):
-    endpoint1 = np.array([[0, 0, 0],[0, 1, 0],[0, 0, 0]], dtype = bool)
-    endpoint2 = np.array([[0, 0, 1],[1, 0, 1],[1, 1, 1]], dtype = bool)
-    endpoint3 = np.array([[0, 0, 0],[0, 1, 0],[0, 0, 0]], dtype = bool)
-    endpoint4 = np.array([[1, 0, 0],[1, 0, 1],[1, 1, 1]], dtype = bool)
+    endpoint1 = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]], dtype=bool)
+    endpoint2 = np.array([[0, 0, 1], [1, 0, 1], [1, 1, 1]], dtype=bool)
+    endpoint3 = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]], dtype=bool)
+    endpoint4 = np.array([[1, 0, 0], [1, 0, 1], [1, 1, 1]], dtype=bool)
     interval_1 = se2hmt(endpoint1, endpoint2)
     ep_1 = supcanon(skel, interval_1)
     interval_2 = se2hmt(endpoint3, endpoint4)
@@ -77,18 +75,18 @@ def endPoints(skel):
 # In[8]:
 
 def junctionPoints(skel):
-    juncpoint1 = np.array([[0, 1, 0],[0, 1, 0],[1, 0, 1]], dtype = bool)
-    juncpoint2 = np.array([[0, 0, 0],[1, 0, 1],[0, 1, 0]], dtype = bool)
+    juncpoint1 = np.array([[0, 1, 0], [0, 1, 0], [1, 0, 1]], dtype=bool)
+    juncpoint2 = np.array([[0, 0, 0], [1, 0, 1], [0, 1, 0]], dtype=bool)
     interval_A = se2hmt(juncpoint1, juncpoint2)
     jp_A = supcanon(skel, interval_A)
 
-    juncpoint3 = np.array([[0, 1, 0],[1, 1, 1],[0, 0, 0]], dtype = bool)
-    juncpoint4 = np.array([[1, 0, 1],[0, 0, 0],[0, 1, 0]], dtype = bool)
+    juncpoint3 = np.array([[0, 1, 0], [1, 1, 1], [0, 0, 0]], dtype=bool)
+    juncpoint4 = np.array([[1, 0, 1], [0, 0, 0], [0, 1, 0]], dtype=bool)
     interval_B = se2hmt(juncpoint3, juncpoint4)
     jp_B = supcanon(skel, interval_B)
 
-    juncpoint5 = np.array([[0, 0, 1],[1, 1, 0],[0, 1, 0]], dtype = bool)
-    juncpoint6 = np.array([[0, 1, 0],[0, 0, 1],[0, 0, 0]], dtype = bool)
+    juncpoint5 = np.array([[0, 0, 1], [1, 1, 0], [0, 1, 0]], dtype=bool)
+    juncpoint6 = np.array([[0, 1, 0], [0, 0, 1], [0, 0, 0]], dtype=bool)
     interval_C = se2hmt(juncpoint5, juncpoint6)
     jp_C = supcanon(skel, interval_C)
 
@@ -98,15 +96,15 @@ def junctionPoints(skel):
 
 # In[68]:
 
-def CellNOne(img_input_path, img_output_path, json_output_path):
+def CellNOne(task_record):
 
-#     import time
-#     tStart=time.time()
+    #     import time
+    #     tStart=time.time()
     # --------------------------------------------------------------------------------------------
     # read input image
     # resize to 1200
 
-    ori_img = cv2.imread(img_input_path)
+    ori_img = cv2.imread(task_record.uploaded_image.path)
     img_gray = cv2.cvtColor(ori_img, cv2.COLOR_BGR2GRAY)
     ori_img_int8 = img_as_ubyte(img_gray)
 
@@ -117,26 +115,27 @@ def CellNOne(img_input_path, img_output_path, json_output_path):
         dheight = height / factor
         dwidth = width / factor
         img = cv2.resize(ori_img_int8, (dwidth, dheight))
-    else :
+    else:
         img = ori_img_int8.copy()
-
 
     # --------------------------------------------------------------------------------------------
     # edge thershold
-    blur = cv2.GaussianBlur(img,(5,5),0)
+    blur = cv2.GaussianBlur(img, (5, 5), 0)
     thresh = skimage.filters.threshold_otsu(blur)
     edge = cv2.Canny(blur, 0, thresh)
-    kernel = np.ones((5,5), np.uint8)
+    kernel = np.ones((5, 5), np.uint8)
     img_thrs = cv2.morphologyEx(edge, cv2.MORPH_CLOSE, kernel)
     img_thrs = img_thrs >= 1
     img_thrs = dilation(img_thrs, disk(1))
     img_thrs_reverse = 1 - img_thrs
     img_thrs_reverse = np.array(img_thrs_reverse, dtype=np.bool)
     small_holes = 100
-    img_binary_reverse = morphology.remove_small_objects(img_thrs_reverse, small_holes)
+    img_binary_reverse = morphology.remove_small_objects(
+        img_thrs_reverse, small_holes)
     img_binary = 1 - img_binary_reverse
     # otsu thershold
-    re3, img_thrs_1 = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+    re3, img_thrs_1 = cv2.threshold(
+        blur, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     img_thrs_1 = np.array(img_thrs_1, dtype=np.bool)
     # combined those threshold result
     img_bi_or = np.logical_or(img_binary, img_thrs_1)
@@ -201,13 +200,14 @@ def CellNOne(img_input_path, img_output_path, json_output_path):
     # remove wrong soma
     tmap = img_p3.copy()
     tmap_uint8 = np.array(tmap, dtype=np.uint8)
-    ret, labeled_tmap, stats, centroids = cv2.connectedComponentsWithStats(tmap_uint8)
+    ret, labeled_tmap, stats, centroids = cv2.connectedComponentsWithStats(
+        tmap_uint8)
     cellbody = np.zeros(tmap.shape, dtype=bool)
     for i in range(1, labeled_tmap.max() + 1):
         tmap_obj = labeled_tmap == i
         dismap = ma.distance(tmap_obj)
-        tmap_obj_soma = dismap > dismap.max()*0.1
-        if (np.sum(tmap_obj)*0.8 > np.sum(tmap_obj_soma)):
+        tmap_obj_soma = dismap > dismap.max() * 0.1
+        if (np.sum(tmap_obj) * 0.8 > np.sum(tmap_obj_soma)):
             cellbody = np.logical_or(cellbody, tmap_obj_soma)
 
     cellbody = morphology.remove_small_objects(cellbody, 100)
@@ -224,7 +224,6 @@ def CellNOne(img_input_path, img_output_path, json_output_path):
 #     C = np.mean(dmap)
 #     cellbody = cv2.adaptiveThreshold(dmap, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 91, -20)
 #     cellbody = np.array(cellbody, dtype=np.bool)
-
 
     # --------------------------------------------------------------------------------------------
     # skeleton after dilation
@@ -246,9 +245,10 @@ def CellNOne(img_input_path, img_output_path, json_output_path):
     # --------------------------------------------------------------------------------------------
     # test for delete shortline
     small_line = 30
-    img_t1 = morphology.remove_small_objects(dendrine, small_line, connectivity = 2)
-    img_t2 = img_skel^img_t1
-    img_skel2 = img_skel^(dendrine^img_t1)
+    img_t1 = morphology.remove_small_objects(
+        dendrine, small_line, connectivity=2)
+    img_t2 = img_skel ^ img_t1
+    img_skel2 = img_skel ^ (dendrine ^ img_t1)
     # --------------------------------------------------------------------------------------------
     # Attandance points
     # seperate counting
@@ -274,24 +274,22 @@ def CellNOne(img_input_path, img_output_path, json_output_path):
 #     jp = dilation(jp, disk(3))
 #     sum_jp = np.sum(jp)
 
-
-    #---------------------------------------------------------------------------------------------
+    #-------------------------------------------------------------------------
     # find endpoints of Dendrine
     ep = endPoints(img_skel)
     ep = ep ^ (ep & img_cellbody)
     count_ep = np.sum(ep)
     ep = dilation(ep, disk(3))
 
-
-
-    #---------------------------------------------------------------------------------------------
+    #-------------------------------------------------------------------------
 #     # display using overlay
 
-    result = overlay(img, green = img_cellbody, yellow = soma_points , cyan = ep, red = dendrine_dila) # blue = jp
-    count_branches = count_ep-count_attpoint
-    mean_length = round(float(count_length)/count_cellbody,3)
-    mean_branch = round(float(count_branches)/count_cellbody,3)
-    mean_outgrowth = round(float(count_attpoint)/count_cellbody,3)
+    result = overlay(img, green=img_cellbody, yellow=soma_points,
+                     cyan=ep, red=dendrine_dila)  # blue = jp
+    count_branches = count_ep - count_attpoint
+    mean_length = round(float(count_length) / count_cellbody, 3)
+    mean_branch = round(float(count_branches) / count_cellbody, 3)
+    mean_outgrowth = round(float(count_attpoint) / count_cellbody, 3)
 
     # draw text count on image
 #     display_3 = Image.fromarray(display_3)
@@ -302,21 +300,21 @@ def CellNOne(img_input_path, img_output_path, json_output_path):
 #     for i in range(0,soma_features,1):
 #         draw.text((cen[k+1],cen[k]), str(i+1), (34, 139, 34), font = text)
 #         k = k + 2
-    #---------------------------------------------------------------------------------------------
+    #-------------------------------------------------------------------------
     # output as image and json file
 
     result_save = Image.fromarray(result)
-    Image.Image.save(result_save, img_output_path)
-    with open(json_output_path, "w") as outfile:
-        json.dump({'cell_body': count_cellbody,
-                   'outgrowth_length': count_length,
-                   'mean_length': mean_length,
-                   'number_of_branches': count_branches,
-                   'mean_branch': mean_branch,
-                   'neurite_outgrowth': count_attpoint,
-                   'mean_outgrowth': mean_outgrowth},
-                  outfile, indent=1)
-    #---------------------------------------------------------------------------------------------
+    Image.Image.save(result_save, task_record.result_image.path)
+    Image.Image.save(result_save, task_record.result_display.path)
+
+    return {'cell_body': count_cellbody,
+            'outgrowth_length': count_length,
+            'mean_length': mean_length,
+            'number_of_branches': count_branches,
+            'mean_branch': mean_branch,
+            'neurite_outgrowth': count_attpoint,
+            'mean_outgrowth': mean_outgrowth}
+    #-------------------------------------------------------------------------
     # subplot image as testing
 
 
@@ -336,17 +334,7 @@ def CellNOne(img_input_path, img_output_path, json_output_path):
 # import time
 # img_input_path = 'C:\Users\Meriuser\Desktop\NeuronData\JPG_FILE\\TUJ1-0008.jpg'
 # img_output_path = 'C:\Users\Meriuser\Desktop\NeuronData\JPG_FILE\\' + 'Example_2_output.jpg'
-# json_output_path = 'C:\Users\Meriuser\Desktop\NeuronData\JPG_FILE\\' + 'Example_2_output.json'
+# json_output_path = 'C:\Users\Meriuser\Desktop\NeuronData\JPG_FILE\\' +
+# 'Example_2_output.json'
 
 # CellNOne(img_input_path, img_output_path, json_output_path)
-
-
-# In[ ]:
-
-
-
-
-# In[ ]:
-
-
-
