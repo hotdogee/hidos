@@ -1,7 +1,7 @@
 """
 Package for the cellc1.
 """
-from .bin.CellN_v4 import version
+from .bin.CellN_v5 import version
 
 
 version = version

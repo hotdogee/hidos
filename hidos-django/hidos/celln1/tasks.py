@@ -15,7 +15,7 @@ from celery.decorators import periodic_task
 from celery.utils.log import get_task_logger
 from celery.signals import task_sent, task_success, task_failure
 
-from celln1.bin.CellN_v4 import CellNOne
+from celln1.bin.CellN_v5 import CellNOne
 
 from django.conf import settings
 from django.core.cache import cache

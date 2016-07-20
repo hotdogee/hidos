@@ -30,7 +30,7 @@ class CellM1Task(CellTaskModel):
         """
         # Generate args_list and path_prefix
         path_prefix = path.join(settings.MEDIA_ROOT, 'cellm1', 'task', self.task_id, self.task_id)
-        script_path = path.join(settings.PROJECT_ROOT, 'cellm1', 'bin', '1_1_CellM_han.R')
+        # script_path = path.join(settings.PROJECT_ROOT, 'cellm1', 'bin', '1_1_CellM_han.R')
         # avoid exploits, don't any part of the user filename
         uploaded_image_path = path_prefix + '_uploaded.' + self.uploaded_filetype
         result_image_path = path_prefix + '_result.' + self.uploaded_filetype
