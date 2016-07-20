@@ -330,7 +330,7 @@ def CellNOne(img_input_path, img_output_path, json_output_path):
         json.dump({'cell_body':count_cellbody,
                    'dead_bodies':count_dead,
                    'outgrowth_length':count_length,
-                   'mean length':mean_length,
+                   'mean_length':mean_length,
                    'number_of_branches':count_branches,
                    'mean_branch':mean_branch,
                    'neurite_outgrowth':count_attpoint,
