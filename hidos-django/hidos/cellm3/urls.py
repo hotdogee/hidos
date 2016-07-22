@@ -4,7 +4,7 @@ from . import api
 from . import app_name # application namespace
 
 
-urlpatterns = [,
+urlpatterns = [
     # {% url "cellc2:tasks" %}
     url(r'^tasks$', api.TaskViewSet.as_view({
         'get': 'list',
