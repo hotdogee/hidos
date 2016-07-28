@@ -1,0 +1,34 @@
+{% load staticfiles %}
+{% load static %}
+<link REL=stylesheet TYPE=text/css href="{% static 'tfMRI/css/fsl.css' %}">
+
+<TABLE BORDER=0><TR>
+
+<TD ALIGN=CENTER WIDTH=100%>
+
+<TABLE BORDER=0>
+
+<tr><td align=center><font size=+3><b>FEAT Report</b></font></tr>
+
+
+<!--runningstart-->
+Finished at Thu Jul 28 13:50:22 CST 2016
+<!--runningstop-->
+</tr>
+
+<tr valign=bottom><td align=center>
+<A HREF="{% url 'freg' %}" target=_top>Registration</A> &nbsp;-&nbsp;
+<A HREF="{% url 'fprestats' %}" target=_top>Pre-stats</A> &nbsp;-&nbsp;
+<A HREF="{% url 'fstats' %}" target=_top>Stats</A> &nbsp;-&nbsp;
+<A HREF="{% url 'fpoststats' %}" target=_top>Post-stats</A> &nbsp;-&nbsp;
+<A HREF="{% url 'flog' %}" target=_top>Log</A>
+
+</tr></table>
+
+<TD ALIGN=RIGHT>
+<a href=http://www.fmrib.ox.ac.uk/fsl target=_top>
+<IMG BORDER=0 SRC=file:/usr/local/fsl/doc//images/fsl-logo-big.jpg WIDTH=165></a>
+</TD>
+
+</TR></TABLE><hr>
+

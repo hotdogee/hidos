@@ -31,7 +31,7 @@ SECRET_KEY = 'n(bd1f1c%e8=_xad02x53tfn%wgwpi492e$8_erx+d)!tpeoim'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'django',
         'USER': 'django',
         'PASSWORD': '',
@@ -69,6 +69,8 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.9/topics/i18n/
@@ -164,6 +166,7 @@ INSTALLED_APPS = (
     'fs.apps.Config',
     'cell.apps.Config',
     'cellc2.apps.Config',
+    'tfMRI.apps.Config',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:

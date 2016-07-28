@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Configure your dataset</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        {% load static %}
+        <link rel="stylesheet" href="{% static 'tfMRI/css/bootstrap.min.css' %}">
+        <script src="{% static 'tfMRI/js/jquery.min.js' %}"></script>
+        <script src="{% static 'tfMRI/js/bootstrap.min.js' %}"></script>
+        <style>input.ev_p{ margin-left: 1em; width: 5em }</style>
+        <style>label.ev_p{ margin-left: 1em; width: 8em; font-weight: normal }</style>
+    </head>
+    <body>
+        <div class="panel panel-default">
+            <div class="panel-heading">Data</div>
+            <div class="panel-body">
+                <p id="nInputs">Number of inputs: 0</p>
+                <label for="4D_data">Select 4D Data</label> <input type="file" id="4D_data"> 
+                <br> <button type="button" onclick="add_4D_data()">Add 4D data</button>
+                <button type="button" onclick="remove_4D_data()">Remove selected data</button>
+                <p id="4D_data_list"></p>
+            </div>
+        </div>
+        
+        <div class="panel panel-default">
+            <div class="panel-heading">Registration</div>
+            <div class="panel-body">
+                <label for="struct_data">Main structural image</label> <input type="file" id="struct_data">
+            </div>
+        </div>
+        
+        <div class="panel panel-default">
+            <div class="panel-heading">EVs</div>
+            <div class="panel-body">
+                <p>Number of original EVs: 
+                    <input type="text" value="" maxlength="3" size="3" 
+                           onkeypress="return isNumber(event)" id="nEVs">
+                </p>
+                <select id="evs_same_select">
+                    <option value="same">Setup all EVs with the same 
+                        parameters</option>
+                    <option value="distinct">Setup each EV separately</option>
+                </select>
+                <br><br> <button type="button" onclick="refresh_evs_tabs()" 
+                                 >start to setup EVs</button>
+                <button type="button" onclick="reset_evs()">reset</button>
+                <div class="container" id="EVs_tabs_container"></div>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">Contrasts</div>
+            <div class="panel-body">
+                <p>Number of Contrasts: 
+                    <input type="text" value="" maxlength="3" size="3" 
+                           onkeypress="return isNumber(event)" id="nCon">
+                </p>
+                
+                <br><button type="button" onclick="refresh_contrasts()" 
+                                 >start to setup Contrasts</button>
+                <button type="button" onclick="reset_contrasts()">reset</button>
+                <div class="container" id="Contrasts_container"></div>
+            </div>
+        </div>
+        <button type="button" onclick="show()" style="visibility:hidden">show</button>
+        <button type="button" onclick="copy_to_clipboard()" style="visibility:hidden">copy</button>
+        <form name="send_fsf" id="send_fsf" action="/tfMRI/running/" method="post">
+            {% csrf_token %}
+            <br><br><textarea id="show" name="show" style="margin-left:2%;width:0%;height:0px;visibility:hidden"></textarea>
+            <input type="submit" target="_blank" value="go" onclick="go();this.form.target='_blank';return true;">
+        </form>
+	<script src="{% static 'tfMRI/js/write_fsf.js' %}"></script>
+    </body>
+</html>

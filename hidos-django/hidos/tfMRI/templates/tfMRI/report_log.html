@@ -1,0 +1,200 @@
+{% load staticfiles %}
+{% load static %}
+<HTML><HEAD>
+<!--refreshstart-->
+
+<!--refreshstop-->
+<link REL=stylesheet TYPE=text/css href="{% static 'tfMRI/css/fsl.css' %}">
+<TITLE>FSL</TITLE></HEAD><BODY><OBJECT data="{% url 'fresults' %}"></OBJECT>
+<h2>Progress Report / Log</h2>
+Started at 2016年 7月28日 周四 13時27分27秒 CST<p>
+Feat main script<br><pre>
+
+/bin/cp /Users/ray/WorkSpace/hidos/hidos-django/hidos/media/tfMRI/inputs/design.fsf design.fsf
+
+/usr/local/fsl/bin/feat_model design
+
+mkdir .files;cp /usr/local/fsl/doc/fsl.css .files;cp -r /usr/local/fsl/doc/images .files/images
+
+/usr/local/fsl/bin/fsl_sub -T 10 -l logs -N feat0_init   /usr/local/fsl/bin/feat /Users/ray/WorkSpace/hidos/hidos-django/hidos/media/tfMRI/outputs/210_6.feat/design.fsf -D /Users/ray/WorkSpace/hidos/hidos-django/hidos/media/tfMRI/outputs/210_6.feat -I 1 -init
+22758
+
+/usr/local/fsl/bin/fsl_sub -T 84 -l logs -N feat2_pre -j 22758  /usr/local/fsl/bin/feat /Users/ray/WorkSpace/hidos/hidos-django/hidos/media/tfMRI/outputs/210_6.feat/design.fsf -D /Users/ray/WorkSpace/hidos/hidos-django/hidos/media/tfMRI/outputs/210_6.feat -I 1 -prestats
+22837
+
+/usr/local/fsl/bin/fsl_sub -T 1 -l logs -N feat3_film -j 22837  /usr/local/fsl/bin/feat /Users/ray/WorkSpace/hidos/hidos-django/hidos/media/tfMRI/outputs/210_6.feat/design.fsf -D /Users/ray/WorkSpace/hidos/hidos-django/hidos/media/tfMRI/outputs/210_6.feat -I 1 -stats
+24871
+
+/usr/local/fsl/bin/fsl_sub -T 119 -l logs -N feat4_post -j 24871  /usr/local/fsl/bin/feat /Users/ray/WorkSpace/hidos/hidos-django/hidos/media/tfMRI/outputs/210_6.feat/design.fsf -D /Users/ray/WorkSpace/hidos/hidos-django/hidos/media/tfMRI/outputs/210_6.feat -poststats 0 
+25135
+
+/usr/local/fsl/bin/fsl_sub -T 1 -l logs -N feat5_stop -j 22837,24871,25135  /usr/local/fsl/bin/feat /Users/ray/WorkSpace/hidos/hidos-django/hidos/media/tfMRI/outputs/210_6.feat/design.fsf -D /Users/ray/WorkSpace/hidos/hidos-django/hidos/media/tfMRI/outputs/210_6.feat -stop
+</pre><hr>Initialisation<br><pre>
+
+/usr/local/fsl/bin/fslmaths /Users/ray/WorkSpace/hidos/hidos-django/hidos/media/tfMRI/inputs/denoised_func_data_nonaggr prefiltered_func_data -odt float
+Total original volumes = 246
+
+/usr/local/fsl/bin/fslroi prefiltered_func_data example_func 123 1
+</pre><hr>Preprocessing:Stage 1<br><pre>
+
+/usr/local/fsl/bin/mainfeatreg -F 6.00 -d /Users/ray/WorkSpace/hidos/hidos-django/hidos/media/tfMRI/outputs/210_6.feat -l /Users/ray/WorkSpace/hidos/hidos-django/hidos/media/tfMRI/outputs/210_6.feat/logs/feat2_pre -R /Users/ray/WorkSpace/hidos/hidos-django/hidos/media/tfMRI/outputs/210_6.feat/report_unwarp.html -r /Users/ray/WorkSpace/hidos/hidos-django/hidos/media/tfMRI/outputs/210_6.feat/report_reg.html  -i /Users/ray/WorkSpace/hidos/hidos-django/hidos/media/tfMRI/outputs/210_6.feat/example_func.nii.gz  -n 10 -h /Users/ray/WorkSpace/hidos/hidos-django/hidos/media/tfMRI/inputs/coMPRAGESag1mmisog2S210_brain -w  BBR -x 90 -s /usr/local/fsl/data/standard/MNI152_T1_2mm_brain -y 12 -z 90 
+Option -F ( FEAT version parameter ) selected with  argument "6.00"
+Option -d ( output directory ) selected with  argument "/Users/ray/WorkSpace/hidos/hidos-django/hidos/media/tfMRI/outputs/210_6.feat"
+Option -l ( logfile )input with argument "/Users/ray/WorkSpace/hidos/hidos-django/hidos/media/tfMRI/outputs/210_6.feat/logs/feat2_pre"
+Option -R ( html unwarping report ) selected with  argument "/Users/ray/WorkSpace/hidos/hidos-django/hidos/media/tfMRI/outputs/210_6.feat/report_unwarp.html"
+Option -r ( html registration report ) selected with  argument "/Users/ray/WorkSpace/hidos/hidos-django/hidos/media/tfMRI/outputs/210_6.feat/report_reg.html"
+Option -i ( main input ) input with argument "/Users/ray/WorkSpace/hidos/hidos-django/hidos/media/tfMRI/outputs/210_6.feat/example_func.nii.gz"
+Option -n ( use nonlinear reg ) input with argument "10"
+Option -h ( high-res structural image ) selected with  argument "/Users/ray/WorkSpace/hidos/hidos-django/hidos/media/tfMRI/inputs/coMPRAGESag1mmisog2S210_brain"
+Option -w ( highres dof ) selected with  argument "BBR"
+Option -x ( highres search ) selected with  argument "90"
+Option -s ( standard image ) selected with  argument "/usr/local/fsl/data/standard/MNI152_T1_2mm_brain"
+Option -y ( standard dof ) selected with  argument "12"
+Option -z ( standard search ) selected with  argument "90"
+</pre><hr>Registration<br><pre>
+
+/bin/mkdir -p /Users/ray/WorkSpace/hidos/hidos-django/hidos/media/tfMRI/outputs/210_6.feat/reg
+
+
+/usr/local/fsl/bin/fslmaths /Users/ray/WorkSpace/hidos/hidos-django/hidos/media/tfMRI/inputs/coMPRAGESag1mmisog2S210_brain highres
+
+
+/usr/local/fsl/bin/fslmaths /Users/ray/WorkSpace/hidos/hidos-django/hidos/media/tfMRI/inputs/coMPRAGESag1mmisog2S210_brain  highres_head
+
+Checking for /Users/ray/WorkSpace/hidos/hidos-django/hidos/media/tfMRI/inputs/coMPRAGESag1mmisog2S210_brain2MNI152_T1_2mm_brain_warp and /Users/ray/WorkSpace/hidos/hidos-django/hidos/media/tfMRI/inputs/coMPRAGESag1mmisog2S210_brain2MNI152_T1_2mm_brain.mat
+
+/usr/local/fsl/bin/fslmaths /usr/local/fsl/data/standard/MNI152_T1_2mm_brain standard
+
+
+/usr/local/fsl/bin/fslmaths /usr/local/fsl/data/standard/MNI152_T1_2mm standard_head
+
+
+/usr/local/fsl/bin/fslmaths /usr/local/fsl/data/standard/MNI152_T1_2mm_brain_mask_dil standard_mask
+
+did not find file: example_func2highres.mat. Generating transform.
+
+/usr/local/fsl/bin/epi_reg --epi=example_func --t1=highres_head --t1brain=highres --out=example_func2highres
+Running FAST segmentation FLIRT pre-alignment Running BBR 0.569641 0.999999 0.001036 0.001012 0.000000 -0.001048 0.999938 0.011093 0.000000 -0.001000 -0.011094 0.999938 0.000000 -0.002177 2.275656 0.502462 1.000000
+
+/usr/local/fsl/bin/convert_xfm -inverse -omat highres2example_func.mat example_func2highres.mat
+
+
+/usr/local/fsl/bin/slicer example_func2highres highres -s 2 -x 0.35 sla.png" -x 0.45 slb.png" -x 0.55 slc.png" -x 0.65 sld.png" -y 0.35 sle.png" -y 0.45 slf.png" -y 0.55 slg.png" -y 0.65 slh.png" -z 0.35 sli.png" -z 0.45 slj.png" -z 0.55 slk.png" -z 0.65 sll.png" ; /usr/local/fsl/bin/pngappend sla.png" + slb.png" + slc.png" + sld.png" + sle.png" + slf.png" + slg.png" + slh.png" + sli.png" + slj.png" + slk.png" + sll.png" example_func2highres1.png" ; /usr/local/fsl/bin/slicer highres example_func2highres -s 2 -x 0.35 sla.png" -x 0.45 slb.png" -x 0.55 slc.png" -x 0.65 sld.png" -y 0.35 sle.png" -y 0.45 slf.png" -y 0.55 slg.png" -y 0.65 slh.png" -z 0.35 sli.png" -z 0.45 slj.png" -z 0.55 slk.png" -z 0.65 sll.png" ; /usr/local/fsl/bin/pngappend sla.png" + slb.png" + slc.png" + sld.png" + sle.png" + slf.png" + slg.png" + slh.png" + sli.png" + slj.png" + slk.png" + sll.png" example_func2highres2.png" ; /usr/local/fsl/bin/pngappend example_func2highres1.png" - example_func2highres2.png" example_func2highres.png"; /bin/rm -f sl?.png" example_func2highres2.png"
+
+
+/bin/rm example_func2highres1.png"
+
+did not find file: highres2standard.mat. Generating transform.
+
+/usr/local/fsl/bin/flirt -in highres -ref standard -out highres2standard -omat highres2standard.mat -cost corratio -dof 12 -searchrx -90 90 -searchry -90 90 -searchrz -90 90 -interp trilinear 
+
+
+/usr/local/fsl/bin/fnirt --iout=highres2standard_head --in=highres_head --aff=highres2standard.mat --cout=highres2standard_warp --iout=highres2standard --jout=highres2highres_jac --config=T1_2_MNI152_2mm --ref=standard_head --refmask=standard_mask --warpres=10,10,10
+
+
+/usr/local/fsl/bin/applywarp -i highres -r standard -o highres2standard -w highres2standard_warp
+
+
+/usr/local/fsl/bin/convert_xfm -inverse -omat standard2highres.mat highres2standard.mat
+
+
+/usr/local/fsl/bin/slicer highres2standard standard -s 2 -x 0.35 sla.png" -x 0.45 slb.png" -x 0.55 slc.png" -x 0.65 sld.png" -y 0.35 sle.png" -y 0.45 slf.png" -y 0.55 slg.png" -y 0.65 slh.png" -z 0.35 sli.png" -z 0.45 slj.png" -z 0.55 slk.png" -z 0.65 sll.png" ; /usr/local/fsl/bin/pngappend sla.png" + slb.png" + slc.png" + sld.png" + sle.png" + slf.png" + slg.png" + slh.png" + sli.png" + slj.png" + slk.png" + sll.png" highres2standard1.png" ; /usr/local/fsl/bin/slicer standard highres2standard -s 2 -x 0.35 sla.png" -x 0.45 slb.png" -x 0.55 slc.png" -x 0.65 sld.png" -y 0.35 sle.png" -y 0.45 slf.png" -y 0.55 slg.png" -y 0.65 slh.png" -z 0.35 sli.png" -z 0.45 slj.png" -z 0.55 slk.png" -z 0.65 sll.png" ; /usr/local/fsl/bin/pngappend sla.png" + slb.png" + slc.png" + sld.png" + sle.png" + slf.png" + slg.png" + slh.png" + sli.png" + slj.png" + slk.png" + sll.png" highres2standard2.png" ; /usr/local/fsl/bin/pngappend highres2standard1.png" - highres2standard2.png" highres2standard.png"; /bin/rm -f sl?.png" highres2standard2.png"
+
+
+/bin/rm highres2standard1.png"
+
+
+/usr/local/fsl/bin/convert_xfm -omat example_func2standard.mat -concat highres2standard.mat example_func2highres.mat
+
+
+/usr/local/fsl/bin/convertwarp --ref=standard --premat=example_func2highres.mat --warp1=highres2standard_warp --out=example_func2standard_warp
+
+
+/usr/local/fsl/bin/applywarp --ref=standard --in=example_func --out=example_func2standard --warp=example_func2standard_warp
+
+
+/usr/local/fsl/bin/convert_xfm -inverse -omat standard2example_func.mat example_func2standard.mat
+
+
+/usr/local/fsl/bin/slicer example_func2standard standard -s 2 -x 0.35 sla.png" -x 0.45 slb.png" -x 0.55 slc.png" -x 0.65 sld.png" -y 0.35 sle.png" -y 0.45 slf.png" -y 0.55 slg.png" -y 0.65 slh.png" -z 0.35 sli.png" -z 0.45 slj.png" -z 0.55 slk.png" -z 0.65 sll.png" ; /usr/local/fsl/bin/pngappend sla.png" + slb.png" + slc.png" + sld.png" + sle.png" + slf.png" + slg.png" + slh.png" + sli.png" + slj.png" + slk.png" + sll.png" example_func2standard1.png" ; /usr/local/fsl/bin/slicer standard example_func2standard -s 2 -x 0.35 sla.png" -x 0.45 slb.png" -x 0.55 slc.png" -x 0.65 sld.png" -y 0.35 sle.png" -y 0.45 slf.png" -y 0.55 slg.png" -y 0.65 slh.png" -z 0.35 sli.png" -z 0.45 slj.png" -z 0.55 slk.png" -z 0.65 sll.png" ; /usr/local/fsl/bin/pngappend sla.png" + slb.png" + slc.png" + sld.png" + sle.png" + slf.png" + slg.png" + slh.png" + sli.png" + slj.png" + slk.png" + sll.png" example_func2standard2.png" ; /usr/local/fsl/bin/pngappend example_func2standard1.png" - example_func2standard2.png" example_func2standard.png"; /bin/rm -f sl?.png" example_func2standard2.png"
+
+</pre><hr>Preprocessing:Stage 2<br><pre>
+
+/usr/local/fsl/bin/mcflirt -in prefiltered_func_data -out prefiltered_func_data_mcf -mats -plots -reffile example_func -rmsrel -rmsabs -spline_final
+
+/bin/mkdir -p mc ; /bin/mv -f prefiltered_func_data_mcf.mat prefiltered_func_data_mcf.par prefiltered_func_data_mcf_abs.rms prefiltered_func_data_mcf_abs_mean.rms prefiltered_func_data_mcf_rel.rms prefiltered_func_data_mcf_rel_mean.rms mc
+
+/usr/local/fsl/bin/fsl_tsplot -i prefiltered_func_data_mcf.par -t 'MCFLIRT estimated rotations (radians)' -u 1 --start=1 --finish=3 -a x,y,z -w 640 -h 144 -o rot.png" 
+
+/usr/local/fsl/bin/fsl_tsplot -i prefiltered_func_data_mcf.par -t 'MCFLIRT estimated translations (mm)' -u 1 --start=4 --finish=6 -a x,y,z -w 640 -h 144 -o trans.png" 
+
+/usr/local/fsl/bin/fsl_tsplot -i prefiltered_func_data_mcf_abs.rms,prefiltered_func_data_mcf_rel.rms -t 'MCFLIRT estimated mean displacement (mm)' -u 1 -w 640 -h 144 -a absolute,relative -o disp.png" 
+
+/usr/local/fsl/bin/fslmaths prefiltered_func_data_mcf -Tmean mean_func
+
+/usr/local/fsl/bin/bet2 mean_func mask -f 0.3 -n -m; /usr/local/fsl/bin/immv mask_mask mask
+
+/usr/local/fsl/bin/fslmaths prefiltered_func_data_mcf -mas mask prefiltered_func_data_bet
+
+/usr/local/fsl/bin/fslstats prefiltered_func_data_bet -p 2 -p 98
+-0.000000 11131.716797 
+
+/usr/local/fsl/bin/fslmaths prefiltered_func_data_bet -thr 1113.1716797 -Tmin -bin mask -odt char
+
+/usr/local/fsl/bin/fslstats prefiltered_func_data_mcf -k mask -p 50
+9948.619141 
+
+/usr/local/fsl/bin/fslmaths mask -dilF mask
+
+/usr/local/fsl/bin/fslmaths prefiltered_func_data_mcf -mas mask prefiltered_func_data_thresh
+
+/usr/local/fsl/bin/fslmaths prefiltered_func_data_thresh -Tmean mean_func
+
+/usr/local/fsl/bin/susan prefiltered_func_data_thresh 7461.46435575 2.12314225053 3 1 1 mean_func 7461.46435575 prefiltered_func_data_smooth
+
+/usr/local/fsl/bin/fslmaths prefiltered_func_data_smooth -mas mask prefiltered_func_data_smooth
+
+/usr/local/fsl/bin/fslmaths prefiltered_func_data_smooth -mul 1.00516462217 prefiltered_func_data_intnorm
+
+/usr/local/fsl/bin/fslmaths prefiltered_func_data_intnorm filtered_func_data
+
+/usr/local/fsl/bin/fslmaths filtered_func_data -Tmean mean_func
+
+/bin/rm -rf prefiltered_func_data*
+</pre><hr>Stats<br><pre>
+
+mkdir -p custom_timing_files ; /usr/local/fsl/bin/fslFixText /Users/ray/WorkSpace/hidos/hidos-django/hidos/media/tfMRI/inputs/210_6go.txt custom_timing_files/ev1.txt
+
+mkdir -p custom_timing_files ; /usr/local/fsl/bin/fslFixText /Users/ray/WorkSpace/hidos/hidos-django/hidos/media/tfMRI/inputs/210_6si.txt custom_timing_files/ev2.txt
+
+mkdir -p custom_timing_files ; /usr/local/fsl/bin/fslFixText /Users/ray/WorkSpace/hidos/hidos-django/hidos/media/tfMRI/inputs/210_6sr.txt custom_timing_files/ev3.txt
+
+mkdir -p custom_timing_files ; /usr/local/fsl/bin/fslFixText /Users/ray/WorkSpace/hidos/hidos-django/hidos/media/tfMRI/inputs/210_6nuisance.txt custom_timing_files/ev4.txt
+
+/usr/local/fsl/bin/film_gls --in=filtered_func_data --rn=stats --pd=design.mat --thr=1000.0 --sa --ms=5 --con=design.con  
+Log directory is: stats
+paradigm.getDesignMatrix().Nrows()=246
+paradigm.getDesignMatrix().Ncols()=8
+sizeTS=246
+numTS=42214
+Calculating residuals...
+Completed
+Estimating residual autocorrelation...
+Calculating raw AutoCorrs... Completed
+mode = 10152.2
+sig = 407
+Spatially smoothing auto corr estimates
+..............
+Completed
+Tukey M = 15
+Tukey estimates... Completed
+Completed
+Prewhitening and Computing PEs...
+Percentage done:
+1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,Completed
+Saving results... 
+Completed
+
+/usr/local/fsl/bin/smoothest -d 238   -m mask -r stats/res4d > stats/smoothness
+</pre><hr>Post-stats<br><pre>
+</pre><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br></BODY></HTML>

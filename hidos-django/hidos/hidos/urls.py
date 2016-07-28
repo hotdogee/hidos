@@ -24,8 +24,8 @@ from app.forms import BootstrapAuthenticationForm
 
 # Uncomment the next lines to enable the admin:
 # from django.conf.urls import include
-# from django.contrib import admin
-# admin.autodiscover()
+#from django.contrib import admin
+#admin.autodiscover()
 
 urlpatterns = [
     #url(r'^api/v1/tasks$', app_views.tasks, name='tasks'),
@@ -56,6 +56,7 @@ urlpatterns = [
     url(r'^api/v1/fs/', include('fs.urls', namespace='fs')),
 
     url(r'^', include('cell.urls')),
+    url(r'^tfMRI/', include('tfMRI.urls')),
 ]
 
 # Serving files uploaded by a user during development
