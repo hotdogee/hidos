@@ -6,14 +6,14 @@ numpy==1.11.1
 matplotlib>=1.5.1
 Markdown>=2.6.6
 Pillow>=3.1.1
-Django[bcrypt]>=1.9.6
+Django[bcrypt]>=1.10rc1
 django-extensions>=1.6.7
 django-allauth>=0.24.1
 django-model-utils>=2.4
 django-vanilla-views>=1.0.4
 django-filter>=0.13.0
 django-material>=0.7.0
-djangorestframework>=3.3.3
+djangorestframework>=3.4.0
 
 scikit-image>=0.12.3
 scipy==0.17.1
