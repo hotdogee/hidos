@@ -344,3 +344,11 @@ REST_FRAMEWORK = {
         'register_view':'2/h', # rest_auth.register.views.RegisterView
     }
 }
+
+# Email setting
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_HOST_PASSWORD = 53394221
+EMAIL_HOST_USER = "hidos.image@gmail.com"
+EMAIL_USE_TLS = True
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
