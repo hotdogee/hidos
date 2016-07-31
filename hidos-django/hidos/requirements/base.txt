@@ -1,18 +1,18 @@
-celery>=3.1.20
+celery>=3.1.23
 docutils>=0.12
 urllib3>=1.16
-psycopg2>=2.6.1
+psycopg2>=2.6.2
 numpy==1.11.1
 matplotlib>=1.5.1
 Markdown>=2.6.6
-Pillow>=3.1.1
+Pillow>=3.3.0
 Django[bcrypt]>=1.10rc1
 django-extensions>=1.6.7
-django-rest-auth[with_social]>=0.7.0
-django-model-utils>=2.4
+django-rest-auth[with_social]>=0.8.1
+django-model-utils>=2.5
 django-vanilla-views>=1.0.4
 django-filter>=0.13.0
-django-material>=0.7.0
+django-material>=0.8.0
 djangorestframework>=3.4.1
 
 scikit-image>=0.12.3
