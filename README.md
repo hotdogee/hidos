@@ -65,3 +65,11 @@ run_celery.cmd
 1. Test the app
   * Login to admin: `http://127.0.0.1:8000/admin/`
   * Explore the REST API: `http://127.0.0.1:8000/api/v1/`
+
+1. Install VSCode (Optional)
+   * Available on Windows, Mac, Linux
+   * Supports Django debugging, linting, autopep8
+   * hidos project includes vscode settings files
+   * Download: https://code.visualstudio.com
+   * Install Python extensions
+     * https://marketplace.visualstudio.com/items?itemName=donjayamanne.python
