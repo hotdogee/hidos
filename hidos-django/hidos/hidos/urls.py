@@ -22,6 +22,8 @@ from django.contrib.auth import views as auth_views
 
 from app.forms import BootstrapAuthenticationForm
 
+from allauth.account.views import ConfirmEmailView
+
 from rest_auth.registration.views import SocialLoginView
 from allauth.socialaccount.providers.facebook.views import FacebookOAuth2Adapter
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
@@ -64,6 +66,8 @@ urlpatterns = [
     url(r'^api/v1/auth/registration/', include('rest_auth.registration.urls')),
     url(r'^api/v1/auth/facebook/$', FacebookLogin.as_view(), name='facebook_login'),
     url(r'^api/v1/auth/google/$', GoogleLogin.as_view(), name='google_login'),
+    url(r'^confirm-email/(?P<key>[-:\w]+)/$', ConfirmEmailView.as_view(),
+        name='account_confirm_email'), # TODO: implement this in client
 ]
 
 # Serving files uploaded by a user during development
