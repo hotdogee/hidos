@@ -28,9 +28,12 @@
         {
             "name": "Django",
             "type": "python",
+            "pythonPath": "${workspaceRoot}/hidos-django/hidos/env/Scripts/python",
             "request": "launch",
             "stopOnEntry": true,
-            "program": "${workspaceRoot}/manage.py",
+            "externalConsole": false,
+            "program": "${workspaceRoot}/hidos-django/hidos/manage.py",
+            "cwd": "${workspaceRoot}/hidos-django/hidos/",
             "args": [
                 "runserver",
                 "--noreload"

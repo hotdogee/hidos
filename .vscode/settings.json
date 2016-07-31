@@ -14,6 +14,11 @@
     // Controls if the explorer should automatically reveal files when opening them.
     "explorer.autoReveal": false,
 
+// Python Configuration
+
+    // Path to Python, you can use a custom version of Python by modifying this setting to include the full path.
+    "python.pythonPath": "${workspaceRoot}/hidos-django/hidos/env/Scripts/python",
+
     // Arguments passed in. Each argument is a separate item in the array.
     "python.formatting.autopep8Args": ["--max-line-length", "180"],
 
