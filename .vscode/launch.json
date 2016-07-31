@@ -43,7 +43,10 @@
                 "WaitOnNormalExit",
                 "RedirectOutput",
                 "DjangoDebugging"
-            ]
+            ],
+            "env": {
+                "DJANGO_SETTINGS_MODULE": "hidos.settings.local"
+            }
         },
         {
             "name": "Watson",
