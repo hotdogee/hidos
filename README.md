@@ -21,6 +21,10 @@ Setting up the development environment on Windows
    * Install `virtualenv`
      * `pip install virtualenv`
        * Learn more: http://docs.python-guide.org/en/latest/dev/virtualenvs/
+   * Install `Microsoft Visual C++ Compiler for Python 2.7`
+     * Download: https://www.microsoft.com/en-us/download/details.aspx?id=44266
+1. Install PostgreSQL 9.5+
+   * Download: http://bigsql.org/postgresql/installers.jsp
 1. Install Erlang/OTP 64-bit
    * This is required for RabbitMQ server
    * Download: http://www.erlang.org/download.html
@@ -43,8 +47,9 @@ Setting up the development environment on Windows
    ```
 git clone https://github.com/hotdogee/hidos.git
 cd hidos\hidos
+setup_postgres.cmd
 init_venv.cmd
-reset_datadb.cmd
+postgres_reset.cmd
 ```
 
 1. Run development web server
@@ -58,4 +63,5 @@ run_celery.cmd
 ```
 
 1. Test the app
-  * Check if the page `http://127.0.0.1:8000/` loads
+  * Login to admin: `http://127.0.0.1:8000/admin/`
+  * Explore the REST API: `http://127.0.0.1:8000/api/v1/`
