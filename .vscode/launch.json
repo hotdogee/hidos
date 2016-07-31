@@ -30,7 +30,7 @@
             "type": "python",
             "pythonPath": "${workspaceRoot}/hidos-django/hidos/env/Scripts/python",
             "request": "launch",
-            "stopOnEntry": true,
+            "stopOnEntry": false,
             "externalConsole": false,
             "program": "${workspaceRoot}/hidos-django/hidos/manage.py",
             "cwd": "${workspaceRoot}/hidos-django/hidos/",

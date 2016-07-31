@@ -30,7 +30,7 @@ from scipy import ndimage
 # In[101]:
 
 def PlotOut(img, title, img2, title2):
-    fig = plt.figure(figsize=(30,30))
+    fig = plt.figure(figsize=(30, 30))
     ax0 = fig.add_subplot(121)
     ax0.imshow(img, cmap=plt.cm.spectral)
     ax0.set_title(title)
