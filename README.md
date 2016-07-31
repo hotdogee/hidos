@@ -73,3 +73,4 @@ run_celery.cmd
    * Download: https://code.visualstudio.com
    * Install Python extensions
      * https://marketplace.visualstudio.com/items?itemName=donjayamanne.python
+   * ![alt tag](http://i.imgur.com/Amagk0F.jpg)
