@@ -70,6 +70,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTH_USER_MODEL = 'auth.User'
+
 # Internationalization
 # https://docs.djangoproject.com/en/1.9/topics/i18n/
 
@@ -164,6 +166,7 @@ INSTALLED_APPS = (
     'allauth.socialaccount.providers.facebook',
     'allauth.socialaccount.providers.google',
     'app.apps.AppConfig',
+    'auth.apps.Config',
     'fs.apps.Config',
     'cell.apps.Config',
     'cella1.apps.Config',
