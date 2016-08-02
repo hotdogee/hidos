@@ -54,3 +54,21 @@ class User(AbstractUser):
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
+
+    def get_full_name(self):
+        """
+        Returns the first_name plus the last_name, with a space in between.
+        """
+        name = ('%s %s' % (self.first_name, self.last_name)).strip()
+        if not name:
+            name = self.email.split('@')[0]
+        return name
+
+    def get_short_name(self):
+        """
+        Returns the short name for the user.
+        """
+        name = self.first_name
+        if not name:
+            name = self.email.split('@')[0]
+        return name
