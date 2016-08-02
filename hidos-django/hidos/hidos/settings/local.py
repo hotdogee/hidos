@@ -5,6 +5,13 @@ from __future__ import absolute_import, unicode_literals
 
 from .base import *
 
+DEBUG = True
+
+ALLOWED_HOSTS = ALLOWED_HOSTS + [
+    '127.0.0.1',
+    'localhost'
+]
+
 CORS_ORIGIN_ALLOW_ALL = False
 
 CORS_ORIGIN_WHITELIST = (

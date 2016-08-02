@@ -7,11 +7,9 @@ PROJECT_ROOT = path.dirname(path.dirname(path.abspath(__file__)))
 
 DEBUG = False
 
-ALLOWED_HOSTS = (
-    'localhost',
-    '.hotdogee.com',
+ALLOWED_HOSTS = [
     '.hidos.io',
-)
+]
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
