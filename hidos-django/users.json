@@ -1,128 +1,19 @@
 [
 {
-    "model": "auth.user",
-    "pk": 1,
-    "fields": {
-        "password": "pbkdf2_sha256$24000$2aDE9DwSDaYy$bHOct8Ya8kNdShyR5/DoCkZ7OmKjdWRpjFR3dBZ5zks=",
-        "last_login": null,
-        "is_superuser": true,
-        "username": "hidos_test_ind",
-        "first_name": "",
-        "last_name": "",
-        "email": "",
-        "is_staff": true,
-        "is_active": true,
-        "date_joined": "2016-03-17T17:02:42.990Z",
-        "groups": [],
-        "user_permissions": []
-    }
-},
-{
-    "model": "auth.user",
-    "pk": 2,
-    "fields": {
-        "password": "pbkdf2_sha256$24000$zDzaqEq8mbJk$FoJHTgmo++Cu2wJMLqWRSfDpfWdXFsu9uRpKFnHYs1M=",
-        "last_login": null,
-        "is_superuser": true,
-        "username": "hidos_admin",
-        "first_name": "",
-        "last_name": "",
-        "email": "",
-        "is_staff": true,
-        "is_active": true,
-        "date_joined": "2016-03-17T17:03:00.934Z",
-        "groups": [],
-        "user_permissions": []
-    }
-},
-{
-    "model": "auth.user",
-    "pk": 3,
-    "fields": {
-        "password": "pbkdf2_sha256$24000$hRQ45DSWQv9B$EcOR+/08bSfaevQDStjU6m9FI+WGunlj+vqQCPbw7Ac=",
-        "last_login": null,
-        "is_superuser": true,
-        "username": "hidos_admin2",
-        "first_name": "",
-        "last_name": "",
-        "email": "",
-        "is_staff": true,
-        "is_active": true,
-        "date_joined": "2016-03-18T13:31:39.624Z",
-        "groups": [],
-        "user_permissions": []
-    }
-},
-{
-    "model": "auth.user",
-    "pk": 4,
-    "fields": {
-        "password": "pbkdf2_sha256$24000$xSNtPCFIpmP4$O756LkBudGeVv/bfZuw9b3UhDk3DT/IKQoLh7RsTUvA=",
-        "last_login": null,
-        "is_superuser": true,
-        "username": "hidos_admin3",
-        "first_name": "",
-        "last_name": "",
-        "email": "",
-        "is_staff": true,
-        "is_active": true,
-        "date_joined": "2016-03-18T13:31:57.710Z",
-        "groups": [],
-        "user_permissions": []
-    }
-},
-{
-    "model": "auth.user",
-    "pk": 5,
-    "fields": {
-        "password": "pbkdf2_sha256$24000$npoVXVqjtEg0$eptiW8n21TbUKcYeG16xVh2QBQpgAiv/1c1yZQ5C200=",
-        "last_login": null,
-        "is_superuser": true,
-        "username": "hidos_admin4",
-        "first_name": "",
-        "last_name": "",
-        "email": "",
-        "is_staff": true,
-        "is_active": true,
-        "date_joined": "2016-03-18T13:32:07.799Z",
-        "groups": [],
-        "user_permissions": []
-    }
-},
-{
-    "model": "auth.user",
-    "pk": 6,
-    "fields": {
-        "password": "pbkdf2_sha256$24000$dxiw87dxNyHB$+EBkPjE12STyykPCWnJVdk9QXGXnIdmZzmWB24gWH+s=",
-        "last_login": null,
-        "is_superuser": true,
-        "username": "hidos_admin5",
-        "first_name": "",
-        "last_name": "",
-        "email": "",
-        "is_staff": true,
-        "is_active": true,
-        "date_joined": "2016-03-18T13:32:19.046Z",
-        "groups": [],
-        "user_permissions": []
-    }
-},
-{
-    "model": "auth.user",
-    "pk": 7,
-    "fields": {
-        "password": "pbkdf2_sha256$24000$NzbouW1sf7zH$vhOYq3OfEje2l28lF02zdziPItnYeShEVAJdtqCjsAE=",
-        "last_login": null,
-        "is_superuser": true,
-        "username": "hiservice",
-        "first_name": "",
-        "last_name": "",
-        "email": "",
-        "is_staff": true,
-        "is_active": true,
-        "date_joined": "2016-03-22T11:39:58.701Z",
-        "groups": [],
-        "user_permissions": []
-    }
+  "model": "users.user",
+  "pk": 1,
+  "fields": {
+    "password": "bcrypt_sha256$$2b$12$dHcQ.23W.Pq72vKTcxfnKu1qL8tZpOJVsVqooYJNxpfDh1fhIIKpq",
+    "last_login": "2016-08-02T09:23:26.672Z",
+    "is_superuser": true,
+    "first_name": "",
+    "last_name": "",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2016-08-02T09:23:13.564Z",
+    "email": "admin@hidos.io",
+    "groups": [],
+    "user_permissions": []
+  }
 }
 ]

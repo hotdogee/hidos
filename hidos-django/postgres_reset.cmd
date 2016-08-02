@@ -5,5 +5,6 @@ cd hidos
 del /s /q media\cell*
 rd /s /q media\cellc2
 python manage.py migrate
+python manage.py loaddata ../users.json
 cd ..
 call deactivate
