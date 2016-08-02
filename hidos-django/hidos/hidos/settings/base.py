@@ -13,14 +13,6 @@ ALLOWED_HOSTS = (
     '.hidos.io',
 )
 
-CORS_ORIGIN_ALLOW_ALL = False
-
-CORS_ORIGIN_WHITELIST = (
-    'localhost:8080',
-    '.hotdogee.com',
-    '.hidos.io',
-)
-
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
@@ -154,7 +146,7 @@ STATICFILES_FINDERS = (
 
 SITE_ID = 1
 
-INSTALLED_APPS = (
+INSTALLED_APPS = [
     'material',
     'material.admin',
     'django.contrib.auth',
@@ -183,12 +175,11 @@ INSTALLED_APPS = (
     'cellm1.apps.Config',
     'cellm3.apps.Config',
     'celln1.apps.Config',
-    'corsheaders',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     'django.contrib.admindocs',
-)
+]
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
