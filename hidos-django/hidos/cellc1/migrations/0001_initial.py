@@ -37,7 +37,7 @@ class Migration(migrations.Migration):
                 'ordering': ('-modified', '-created'),
                 'abstract': False,
                 'get_latest_by': 'modified',
-                'verbose_name': 'Cell C2 Task',
+                'verbose_name': 'Cell C1 Task',
             },
             bases=('fs.file',),
         ),

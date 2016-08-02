@@ -70,7 +70,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-AUTH_USER_MODEL = 'auth.User'
+AUTH_USER_MODEL = 'hidos_auth.User'
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.9/topics/i18n/
@@ -156,6 +156,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_extensions',
+    'auth.apps.Config',
     'rest_framework',
     'rest_framework.authtoken',
     'rest_auth',
@@ -166,7 +167,6 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.facebook',
     'allauth.socialaccount.providers.google',
     'app.apps.AppConfig',
-    'auth.apps.Config',
     'fs.apps.Config',
     'cell.apps.Config',
     'cella1.apps.Config',

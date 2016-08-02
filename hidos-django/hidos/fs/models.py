@@ -4,7 +4,7 @@ import uuid
 from os import path
 
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings
 from django.core.validators import RegexValidator
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -43,7 +43,7 @@ class File(TimeStampedModel):
         #validators=[RegexValidator(file_re, r'File names must not contain  \ / : * ? " < > |')])
     type = models.CharField(max_length=32, null=True, blank=True) # look up in FileType model
         #validators=[RegexValidator(file_re, r'File type must not contain  \ / : * ? " < > |')])
-    owner = models.ForeignKey(User, models.CASCADE, null=True, blank=True)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, models.CASCADE, null=True, blank=True)
     folder = models.ForeignKey('Folder', models.CASCADE, null=True, blank=True, related_name='files')
     content_type = models.ForeignKey(ContentType, models.CASCADE, null=True, blank=True)
     content_id = models.UUIDField(max_length=32, null=True, blank=True)
