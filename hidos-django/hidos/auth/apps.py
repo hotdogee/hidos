@@ -1,5 +1,5 @@
 from __future__ import unicode_literals
-
+from . import app_name, verbose_name
 from django.apps import AppConfig
 
 
