@@ -13,6 +13,14 @@ ALLOWED_HOSTS = (
     '.hidos.io',
 )
 
+CORS_ORIGIN_ALLOW_ALL = False
+
+CORS_ORIGIN_WHITELIST = (
+    'localhost:8080',
+    '.hotdogee.com',
+    '.hidos.io',
+)
+
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
@@ -169,6 +177,7 @@ INSTALLED_APPS = (
     'cellm1.apps.Config',
     'cellm3.apps.Config',
     'celln1.apps.Config',
+    'corsheaders',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
@@ -178,6 +187,7 @@ INSTALLED_APPS = (
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -296,8 +306,14 @@ TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 # Rscript path
 from sys import platform
 R_SCRIPT = r"/usr/bin/Rscript"
+FONT = 'DejaVuSerif-Italic.ttf'
+
 if platform == 'win32':
     R_SCRIPT = r"C:\Program Files\R\R-3.2.4revised\bin\RScript.exe"
+if platform == 'darwin':
+    R_SCRIPT = r'/usr/local/bin/Rscript'
+    FONT = '/Library/Fonts/Times New Roman.ttf'
+
 
 USE_CACHE = False
 
