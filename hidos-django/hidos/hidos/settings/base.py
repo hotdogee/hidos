@@ -1,7 +1,7 @@
 ﻿"""
-Django settings for hidos project.
+base settings
 """
-
+from __future__ import absolute_import, unicode_literals
 from os import path
 PROJECT_ROOT = path.dirname(path.dirname(path.abspath(__file__)))
 
@@ -77,6 +77,8 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+AUTH_USER_MODEL = 'auth.User'
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.9/topics/i18n/
@@ -162,13 +164,17 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_extensions',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'rest_auth',
     'allauth',
     'allauth.account',
+    'rest_auth.registration',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.facebook',
     'allauth.socialaccount.providers.google',
-    'rest_framework',
     'app.apps.AppConfig',
+    'auth.apps.Config',
     'fs.apps.Config',
     'cell.apps.Config',
     'cella1.apps.Config',
@@ -340,3 +346,63 @@ CELERY_ACCEPT_CONTENT=['json']
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_DISABLE_RATE_LIMITS = True
 #CELERY_ENABLE_UTC = True
+
+# REST framework
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ),
+    'DEFAULT_THROTTLE_CLASSES': (
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.ScopedRateThrottle',
+    ),
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '10/h',
+        'register_view':'2/h', # rest_auth.register.views.RegisterView
+    }
+}
+
+# Email
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_HOST_PASSWORD = 53394221
+EMAIL_HOST_USER = "hidos.image@gmail.com"
+EMAIL_USE_TLS = True
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+# allauth
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
+
+SOCIALACCOUNT_PROVIDERS = {
+    'facebook': {
+        'METHOD': 'oauth2',
+        'SCOPE': ['email', 'public_profile'],
+        'AUTH_PARAMS': { 'auth_type': 'reauthenticate' },
+        'FIELDS': [
+            'id',
+            'email',
+            'name',
+            'first_name',
+            'last_name',
+            'verified',
+            'locale',
+            'timezone',
+            'link',
+            'gender',
+            'updated_time'],
+        'EXCHANGE_TOKEN': True,
+        'VERIFIED_EMAIL': False,
+        'VERSION': 'v2.4'
+    },
+    'google': {
+        'SCOPE': ['profile', 'email'],
+        'AUTH_PARAMS': { 'access_type': 'online' }
+    }
+}
