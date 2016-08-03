@@ -67,8 +67,9 @@ class FolderManager(models.Manager):
             'type': 'folder',
             'folder': folder,
         }
-        if owner.username:
+        if not owner.is_anonymous:
             data['owner'] = owner
+        print(data)
         obj = super(FolderManager, self).create(**data)
         obj.content = obj
         obj.save()

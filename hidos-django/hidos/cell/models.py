@@ -97,7 +97,7 @@ class SingleImageUploadManager(models.Manager):
             'uploaded_display': uploaded_display_path,
             'result_display': result_display_path,
         }
-        if owner.username:
+        if not owner.is_anonymous:
             data['owner'] = owner
         obj = super(SingleImageUploadManager, self).create(**data)
         obj.content = obj

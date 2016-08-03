@@ -39,10 +39,15 @@ class FileViewSet(viewsets.ModelViewSet):
         querysets depending on the incoming request.
         (Eg. return a list of items that is specific to the user)
         """
-        if self.request.user.username:
+        if not self.request.user.is_anonymous:
             return File.objects.filter(owner=self.request.user)
         else:
             return File.objects.none()
+
+    def perform_create(self, serializer): # CreateModelMixin
+        # If anonymous upload, user will be django.contrib.auth.models.AnonymousUser
+        # and username will be an empty string.
+        obj = serializer.save(owner=self.request.user) # returns create model instance
 
 
 class FolderViewSet(viewsets.ModelViewSet):
@@ -75,14 +80,13 @@ class FolderViewSet(viewsets.ModelViewSet):
         querysets depending on the incoming request.
         (Eg. return a list of items that is specific to the user)
         """
-        if self.request.user.username:
+        if not self.request.user.is_anonymous:
             return Folder.objects.filter(owner=self.request.user)
         else:
             return Folder.objects.none()
 
     def perform_create(self, serializer): # CreateModelMixin
         # If anonymous upload, user will be django.contrib.auth.models.AnonymousUser
-        # and username will be an empty string.
         obj = serializer.save(owner=self.request.user) # returns create model instance
 
     # @detail_route()
