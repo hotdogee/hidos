@@ -155,6 +155,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_extensions',
     'users.apps.Config',
+    'crispy_forms',
     'rest_framework',
     'rest_framework.authtoken',
     'rest_auth',
