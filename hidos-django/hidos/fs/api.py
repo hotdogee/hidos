@@ -25,6 +25,7 @@ class FileViewSet(viewsets.ModelViewSet):
     queryset = File.objects.all()
     serializer_class = FileSerializer
     filter_backends = (filters.DjangoFilterBackend,)
+    filter_fields = ('type', 'folder')
     pagination_class = None
 
     def get_queryset(self): # GenericAPIView
@@ -66,6 +67,7 @@ class FolderViewSet(viewsets.ModelViewSet):
     queryset = Folder.objects.all()
     serializer_class = FolderSerializer
     filter_backends = (filters.DjangoFilterBackend,)
+    filter_fields = ('folder',)
     pagination_class = None
 
     def get_queryset(self): # GenericAPIView
