@@ -75,3 +75,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# EmailConfirmation not used, hide its admin
+from allauth.account.models import EmailConfirmation
+admin.site.unregister(EmailConfirmation)
