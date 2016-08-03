@@ -350,7 +350,8 @@ REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_RATES': {
         'anon': '10/h',
         'register_view':'2/h', # rest_auth.register.views.RegisterView
-    }
+    },
+    'DEFAULT_FILTER_BACKENDS': ('rest_framework.filters.DjangoFilterBackend',)
 }
 
 # Email
