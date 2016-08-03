@@ -395,3 +395,9 @@ SOCIALACCOUNT_PROVIDERS = {
         'AUTH_PARAMS': { 'access_type': 'online' }
     }
 }
+
+# restauth
+REST_AUTH_SERIALIZERS = {
+    'LOGIN_SERIALIZER': 'users.serializers.LoginSerializer',
+    'USER_DETAILS_SERIALIZER': 'users.serializers.UserDetailsSerializer',
+}
