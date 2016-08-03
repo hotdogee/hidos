@@ -401,3 +401,7 @@ REST_AUTH_SERIALIZERS = {
     'LOGIN_SERIALIZER': 'users.serializers.LoginSerializer',
     'USER_DETAILS_SERIALIZER': 'users.serializers.UserDetailsSerializer',
 }
+
+REST_AUTH_REGISTER_SERIALIZERS = {
+    'REGISTER_SERIALIZER': 'users.serializers.RegisterSerializer',
+}
