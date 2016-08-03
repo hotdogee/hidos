@@ -12,7 +12,7 @@
     },
 
     // Controls if the explorer should automatically reveal files when opening them.
-    "explorer.autoReveal": false,
+    "explorer.autoReveal": true,
 
 // Python Configuration
 
