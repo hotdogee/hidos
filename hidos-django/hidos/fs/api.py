@@ -51,6 +51,19 @@ class FileViewSet(viewsets.ModelViewSet):
         obj = serializer.save(owner=self.request.user) # returns create model instance
 
 
+    @list_route()
+    def root(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+
 class FolderViewSet(viewsets.ModelViewSet):
     """
     list
