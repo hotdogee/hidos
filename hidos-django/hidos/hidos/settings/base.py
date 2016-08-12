@@ -3,7 +3,7 @@ base settings
 """
 from __future__ import absolute_import, unicode_literals
 from os import path
-PROJECT_ROOT = path.dirname(path.dirname(path.abspath(__file__)))
+PROJECT_ROOT = path.dirname(path.dirname(path.dirname(path.abspath(__file__))))
 
 DEBUG = False
 
