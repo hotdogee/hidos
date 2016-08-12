@@ -1,12 +1,17 @@
 from __future__ import absolute_import, unicode_literals
 import re
+import sys
 import json
+from collections import OrderedDict
 
+from django.db import models
 from django.db.models.fields.files import FieldFile
 from django.core.validators import RegexValidator
 
 from rest_framework import serializers
 from rest_framework import filters
+from rest_framework import fields
+from rest_framework import relations
 
 from .models import Folder, File
 
@@ -52,14 +57,50 @@ class FileSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(format='hex', read_only=True)
     name = serializers.CharField(max_length=255,  # display name
         validators=[RegexValidator(file_re, r'File names must not contain  \ / : * ? " < > |')])
-    type = serializers.CharField(max_length=32, # look up in FileType model
+    type = serializers.CharField(max_length=32, read_only=True, # look up in FileType model
         validators=[RegexValidator(file_re, r'File type must not contain  \ / : * ? " < > |')])
     content = ContentRelatedField(read_only=True)
 
     class Meta:
         model = File
-        read_only_fields = ['id', 'created', 'modified', 'owner', 'content']
-        fields = read_only_fields + ['name', 'type', 'folder']
+        read_only_fields = ['id', 'type', 'created', 'modified', 'owner', 'content']
+        fields = read_only_fields + ['name', 'folder']
+
+    def to_representation(self, instance):
+        """
+        Object instance -> Dict of primitive datatypes.
+        """
+        # recursive check
+        if type(instance).__name__ != type(instance.content).__name__:
+            # get the module, will raise KeyError if module cannot be found
+            # get the class, will raise AttributeError if class cannot be found
+            try:
+                app_label = instance.content_type.app_label
+                model_class_name = type(instance.content).__name__
+                serializer = getattr(sys.modules[app_label + '.serializers'], model_class_name + 'Serializer')()
+                return serializer.to_representation(instance.content)
+            except (KeyError, AttributeError):
+                pass
+        ret = OrderedDict()
+
+        for field in self._readable_fields:
+            try:
+                attribute = field.get_attribute(instance)
+            except fields.SkipField:
+                continue
+
+            # We skip `to_representation` for `None` values so that fields do
+            # not have to explicitly deal with that case.
+            #
+            # For related fields with `use_pk_only_optimization` we need to
+            # resolve the pk value.
+            check_for_none = attribute.pk if isinstance(attribute, relations.PKOnlyObject) else attribute
+            if check_for_none is None:
+                ret[field.field_name] = None
+            else:
+                ret[field.field_name] = field.to_representation(attribute)
+
+        return ret
 
 
 class FolderSerializer(FileSerializer):
