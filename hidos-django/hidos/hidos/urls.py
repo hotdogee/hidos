@@ -22,10 +22,17 @@ from django.contrib.auth import views as auth_views
 
 from app.forms import BootstrapAuthenticationForm
 
-# Uncomment the next lines to enable the admin:
-# from django.conf.urls import include
-# from django.contrib import admin
-# admin.autodiscover()
+from allauth.account.views import ConfirmEmailView
+
+from rest_auth.registration.views import SocialLoginView
+from allauth.socialaccount.providers.facebook.views import FacebookOAuth2Adapter
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+
+class FacebookLogin(SocialLoginView):
+    adapter_class = FacebookOAuth2Adapter
+
+class GoogleLogin(SocialLoginView):
+    adapter_class = GoogleOAuth2Adapter
 
 urlpatterns = [
     #url(r'^api/v1/tasks$', app_views.tasks, name='tasks'),
@@ -53,9 +60,14 @@ urlpatterns = [
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^admin/', admin.site.urls),
     
+    url(r'^api/v1/cell/', include('cell.urls')),
     url(r'^api/v1/fs/', include('fs.urls', namespace='fs')),
-
-    url(r'^', include('cell.urls')),
+    url(r'^api/v1/auth/', include('rest_auth.urls')),
+    url(r'^api/v1/auth/registration/', include('rest_auth.registration.urls')),
+    url(r'^api/v1/auth/facebook/$', FacebookLogin.as_view(), name='facebook_login'),
+    url(r'^api/v1/auth/google/$', GoogleLogin.as_view(), name='google_login'),
+    url(r'^confirm-email/(?P<key>[-:\w]+)/$', ConfirmEmailView.as_view(),
+        name='account_confirm_email'), # TODO: implement this in client
 ]
 
 # Serving files uploaded by a user during development
@@ -63,3 +75,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# EmailConfirmation table not used because we're using EmailConfirmationHMAC, hide its admin
+from allauth.account.models import EmailConfirmation
+admin.site.unregister(EmailConfirmation)

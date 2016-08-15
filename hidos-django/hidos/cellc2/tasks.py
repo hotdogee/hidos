@@ -12,4 +12,3 @@ logger = get_task_logger(__name__)
 @shared_task(base=CellTask) # ignore_result=True
 def analysis(task_id):
     return analysis.process_image(app_name, task_id, logger)
-    

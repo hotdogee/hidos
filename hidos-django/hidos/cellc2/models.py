@@ -11,8 +11,8 @@ from . import app_name, verbose_name, version
 
 class Task(CellTask):
 
-    def get_absolute_url(self):
-        return reverse(app_name + ':detail', kwargs={'id': self.id.hex}, current_app=app_name)
+    # def get_absolute_url(self):
+    #     return reverse(app_name + ':detail', kwargs={'id': self.id.hex}, current_app=app_name)
 
     class Meta(CellTask.Meta):
         verbose_name = '{0} {1}'.format(verbose_name, 'Task')

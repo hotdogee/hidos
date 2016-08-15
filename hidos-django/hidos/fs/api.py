@@ -25,6 +25,7 @@ class FileViewSet(viewsets.ModelViewSet):
     queryset = File.objects.all()
     serializer_class = FileSerializer
     filter_backends = (filters.DjangoFilterBackend,)
+    filter_fields = ('type', 'folder')
     pagination_class = None
 
     def get_queryset(self): # GenericAPIView
@@ -39,10 +40,28 @@ class FileViewSet(viewsets.ModelViewSet):
         querysets depending on the incoming request.
         (Eg. return a list of items that is specific to the user)
         """
-        if self.request.user.username:
+        if not self.request.user.is_anonymous:
             return File.objects.filter(owner=self.request.user)
         else:
             return File.objects.none()
+
+    def perform_create(self, serializer): # CreateModelMixin
+        # If anonymous upload, user will be django.contrib.auth.models.AnonymousUser
+        # and username will be an empty string.
+        obj = serializer.save(owner=self.request.user) # returns create model instance
+
+
+    @list_route()
+    def root(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
 
 class FolderViewSet(viewsets.ModelViewSet):
@@ -61,6 +80,7 @@ class FolderViewSet(viewsets.ModelViewSet):
     queryset = Folder.objects.all()
     serializer_class = FolderSerializer
     filter_backends = (filters.DjangoFilterBackend,)
+    filter_fields = ('folder',)
     pagination_class = None
 
     def get_queryset(self): # GenericAPIView
@@ -75,14 +95,13 @@ class FolderViewSet(viewsets.ModelViewSet):
         querysets depending on the incoming request.
         (Eg. return a list of items that is specific to the user)
         """
-        if self.request.user.username:
+        if not self.request.user.is_anonymous:
             return Folder.objects.filter(owner=self.request.user)
         else:
             return Folder.objects.none()
 
     def perform_create(self, serializer): # CreateModelMixin
         # If anonymous upload, user will be django.contrib.auth.models.AnonymousUser
-        # and username will be an empty string.
         obj = serializer.save(owner=self.request.user) # returns create model instance
 
     # @detail_route()

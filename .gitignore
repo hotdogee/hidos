@@ -65,3 +65,5 @@ browse.VC.db
 # sqlite3
 *.sqlite3
 
+# cellx/bin/results/
+**/bin/results/

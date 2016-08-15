@@ -10,12 +10,12 @@ from .models import Task
 
 class TaskSerializer(FileSerializer):
     file = serializers.ImageField(write_only=True, max_length=None, allow_empty_file=False, use_url=False)
-    url = serializers.URLField(source='get_absolute_url', read_only=True)
+    # url = serializers.URLField(source='get_absolute_url', read_only=True)
     type = serializers.CharField(max_length=32, read_only=True)
     name = serializers.CharField(max_length=255, read_only=True)
 
     class Meta:
-        read_only_fields = ['url', 'id', 'name', 'type', 'created', 'modified', 'owner', 'content']
+        read_only_fields = ['id', 'name', 'type', 'created', 'modified', 'owner', 'content']
         fields = read_only_fields + ['file', 'folder']
 
     # def create(self, validated_data):

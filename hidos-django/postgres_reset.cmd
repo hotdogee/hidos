@@ -5,6 +5,7 @@ cd hidos
 del /s /q media\cell*
 rd /s /q media\cellc2
 python manage.py migrate
+rem python manage.py dumpdata users.user account.emailaddress --indent 2
 python manage.py loaddata ../users.json
 cd ..
 call deactivate

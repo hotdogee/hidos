@@ -42,7 +42,7 @@ class TaskViewSet(viewsets.ModelViewSet):
         querysets depending on the incoming request.
         (Eg. return a list of items that is specific to the user)
         """
-        if self.request.user.username:
+        if not self.request.user.is_anonymous:
             return self.model.objects.filter(owner=self.request.user)
         else:
             return self.model.objects.none()

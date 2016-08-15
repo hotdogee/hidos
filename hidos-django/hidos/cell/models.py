@@ -62,7 +62,7 @@ class SingleImageUploadManager(models.Manager):
         # Generate task id
         m = hashlib.md5()
         m.update(app.version)
-        m.update(owner.username) # if anonymous, username is ''
+        m.update(owner.email) # if anonymous, username is ''
         m.update(uploaded_file_data)
         task_id = m.hexdigest()
 
@@ -97,7 +97,7 @@ class SingleImageUploadManager(models.Manager):
             'uploaded_display': uploaded_display_path,
             'result_display': result_display_path,
         }
-        if owner.username:
+        if not owner.is_anonymous:
             data['owner'] = owner
         obj = super(SingleImageUploadManager, self).create(**data)
         obj.content = obj
@@ -111,7 +111,7 @@ class SingleImageUploadManager(models.Manager):
         obj.uploaded_display.save(uploaded_display_path, ContentFile(bytearray(uploaded_display_array)), save=False)
 
         # TODO: Make thumbnail
-        
+
         # save to database
         obj.save()
         return obj

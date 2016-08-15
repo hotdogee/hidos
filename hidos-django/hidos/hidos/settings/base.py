@@ -1,17 +1,15 @@
 ﻿"""
-Django settings for hidos project.
+base settings
 """
-
+from __future__ import absolute_import, unicode_literals
 from os import path
-PROJECT_ROOT = path.dirname(path.dirname(path.abspath(__file__)))
+PROJECT_ROOT = path.dirname(path.dirname(path.dirname(path.abspath(__file__))))
 
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = (
-    'localhost',
-    '.hotdogee.com',
+ALLOWED_HOSTS = [
     '.hidos.io',
-)
+]
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -69,6 +67,8 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+AUTH_USER_MODEL = 'users.User'
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.9/topics/i18n/
@@ -144,7 +144,7 @@ STATICFILES_FINDERS = (
 
 SITE_ID = 1
 
-INSTALLED_APPS = (
+INSTALLED_APPS = [
     'material',
     'material.admin',
     'django.contrib.auth',
@@ -154,25 +154,36 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_extensions',
+    'users.apps.Config',
+    'crispy_forms',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'rest_auth',
     'allauth',
     'allauth.account',
+    'rest_auth.registration',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.facebook',
     'allauth.socialaccount.providers.google',
-    'rest_framework',
     'app.apps.AppConfig',
     'fs.apps.Config',
     'cell.apps.Config',
+    'cella1.apps.Config',
+    'cellc1.apps.Config',
     'cellc2.apps.Config',
+    'cellm1.apps.Config',
+    'cellm3.apps.Config',
+    'celln1.apps.Config',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     'django.contrib.admindocs',
-)
+]
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -291,8 +302,14 @@ TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 # Rscript path
 from sys import platform
 R_SCRIPT = r"/usr/bin/Rscript"
+FONT = 'DejaVuSerif-Italic.ttf'
+
 if platform == 'win32':
     R_SCRIPT = r"C:\Program Files\R\R-3.2.4revised\bin\RScript.exe"
+if platform == 'darwin':
+    R_SCRIPT = r'/usr/local/bin/Rscript'
+    FONT = '/Library/Fonts/Times New Roman.ttf'
+
 
 USE_CACHE = False
 
@@ -319,3 +336,77 @@ CELERY_ACCEPT_CONTENT=['json']
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_DISABLE_RATE_LIMITS = True
 #CELERY_ENABLE_UTC = True
+
+# REST framework
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ),
+    'DEFAULT_THROTTLE_CLASSES': (
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.ScopedRateThrottle',
+    ),
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '10/h',
+        'register_view':'2/h', # rest_auth.register.views.RegisterView
+    },
+    'DEFAULT_FILTER_BACKENDS': ('rest_framework.filters.DjangoFilterBackend',)
+}
+
+# Email
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_HOST_PASSWORD = 53394221
+EMAIL_HOST_USER = "hidos.image@gmail.com"
+EMAIL_USE_TLS = True
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+# allauth
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
+
+SOCIALACCOUNT_PROVIDERS = {
+    'facebook': {
+        'METHOD': 'oauth2',
+        'SCOPE': ['email', 'public_profile'],
+        'AUTH_PARAMS': { 'auth_type': 'reauthenticate' },
+        'FIELDS': [
+            'id',
+            'email',
+            'name',
+            'first_name',
+            'last_name',
+            'verified',
+            'locale',
+            'timezone',
+            'link',
+            'gender',
+            'updated_time'],
+        'EXCHANGE_TOKEN': True,
+        'VERIFIED_EMAIL': False,
+        'VERSION': 'v2.4'
+    },
+    'google': {
+        'SCOPE': ['profile', 'email'],
+        'AUTH_PARAMS': { 'access_type': 'online' }
+    }
+}
+
+# restauth
+REST_USE_JWT = True
+
+REST_AUTH_SERIALIZERS = {
+    'LOGIN_SERIALIZER': 'users.serializers.LoginSerializer',
+    'USER_DETAILS_SERIALIZER': 'users.serializers.UserDetailsSerializer',
+}
+
+REST_AUTH_REGISTER_SERIALIZERS = {
+    'REGISTER_SERIALIZER': 'users.serializers.RegisterSerializer',
+}

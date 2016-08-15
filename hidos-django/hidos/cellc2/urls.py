@@ -9,15 +9,15 @@ urlpatterns = [
     #url(r'^$', views.IndexView.as_view(), name='index'),
     #url(r'^(?P<id>[0-9a-zA-Z]+)$', views.DetailView.as_view(), name='detail'),
     # {% url "cellc2:tasks" %}
-    url(r'^api/v1/tasks$', api.TaskViewSet.as_view({
+    url(r'^tasks$', api.TaskViewSet.as_view({
         'get': 'list',
         'post': 'create'
     }), name='task-list'),
-    url(r'^api/v1/tasks/running$', api.TaskViewSet.as_view({
+    url(r'^tasks/running$', api.TaskViewSet.as_view({
         'get': 'running',
     }), name='task-running'),
     # {% url "cellc2:tasks" task.id %}
-    url(r'^api/v1/tasks/(?P<id>[0-9a-zA-Z]+)$', api.TaskViewSet.as_view({
+    url(r'^tasks/(?P<id>[0-9a-zA-Z]+)$', api.TaskViewSet.as_view({
         'get': 'retrieve',
         #'put': 'update',
         #'patch': 'partial_update',
