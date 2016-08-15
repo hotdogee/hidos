@@ -10,7 +10,7 @@ from rest_framework.decorators import list_route
 
 
 from .models import Folder, File
-from .serializers import FolderSerializer, FileSerializer
+from .serializers import FolderSerializer, FileSerializer, FolderFilesSerializer
 
 
 class FileViewSet(viewsets.ModelViewSet):
@@ -53,15 +53,30 @@ class FileViewSet(viewsets.ModelViewSet):
 
     @list_route()
     def root(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
+        queryset = self.filter_queryset(self.get_queryset()).filter(folder__isnull=True)
 
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = self.get_serializer(page, many=True)
+            serializer = FolderFilesSerializer(page, many=True)
             return self.get_paginated_response(serializer.data)
 
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+        serializer = FolderFilesSerializer(queryset, many=True)
+
+        data = {
+            'id': None,
+            'type': 'folder',
+            'created': None,
+            'modified': None,
+            'owner': self.request.user.pk,
+            'content': {},
+            'name': '/',
+            'folder': None,
+            'breadcrumbs': [],
+            'path': '/',
+            'files': serializer.data
+        }
+
+        return Response(data)
 
 
 class FolderViewSet(viewsets.ModelViewSet):
