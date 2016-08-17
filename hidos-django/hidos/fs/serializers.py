@@ -53,6 +53,16 @@ class ContentRelatedField(serializers.RelatedField):
         return content
 
 
+class FolderRelatedField(serializers.PrimaryKeyRelatedField):
+    """
+    Limit the queryset to owned folders only
+    """
+    def get_queryset(self):
+        if not self.context['request'].user.is_anonymous:
+            return Folder.objects.filter(owner=self.context['request'].user)
+        else:
+            return Folder.objects.none()
+
 class FileSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(format='hex', read_only=True)
     name = serializers.CharField(max_length=255,  # display name
@@ -60,9 +70,8 @@ class FileSerializer(serializers.ModelSerializer):
     type = serializers.CharField(max_length=32, read_only=True, # look up in FileType model
         validators=[RegexValidator(file_re, r'File type must not contain  \ / : * ? " < > |')])
     content = ContentRelatedField(read_only=True)
-    folder = serializers.PrimaryKeyRelatedField(
-        pk_field=serializers.UUIDField(format='hex'), allow_null=True, 
-        queryset=Folder.objects.all(), required=False)
+    folder = FolderRelatedField(allow_null=True, required=False, 
+        pk_field=serializers.UUIDField(format='hex'))
 
     class Meta:
         model = File
