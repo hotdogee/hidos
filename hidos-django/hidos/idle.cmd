@@ -1,1 +1,0 @@
-python -c "from idlelib.PyShell import main; main()"
