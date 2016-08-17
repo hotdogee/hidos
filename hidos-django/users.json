@@ -4,7 +4,7 @@
   "pk": 1,
   "fields": {
     "password": "bcrypt_sha256$$2b$12$Tq0urObqmn0Gs69WmjMrIu.jK2od4FZxgmK9enXEPQAWHZu1nDCZ.",
-    "last_login": null,
+    "last_login": "2016-08-17T13:49:47.061Z",
     "is_superuser": true,
     "first_name": "",
     "last_name": "",
@@ -17,11 +17,38 @@
   }
 },
 {
+  "model": "users.user",
+  "pk": 2,
+  "fields": {
+    "password": "bcrypt_sha256$$2b$12$O/55Tgcw2WDk16LQF4SFsebHFTL326YSupbqHpxg/ZyuHg.CWYQDO",
+    "last_login": null,
+    "is_superuser": false,
+    "first_name": "User",
+    "last_name": "Hidos",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2016-08-17T15:33:57.037Z",
+    "email": "user@hidos.io",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
   "model": "account.emailaddress",
   "pk": 1,
   "fields": {
     "user": 1,
     "email": "admin@hidos.io",
+    "verified": true,
+    "primary": true
+  }
+},
+{
+  "model": "account.emailaddress",
+  "pk": 2,
+  "fields": {
+    "user": 2,
+    "email": "user@hidos.io",
     "verified": true,
     "primary": true
   }
