@@ -8,6 +8,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from .models import User
 
+# curl -X POST -d "email=admin@hidos.io&password=hidos2admin" http://127.0.0.1:8000/api/v1/auth/login/
 
 class UserCreationForm(BaseUserCreationForm):
     """
