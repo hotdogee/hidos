@@ -3,6 +3,8 @@ base settings
 """
 from __future__ import absolute_import, unicode_literals
 from os import path
+from datetime import timedelta
+
 PROJECT_ROOT = path.dirname(path.dirname(path.dirname(path.abspath(__file__))))
 
 DEBUG = False
@@ -410,4 +412,13 @@ REST_AUTH_SERIALIZERS = {
 
 REST_AUTH_REGISTER_SERIALIZERS = {
     'REGISTER_SERIALIZER': 'users.serializers.RegisterSerializer',
+}
+
+# djangorestframework-jwt
+JWT_AUTH = {
+    'JWT_PAYLOAD_HANDLER': 'users.utils.jwt_payload_handler',
+    'JWT_LEEWAY': 30,
+    'JWT_EXPIRATION_DELTA': timedelta(days=7),
+    'JWT_ALLOW_REFRESH': True,
+    'JWT_REFRESH_EXPIRATION_DELTA': timedelta(days=365),
 }
