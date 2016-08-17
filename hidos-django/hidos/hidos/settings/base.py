@@ -405,6 +405,7 @@ REST_USE_JWT = True
 REST_AUTH_SERIALIZERS = {
     'LOGIN_SERIALIZER': 'users.serializers.LoginSerializer',
     'USER_DETAILS_SERIALIZER': 'users.serializers.UserDetailsSerializer',
+    'JWT_SERIALIZER': 'users.serializers.JWTSerializer',
 }
 
 REST_AUTH_REGISTER_SERIALIZERS = {
