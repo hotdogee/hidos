@@ -60,6 +60,9 @@ class FileSerializer(serializers.ModelSerializer):
     type = serializers.CharField(max_length=32, read_only=True, # look up in FileType model
         validators=[RegexValidator(file_re, r'File type must not contain  \ / : * ? " < > |')])
     content = ContentRelatedField(read_only=True)
+    folder = serializers.PrimaryKeyRelatedField(
+        pk_field=serializers.UUIDField(format='hex'), allow_null=True, 
+        queryset=Folder.objects.all(), required=False)
 
     class Meta:
         model = File
@@ -102,18 +105,10 @@ class FileSerializer(serializers.ModelSerializer):
 
         return ret
 
-class FolderFilesSerializer(serializers.ModelSerializer):
-    id = serializers.UUIDField(format='hex', read_only=True)
-    name = serializers.CharField(max_length=255,  # display name
-        validators=[RegexValidator(file_re, r'File names must not contain  \ / : * ? " < > |')])
-    type = serializers.CharField(max_length=32, read_only=True, # look up in FileType model
-        validators=[RegexValidator(file_re, r'File type must not contain  \ / : * ? " < > |')])
-    content = ContentRelatedField(read_only=True)
+class FolderFilesSerializer(FileSerializer):
 
-    class Meta:
-        model = File
-        read_only_fields = ['id', 'type', 'created', 'modified', 'owner', 'content']
-        fields = read_only_fields + ['name', 'folder']
+    class Meta(FileSerializer.Meta):
+        pass
 
     def to_representation(self, instance):
         """
