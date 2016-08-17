@@ -52,7 +52,7 @@ class FileViewSet(viewsets.ModelViewSet):
 
 
     @list_route()
-    def root(self, request, *args, **kwargs):
+    def home(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset()).filter(folder__isnull=True)
 
         page = self.paginate_queryset(queryset)
@@ -69,10 +69,10 @@ class FileViewSet(viewsets.ModelViewSet):
             'modified': None,
             'owner': self.request.user.pk,
             'content': {},
-            'name': 'Home',
+            'name': Folder.home_name,
             'folder': None,
             'breadcrumbs': [],
-            'path': '/',
+            'path': Folder.home_name,
             'files': serializer.data
         }
 
