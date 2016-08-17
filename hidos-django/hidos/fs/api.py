@@ -69,7 +69,7 @@ class FileViewSet(viewsets.ModelViewSet):
             'modified': None,
             'owner': self.request.user.pk,
             'content': {},
-            'name': '/',
+            'name': 'Home',
             'folder': None,
             'breadcrumbs': [],
             'path': '/',
