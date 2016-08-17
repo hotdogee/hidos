@@ -109,10 +109,12 @@ class Folder(File):
 
     objects = FolderManager()
 
+    home_name = 'Home'
+
     @property
     def path(self): # will probably need some caching
         if not self.folder:
-            return self.name
+            return self.home_name + '/' + self.name
         else:
             return self.folder.path + '/' + self.name
 
