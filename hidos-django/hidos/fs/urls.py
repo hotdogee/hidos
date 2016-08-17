@@ -26,9 +26,9 @@ urlpatterns = [
         'get': 'list',
         'post': 'create'
     }), name='file-list'),
-    url(r'^root$', api.FileViewSet.as_view({
-        'get': 'root',
-    }), name='file-root'),
+    url(r'^home$', api.FileViewSet.as_view({
+        'get': 'home',
+    }), name='file-home'),
     # {% url "fs:files" file.id %}
     url(r'^(?P<pk>[0-9a-zA-Z]+)$', api.FileViewSet.as_view({
         'get': 'retrieve',
