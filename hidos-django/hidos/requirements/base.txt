@@ -3,11 +3,11 @@ docutils>=0.12
 urllib3>=1.16
 psycopg2>=2.6.2
 numpy==1.11.1
-matplotlib>=1.5.1
+matplotlib==1.5.1
 Markdown>=2.6.6
-Pillow>=3.3.0
+Pillow==3.3.0
 Django[bcrypt]>=1.10
-django-extensions>=1.7.1
+django-extensions>=1.7.2
 django-rest-auth[with_social]>=0.8.1
 django-model-utils>=2.5
 django-vanilla-views>=1.0.4
