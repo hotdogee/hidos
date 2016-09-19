@@ -19,7 +19,7 @@ from django.conf import settings
 from django.core.cache import cache
 import urllib3
 
-from .bin.cellc2_V04 import cellConfluence_singleTask
+from .bin.cellc2_V05 import cellConfluence_singleTask
 logger = get_task_logger(__name__)
 
 if settings.USE_CACHE:
