@@ -2,7 +2,7 @@
 Package for the cellc2.
 """
 
-from .bin.cellc2_V05 import version
+from .bin.cellc2_V06 import version
 
 version = version
 app_name = __name__
