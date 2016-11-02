@@ -29,3 +29,9 @@ def jwt_payload_handler(user):
         payload['iss'] = api_settings.JWT_ISSUER
 
     return payload
+
+def jwt_get_username_from_payload_handler(payload):
+    """
+    Override this function if username is formatted differently in payload
+    """
+    return payload.get('email')

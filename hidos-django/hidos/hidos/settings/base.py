@@ -417,6 +417,7 @@ REST_AUTH_REGISTER_SERIALIZERS = {
 # djangorestframework-jwt
 JWT_AUTH = {
     'JWT_PAYLOAD_HANDLER': 'users.utils.jwt_payload_handler',
+    'JWT_PAYLOAD_GET_USERNAME_HANDLER': 'users.utils.jwt_get_username_from_payload_handler',
     'JWT_LEEWAY': 30,
     'JWT_EXPIRATION_DELTA': timedelta(days=7),
     'JWT_ALLOW_REFRESH': True,
