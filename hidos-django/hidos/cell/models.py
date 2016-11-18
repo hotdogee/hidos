@@ -139,12 +139,15 @@ class SingleImageUploadManager(models.Manager):
 
         # convert to jpeg for web display
         p = cv2.imread(uploaded_image_path,cv2.IMREAD_ANYDEPTH|cv2.IMREAD_ANYCOLOR)
-        if p.dtype == 'uint16':
-            p = cv2.imread(uploaded_image_path)
-            p = np.uint16(p)
-            p = p*255/p.max()
-            p = np.uint8(p)
-            print('this is 16bit')
+        try:
+            if p.dtype == 'uint16':
+                p = cv2.imread(uploaded_image_path)
+                p = np.uint16(p)
+                p = p*255/p.max()
+                p = np.uint8(p)
+                print('this is 16bit')
+        except:
+            print('the image is a tiff file.')
         # if p.mode.split(';')[1:2] == ['16']:
         #     p = p.point(lambda x: x*(float(1)/256))
         # if p.mode != 'RGB':
