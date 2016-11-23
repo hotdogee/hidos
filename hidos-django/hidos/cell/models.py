@@ -84,7 +84,7 @@ class SingleImageUploadManager(models.Manager):
 
         # build data dictionary
         data = {
-            'id': uuid.UUID(task_id),
+            'id': uuid.UUID(task_id),ls
             'name': file.name,
             'type': app_name,
             'version': app.version,
@@ -102,7 +102,7 @@ class SingleImageUploadManager(models.Manager):
         obj = super(SingleImageUploadManager, self).create(**data)
         obj.content = obj
 
-        chmod(path.dirname(path_prefix), Perm.S_IRWXU | Perm.S_IRWXG | Perm.S_IRWXO)
+        chmod(path.dirname(path.join(settings.MEDIA_ROOT, app_name, 'task', task_id, task_id)), Perm.S_IRWXU | Perm.S_IRWXG | Perm.S_IRWXO)
         # save uploaded image data to file
         obj.uploaded_image.save(uploaded_image_path, file, save=False)
 
