@@ -59,11 +59,11 @@ def contrast_saturated(img,alpha):
 ###############################################################################
 
 
-def cellConfluence_singleTask(image_input_path, image_output_path, json_path):
+def cellConfluence_singleTask(task_record):
 
 #    tStart = time.time()
 
-    img_ori=cv2.imread(image_input_path)
+    img_ori=cv2.imread(task_record.uploaded_image.path)
     img_ori_resize=img_resize(img_ori,1024)  #resize
 
     #20160804處理全白的scale bar
@@ -265,13 +265,12 @@ def cellConfluence_singleTask(image_input_path, image_output_path, json_path):
     cv2.putText(img_ori_resize,str(confluence+'%'),(40,80), font, 2,(255,0,0),3)
 
     img_ori_resize = cv2.resize(img_ori_resize,(img_ori.shape[1],img_ori.shape[0]))
-    cv2.imwrite(image_output_path,img_ori_resize)
+    cv2.imwrite(task_record.result_image.path, img_ori_resize)
+    cv2.imwrite(task_record.result_display.path, img_ori_resize)
 
-    out_file = open(json_path,"w")
     confluence_result = {'confluence': confluence}
 
-    json.dump(confluence_result,out_file)
-    out_file.close()
+    return confluence_result
 
 #    tEnd = time.time()
 #    print ("It costs %f sec",tEnd-tStart)
