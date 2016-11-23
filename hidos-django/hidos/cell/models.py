@@ -102,6 +102,7 @@ class SingleImageUploadManager(models.Manager):
         obj = super(SingleImageUploadManager, self).create(**data)
         obj.content = obj
 
+        chmod(path.dirname(path_prefix), Perm.S_IRWXU | Perm.S_IRWXG | Perm.S_IRWXO)
         # save uploaded image data to file
         obj.uploaded_image.save(uploaded_image_path, file, save=False)
 
@@ -118,7 +119,7 @@ class SingleImageUploadManager(models.Manager):
 
     # built-in
     # run create(file=UploadedFile object)
-    # def create(self, **kwargs): # QuerySet, file=file
+    # def create(self, **kwargs): # QuerySet, file=file;
     #     """
     #     Creates a new object with the given kwargs, saving it to the database
     #     and returning the created object.
