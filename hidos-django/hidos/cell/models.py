@@ -84,7 +84,7 @@ class SingleImageUploadManager(models.Manager):
 
         # build data dictionary
         data = {
-            'id': uuid.UUID(task_id),ls
+            'id': uuid.UUID(task_id),
             'name': file.name,
             'type': app_name,
             'version': app.version,
