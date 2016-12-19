@@ -34,7 +34,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'django',
         'USER': 'django',
-        'PASSWORD': '',
+        'PASSWORD': 'django',
         'HOST': 'localhost',
         'PORT': '',
     }
@@ -358,13 +358,6 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ('rest_framework.filters.DjangoFilterBackend',)
 }
 
-# Email
-EMAIL_HOST = "smtp.gmail.com"
-EMAIL_PORT = 587
-EMAIL_HOST_PASSWORD = 53394221
-EMAIL_HOST_USER = "hidos.image@gmail.com"
-EMAIL_USE_TLS = True
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 # allauth
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
