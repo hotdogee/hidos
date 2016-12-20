@@ -1,7 +1,7 @@
 """
 Package for the cellc1.
 """
-from .bin.cella_V02 import version
+from .bin.cellt1_V03 import version
 
 
 version = version
