@@ -15,7 +15,7 @@ version = '0.2'
 
 def cellm1(task_record):
 
-    ori_img = io.imread(task_record.uploaded_image_path)
+    ori_img = io.imread(task_record.uploaded_image.path)
     ori_img_int8 = img_as_ubyte(ori_img)
 
     # image resize
