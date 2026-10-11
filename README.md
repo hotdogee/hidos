@@ -318,25 +318,34 @@ list.
 * CI (#28)
 * docker compose deployment (#5)
 * logging and failed-task status (#12)
-* permissions and security review (#15, #16, #23)
+* folder system security (#23)
 * local and social signup (#18, #19)
-* Google logins merged into local accounts by confirmed email (#67; Facebook
-  emails aren't verified, so those logins still fail for existing emails)
 * rate limiting (#26)
 * user profile model, serializer and API (#74, #75, #76)
 * sites migration (#78)
 * token-protected API (#96)
 * fs fixes (#97, #98)
 * thumbnails (#38)
-* batch download (#35)
-* chunked uploads (#56)
-* examples (#43, #44)
+* example generation (#44)
 * result viewer fit-to-image (#66)
 * landing page: responsive menu, Cell S removed (#48, #57)
-* optional Google Analytics (#13, #14)
+* account menu on the Django pages (#49)
+* optional Google Analytics (#13)
 
-**Backend ready, frontend pending:** infinite scrolling (#40) and task
-selection (#30). The single page app is not part of this repository.
+**Partly done:**
+
+* security review (#16) and permissions (#15): everything is scoped to its
+  owner; there is no sharing or roles model
+* Google logins merged into local accounts by confirmed email (#67; Facebook
+  emails aren't verified, so those logins still fail for existing emails)
+* detailed Google Analytics events, in the result viewer only (#14)
+* backups: `docker/backup.sh` and restore steps, no scheduling or off-site
+  copies (#25)
+* new server-side result viewer (#41)
+
+**Backend ready, frontend pending:** batch download (#35), chunked uploads
+(#56), the examples API (#43), infinite scrolling (#40) and task selection
+(#30). The single page app is not part of this repository.
 
 **Open:**
 
