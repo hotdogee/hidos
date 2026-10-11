@@ -4,12 +4,15 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.throttling import UserRateThrottle
 
 logger = logging.getLogger(__name__)
 
 
-from .models import Task
-from .serializers import TaskSerializer
+class TaskSubmitRateThrottle(UserRateThrottle):
+    """Rate limit for new analysis tasks per user (#26)"""
+    scope = 'task_submit'
+
 
 class TaskViewSet(viewsets.ModelViewSet):
     """
@@ -56,6 +59,12 @@ class TaskViewSet(viewsets.ModelViewSet):
 
     #     serializer = self.get_serializer(queryset, many=True)
     #     return Response(serializer.data)
+
+    def get_throttles(self):
+        throttles = super().get_throttles()
+        if self.action == 'create':
+            throttles.append(TaskSubmitRateThrottle())
+        return throttles
 
     @action(detail=False)
     def running(self, request, *args, **kwargs):

@@ -388,6 +388,7 @@ REST_FRAMEWORK = {
         'anon': env('THROTTLE_ANON', default='10/h'),
         'register_view': env('THROTTLE_REGISTER', default='2/h'),  # users.views.RegisterView
         'dj_rest_auth': env('THROTTLE_AUTH', default='60/h'),  # login, password reset, ...
+        'task_submit': env('THROTTLE_TASK_SUBMIT', default='600/h'),  # new analysis tasks (#26)
     },
     'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',),
     'DEFAULT_PAGINATION_CLASS': None,

@@ -133,6 +133,26 @@ def test_anonymous_cannot_submit(api_client):
     assert api_client.post(TASKS, {'file': image_file()}, format='multipart').status_code == 401
 
 
+def test_task_submission_is_rate_limited(auth_client, settings, fake_cellc2):
+    """#26"""
+    settings.REST_FRAMEWORK = {**settings.REST_FRAMEWORK, 'DEFAULT_THROTTLE_RATES': {
+        **settings.REST_FRAMEWORK['DEFAULT_THROTTLE_RATES'], 'task_submit': '2/min'}}
+    from rest_framework.settings import api_settings
+    from rest_framework.throttling import SimpleRateThrottle
+    api_settings.reload()
+    SimpleRateThrottle.THROTTLE_RATES = api_settings.DEFAULT_THROTTLE_RATES
+    try:
+        for i in range(2):
+            create_task(auth_client, image=image_file(color=(i, 0, 0)))
+        response = auth_client.post(TASKS, {'file': image_file(color=(9, 9, 9))}, format='multipart')
+        assert response.status_code == 429
+        # listing is not throttled by the submission limit
+        assert auth_client.get(TASKS).status_code == 200
+    finally:
+        api_settings.reload()
+        SimpleRateThrottle.THROTTLE_RATES = api_settings.DEFAULT_THROTTLE_RATES
+
+
 def test_deleting_a_task_removes_its_files(auth_client, fake_cellc2):
     """Deleted images must not stay reachable on disk/by URL (#23)."""
     data = create_task(auth_client)
