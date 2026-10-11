@@ -1,3 +1,4 @@
+import os
 import sys
 import uuid
 
@@ -147,3 +148,42 @@ class Folder(File):
     #     if self.strip:
     #         value = value.strip()
     #     return value
+
+
+class ChunkedUpload(models.Model):
+    """
+    A file uploaded in chunks so large uploads can be resumed (#56).
+    The data is kept in CHUNKED_UPLOAD_ROOT (outside MEDIA_ROOT, which is
+    served publicly) until a task is created from the finished upload.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, models.CASCADE, related_name='chunked_uploads')
+    filename = models.CharField(max_length=255)
+    size = models.BigIntegerField()  # total number of bytes
+    offset = models.BigIntegerField(default=0)  # number of bytes received
+    created = models.DateTimeField(auto_now_add=True)
+    completed = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ('-created',)
+
+    def __str__(self):
+        return '{0} ({1}/{2})'.format(self.filename, self.offset, self.size)
+
+    @property
+    def path(self):
+        return os.path.join(settings.CHUNKED_UPLOAD_ROOT, self.id.hex + '.part')
+
+    @property
+    def status(self):
+        return 'complete' if self.completed else 'uploading'
+
+    @property
+    def expires(self):
+        return self.created + settings.CHUNKED_UPLOAD_EXPIRATION
+
+    def delete_file(self):
+        try:
+            os.remove(self.path)
+        except FileNotFoundError:
+            pass

@@ -1,6 +1,7 @@
 ﻿from django.urls import re_path as url
 
 from . import api
+from . import uploads
 from . import app_name # application namespace
 
 # url(r'^api/v1/fs/', include('fs.urls', namespace='fs')),
@@ -30,6 +31,15 @@ urlpatterns = [
         'get': 'download',
         'post': 'download',
     }), name='file-download'),
+    # chunked resumable uploads (#56)
+    url(r'^uploads$', uploads.ChunkedUploadViewSet.as_view({
+        'post': 'create',
+    }), name='upload-list'),
+    url(r'^uploads/(?P<pk>[0-9a-fA-F-]+)$', uploads.ChunkedUploadViewSet.as_view({
+        'get': 'retrieve',
+        'put': 'append',
+        'delete': 'destroy',
+    }), name='upload-detail'),
     # {% url "fs:files" file.id %}
     url(r'^(?P<pk>[0-9a-zA-Z]+)$', api.FileViewSet.as_view({
         'get': 'retrieve',

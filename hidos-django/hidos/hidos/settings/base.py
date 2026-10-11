@@ -102,6 +102,10 @@ USE_TZ = True
 FILE_UPLOAD_PERMISSIONS = 0o664
 FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o775
 
+# Largest single request body (uploads larger than this should use the
+# chunked upload API, see fs.uploads)
+DATA_UPLOAD_MAX_MEMORY_SIZE = env.int('DATA_UPLOAD_MAX_MEMORY_SIZE', default=10 * 1024 * 1024)
+
 # Media files
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
@@ -360,6 +364,11 @@ PROFILE_IMAGE_MAX_BYTES = env.int('PROFILE_IMAGE_MAX_BYTES', default=2 * 1024 * 
 # Thumbnails generated for every uploaded image (#38), longest side in pixels
 THUMBNAIL_SIZE = env.int('THUMBNAIL_SIZE', default=256)
 
+# Chunked resumable uploads (#56); partial files are kept outside MEDIA_ROOT
+CHUNKED_UPLOAD_ROOT = env('CHUNKED_UPLOAD_ROOT', default=path.join(PROJECT_ROOT, 'chunked_uploads'))
+CHUNKED_UPLOAD_MAX_BYTES = env.int('CHUNKED_UPLOAD_MAX_BYTES', default=200 * 1024 * 1024)
+CHUNKED_UPLOAD_EXPIRATION = timedelta(hours=env.int('CHUNKED_UPLOAD_EXPIRATION_HOURS', default=24))
+
 # REST framework
 # The fs and cell APIs are protected by tokens (#96): JWT from the login API,
 # or DRF tokens created in the admin. Session authentication is only enabled
@@ -392,6 +401,7 @@ REST_FRAMEWORK = {
         'register_view': env('THROTTLE_REGISTER', default='2/h'),  # users.views.RegisterView
         'dj_rest_auth': env('THROTTLE_AUTH', default='60/h'),  # login, password reset, ...
         'task_submit': env('THROTTLE_TASK_SUBMIT', default='600/h'),  # new analysis tasks (#26)
+        'upload_chunk': env('THROTTLE_UPLOAD_CHUNK', default='6000/h'),  # chunked uploads (#56)
     },
     'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',),
     'DEFAULT_PAGINATION_CLASS': None,

@@ -6,7 +6,7 @@ import pytest
 from rest_framework.authtoken.models import Token
 
 from conftest import PASSWORD, image_file
-from fs.models import File, Folder
+from fs.models import ChunkedUpload, File, Folder
 
 pytestmark = pytest.mark.django_db
 
@@ -199,3 +199,57 @@ def test_batch_download_only_includes_own_files(auth_client, other_client, fake_
 def test_batch_download_rejects_bad_ids(auth_client):
     assert auth_client.get(FS + 'download', {'ids': 'nope'}).status_code == 400
     assert auth_client.get(FS + 'download').status_code == 400
+
+
+# --- chunked resumable uploads (#56) ---------------------------------------------
+
+def test_chunked_upload_resume_and_create_task(auth_client, user, fake_cellc2):
+    data = image_file('big.png', size=(300, 200)).getvalue()
+    upload = auth_client.post(FS + 'uploads', {'filename': 'big.png', 'size': len(data)}, format='json').json()
+    url = FS + 'uploads/' + upload['id']
+    half = len(data) // 2
+    first = auth_client.put(url, data[:half], content_type='application/octet-stream',
+                            HTTP_CONTENT_RANGE='bytes 0-%d/%d' % (half - 1, len(data)))
+    assert first.status_code == 200 and first.json()['offset'] == half
+    # a client that lost track of the offset gets 409 and the offset to resume from
+    stale = auth_client.put(url, data[10:20], content_type='application/octet-stream',
+                            HTTP_CONTENT_RANGE='bytes 10-19/%d' % len(data))
+    assert stale.status_code == 409 and stale.json()['offset'] == half
+    assert auth_client.get(url).json()['status'] == 'uploading'
+    rest = auth_client.put(url, data[half:], content_type='application/octet-stream',
+                           HTTP_CONTENT_RANGE='bytes %d-%d/%d' % (half, len(data) - 1, len(data)))
+    assert rest.status_code == 200 and rest.json()['status'] == 'complete'
+
+    response = auth_client.post('/api/v1/cell/c2/tasks', {'upload': upload['id']}, format='json')
+    assert response.status_code == 201, response.content
+    assert response.json()['name'] == 'big.png'
+    assert not ChunkedUpload.objects.exists()
+
+
+def test_incomplete_upload_cannot_create_task(auth_client):
+    upload = auth_client.post(FS + 'uploads', {'filename': 'x.png', 'size': 100}, format='json').json()
+    response = auth_client.post('/api/v1/cell/c2/tasks', {'upload': upload['id']}, format='json')
+    assert response.status_code == 400
+
+
+def test_uploads_are_private(auth_client, other_client):
+    upload = auth_client.post(FS + 'uploads', {'filename': 'x.png', 'size': 10}, format='json').json()
+    assert other_client.get(FS + 'uploads/' + upload['id']).status_code == 404
+    assert other_client.put(FS + 'uploads/' + upload['id'], b'0123456789',
+                            content_type='application/octet-stream').status_code == 404
+    response = other_client.post('/api/v1/cell/c2/tasks', {'upload': upload['id']}, format='json')
+    assert response.status_code == 400
+
+
+def test_upload_size_limit(auth_client, settings):
+    settings.CHUNKED_UPLOAD_MAX_BYTES = 10
+    assert auth_client.post(FS + 'uploads', {'filename': 'x.png', 'size': 11}, format='json').status_code == 400
+
+
+def test_abort_upload_removes_data(auth_client):
+    upload = auth_client.post(FS + 'uploads', {'filename': 'x.png', 'size': 10}, format='json').json()
+    path = ChunkedUpload.objects.get(pk=upload['id']).path
+    assert auth_client.delete(FS + 'uploads/' + upload['id']).status_code == 204
+    assert not ChunkedUpload.objects.exists()
+    import os
+    assert not os.path.exists(path)

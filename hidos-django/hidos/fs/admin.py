@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import File
+from .models import ChunkedUpload, File
 
 class FileAdmin(admin.ModelAdmin):
     date_hierarchy = 'modified'
@@ -12,3 +12,10 @@ class FileAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'type', 'folder', 'owner', 'modified')
 
 admin.site.register(File, FileAdmin)
+
+
+@admin.register(ChunkedUpload)
+class ChunkedUploadAdmin(admin.ModelAdmin):
+    list_display = ('filename', 'owner', 'offset', 'size', 'created', 'completed')
+    readonly_fields = ('id', 'created')
+    search_fields = ['id', 'filename', 'owner__email']
