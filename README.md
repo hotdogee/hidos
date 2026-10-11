@@ -248,6 +248,9 @@ The compose file is the reference deployment. For production:
 * terminate TLS in front of nginx (the 2016 hidos.io setup is in
   `tools/nginx`) and set `SESSION_COOKIE_SECURE=true` and
   `CSRF_COOKIE_SECURE=true`
+* set `NUM_PROXIES` to the number of proxies in front of Django (1 in the
+  compose file for nginx; 2 with a TLS proxy in front of it), so rate
+  limits use the real client address
 * run `python manage.py check --deploy` with the production settings
 * run `python manage.py cleanup_uploads` daily (cron, or
   `docker compose exec web ...`) to delete abandoned chunked uploads
