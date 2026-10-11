@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_framework import filters
 
@@ -15,6 +17,12 @@ class TaskSerializer(FileSerializer):
     class Meta:
         read_only_fields = ['id', 'name', 'type', 'created', 'modified', 'owner', 'content']
         fields = read_only_fields + ['file', 'folder']
+
+    def validate_file(self, file):
+        if file.size > settings.TASK_UPLOAD_MAX_BYTES:
+            raise serializers.ValidationError(
+                _('Images must be smaller than %d MB.') % (settings.TASK_UPLOAD_MAX_BYTES // 2 ** 20))
+        return file
 
     # def create(self, validated_data):
     #    return CellC2Task.objects.create(**validated_data)

@@ -351,6 +351,9 @@ CELERY_TASK_EAGER_PROPAGATES = False
 SLACK_WEBHOOK_URL = env('SLACK_WEBHOOK_URL', default='')
 SLACK_CHANNEL = env('SLACK_CHANNEL', default='#image-bug')
 
+# Largest accepted image for an analysis task
+TASK_UPLOAD_MAX_BYTES = env.int('TASK_UPLOAD_MAX_BYTES', default=200 * 1024 * 1024)
+
 # Largest accepted profile image (#74)
 PROFILE_IMAGE_MAX_BYTES = env.int('PROFILE_IMAGE_MAX_BYTES', default=2 * 1024 * 1024)
 

@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import pytest
 
@@ -45,6 +47,13 @@ def test_create_task_in_folder(auth_client, fake_cellc2):
     assert [f['id'] for f in listed] == [data['id']]
 
 
+def test_uploaded_file_name_is_not_used_on_disk(auth_client, fake_cellc2):
+    task = get_task(create_task(auth_client, image=image_file('../../evil.png'))['id'])
+    assert task.name == 'evil.png'
+    assert '..' not in task.uploaded_image.name
+    assert task.uploaded_image.name.endswith('_uploaded.png')
+
+
 def test_failed_analysis_is_recorded(auth_client, monkeypatch):
     """A crashing algorithm marks the task failed instead of leaving it 'running' (#12)."""
     import cellc2
@@ -86,6 +95,20 @@ def test_missing_result_image_status(auth_client, monkeypatch):
     assert get_task(create_task(auth_client)['id']).status == 'NO_OUT_JPG'
 
 
+def test_same_image_from_two_users_gives_two_tasks(auth_client, other_client, fake_cellc2):
+    a = create_task(auth_client)
+    b = create_task(other_client)
+    assert a['id'] != b['id']
+
+
+def test_task_ids_depend_on_secret_key(settings, user):
+    from cell.models import task_id_for
+    a = task_id_for('0.8', user, b'image')
+    settings.SECRET_KEY = 'another-secret-key-for-this-test-only-123456'
+    assert task_id_for('0.8', user, b'image') != a
+    assert len(a) == 32
+
+
 def test_invalid_upload_is_rejected(auth_client):
     bad = image_file()
     bad = type(bad)(b'not an image')
@@ -95,8 +118,37 @@ def test_invalid_upload_is_rejected(auth_client):
     assert not File.objects.exists()
 
 
+def test_upload_size_limit(auth_client, settings):
+    settings.TASK_UPLOAD_MAX_BYTES = 10
+    assert auth_client.post(TASKS, {'file': image_file()}, format='multipart').status_code == 400
+
+
+def test_cannot_use_someone_elses_folder(auth_client, other_client, fake_cellc2):
+    folder = create_folder(auth_client, 'Mine')
+    response = other_client.post(TASKS, {'file': image_file(), 'folder': folder['id']}, format='multipart')
+    assert response.status_code == 400
+
+
 def test_anonymous_cannot_submit(api_client):
     assert api_client.post(TASKS, {'file': image_file()}, format='multipart').status_code == 401
+
+
+def test_deleting_a_task_removes_its_files(auth_client, fake_cellc2):
+    """Deleted images must not stay reachable on disk/by URL (#23)."""
+    data = create_task(auth_client)
+    task = get_task(data['id'])
+    task_dir = os.path.dirname(task.uploaded_image.path)
+    assert os.path.isdir(task_dir)
+    assert auth_client.delete('/api/v1/fs/' + data['id']).status_code == 204
+    assert not os.path.exists(task_dir)
+
+
+def test_deleting_a_folder_removes_task_files(auth_client, fake_cellc2):
+    folder = create_folder(auth_client, 'A')
+    task = get_task(create_task(auth_client, folder['id'])['id'])
+    task_dir = os.path.dirname(task.uploaded_image.path)
+    auth_client.delete('/api/v1/fs/' + folder['id'])
+    assert not os.path.exists(task_dir)
 
 
 def test_json_safe():

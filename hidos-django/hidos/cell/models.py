@@ -1,4 +1,4 @@
-import hashlib
+import hmac
 import io
 import logging
 import sys
@@ -46,11 +46,12 @@ def display_jpeg(data):
 def task_id_for(version, owner, data):
     """
     Task ids are derived from the app version, the owner and the image, so
-    uploading the same image twice returns the existing task.
+    uploading the same image twice returns the existing task. The digest is
+    keyed with SECRET_KEY because the id is also part of the media URLs.
     """
-    m = hashlib.md5()
+    m = hmac.new(settings.SECRET_KEY.encode('utf-8'), digestmod='md5')
     m.update(version.encode('utf-8'))
-    m.update(owner.email.encode('utf-8'))
+    m.update((owner.email if not owner.is_anonymous else '').encode('utf-8'))
     m.update(data)
     return m.hexdigest()
 
