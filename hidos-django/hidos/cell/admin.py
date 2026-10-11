@@ -2,7 +2,7 @@ from django.contrib import admin
 
 class TaskAdmin(admin.ModelAdmin):
     date_hierarchy = 'modified'
-    fields = ('id', 'status', 'owner', 'parent_folder', 'version',
+    fields = ('id', 'status', 'owner', 'folder', 'version',
             'result',
             'name', 'uploaded_filetype', 'stdout', 'stderr',
             'dequeued', 'finished',

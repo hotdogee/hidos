@@ -3,6 +3,8 @@ base settings
 """
 from __future__ import absolute_import, unicode_literals
 from os import path
+from datetime import timedelta
+
 PROJECT_ROOT = path.dirname(path.dirname(path.dirname(path.abspath(__file__))))
 
 DEBUG = False
@@ -32,7 +34,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'django',
         'USER': 'django',
-        'PASSWORD': '',
+        'PASSWORD': 'django',
         'HOST': 'localhost',
         'PORT': '',
     }
@@ -98,8 +100,8 @@ USE_L10N = True
 USE_TZ = True
 
 # File Permissions
-FILE_UPLOAD_PERMISSION = 0o666
-FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o666
+FILE_UPLOAD_PERMISSION = 0o775
+FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o775
 
 # Media files
 
@@ -356,13 +358,6 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ('rest_framework.filters.DjangoFilterBackend',)
 }
 
-# Email
-EMAIL_HOST = "smtp.gmail.com"
-EMAIL_PORT = 587
-EMAIL_HOST_PASSWORD = 53394221
-EMAIL_HOST_USER = "hidos.image@gmail.com"
-EMAIL_USE_TLS = True
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 # allauth
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
@@ -405,8 +400,19 @@ REST_USE_JWT = True
 REST_AUTH_SERIALIZERS = {
     'LOGIN_SERIALIZER': 'users.serializers.LoginSerializer',
     'USER_DETAILS_SERIALIZER': 'users.serializers.UserDetailsSerializer',
+    'JWT_SERIALIZER': 'users.serializers.JWTSerializer',
 }
 
 REST_AUTH_REGISTER_SERIALIZERS = {
     'REGISTER_SERIALIZER': 'users.serializers.RegisterSerializer',
+}
+
+# djangorestframework-jwt
+JWT_AUTH = {
+    'JWT_PAYLOAD_HANDLER': 'users.utils.jwt_payload_handler',
+    'JWT_PAYLOAD_GET_USERNAME_HANDLER': 'users.utils.jwt_get_username_from_payload_handler',
+    'JWT_LEEWAY': 30,
+    'JWT_EXPIRATION_DELTA': timedelta(days=7),
+    'JWT_ALLOW_REFRESH': True,
+    'JWT_REFRESH_EXPIRATION_DELTA': timedelta(days=365),
 }

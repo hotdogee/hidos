@@ -109,10 +109,12 @@ class Folder(File):
 
     objects = FolderManager()
 
+    home_name = 'Home'
+
     @property
     def path(self): # will probably need some caching
         if not self.folder:
-            return self.name
+            return self.home_name + '/' + self.name
         else:
             return self.folder.path + '/' + self.name
 
@@ -123,7 +125,7 @@ class Folder(File):
         if not folder_list:
             folder_list = []
         if not self.folder:
-            return folder_list
+            return [[self.home_name, self.home_name]] + folder_list
         else:
             folder_list.append([self.folder.id.hex, self.folder.name])
             return self.folder.breadcrumbs(folder_list)

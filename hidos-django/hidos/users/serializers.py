@@ -59,6 +59,13 @@ class LoginSerializer(serializers.Serializer):
         return attrs
 
 
+class JWTSerializer(serializers.Serializer):
+    """
+    Serializer for JWT authentication.
+    """
+    token = serializers.CharField()
+
+
 class UserDetailsSerializer(serializers.ModelSerializer):
     """
     User model w/o password

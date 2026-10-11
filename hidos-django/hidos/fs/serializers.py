@@ -5,6 +5,7 @@ import json
 from collections import OrderedDict
 
 from django.db import models
+from django.utils.translation import ugettext_lazy as _
 from django.db.models.fields.files import FieldFile
 from django.core.validators import RegexValidator
 
@@ -12,6 +13,7 @@ from rest_framework import serializers
 from rest_framework import filters
 from rest_framework import fields
 from rest_framework import relations
+from rest_framework.exceptions import ValidationError
 
 from .models import Folder, File
 
@@ -53,6 +55,38 @@ class ContentRelatedField(serializers.RelatedField):
         return content
 
 
+class FolderRelatedField(serializers.PrimaryKeyRelatedField):
+    """
+    Limit the queryset to owned folders only
+    """
+    def get_queryset(self):
+        if not self.context['request'].user.is_anonymous:
+            return Folder.objects.filter(owner=self.context['request'].user)
+        else:
+            return Folder.objects.none()
+
+
+class NotSelfContainedFolderValidator(object):
+
+    message = _('Can not move a folder inside itself.')
+
+    def __init__(self, message=None):
+        self.message = message or self.message
+
+    def set_context(self, serializer):
+        """
+        This hook is called by the serializer instance,
+        prior to the validation call being made.
+        """
+        # Determine the existing instance, if this is an update operation.
+        self.instance = getattr(serializer, 'instance', None)
+
+    def __call__(self, attrs):
+        folder = attrs['folder']
+        if self.instance and folder and (folder.id == self.instance.id):
+            raise ValidationError(self.message)
+
+
 class FileSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(format='hex', read_only=True)
     name = serializers.CharField(max_length=255,  # display name
@@ -60,11 +94,14 @@ class FileSerializer(serializers.ModelSerializer):
     type = serializers.CharField(max_length=32, read_only=True, # look up in FileType model
         validators=[RegexValidator(file_re, r'File type must not contain  \ / : * ? " < > |')])
     content = ContentRelatedField(read_only=True)
+    folder = FolderRelatedField(allow_null=True, required=False, 
+        pk_field=serializers.UUIDField(format='hex'))
 
     class Meta:
         model = File
         read_only_fields = ['id', 'type', 'created', 'modified', 'owner', 'content']
         fields = read_only_fields + ['name', 'folder']
+        validators = [NotSelfContainedFolderValidator()]
 
     def to_representation(self, instance):
         """
@@ -102,18 +139,10 @@ class FileSerializer(serializers.ModelSerializer):
 
         return ret
 
-class FolderFilesSerializer(serializers.ModelSerializer):
-    id = serializers.UUIDField(format='hex', read_only=True)
-    name = serializers.CharField(max_length=255,  # display name
-        validators=[RegexValidator(file_re, r'File names must not contain  \ / : * ? " < > |')])
-    type = serializers.CharField(max_length=32, read_only=True, # look up in FileType model
-        validators=[RegexValidator(file_re, r'File type must not contain  \ / : * ? " < > |')])
-    content = ContentRelatedField(read_only=True)
+class FolderFilesSerializer(FileSerializer):
 
-    class Meta:
-        model = File
-        read_only_fields = ['id', 'type', 'created', 'modified', 'owner', 'content']
-        fields = read_only_fields + ['name', 'folder']
+    class Meta(FileSerializer.Meta):
+        pass
 
     def to_representation(self, instance):
         """
@@ -162,6 +191,7 @@ class FolderSerializer(FileSerializer):
         model = Folder
         read_only_fields = ['id', 'type', 'created', 'modified', 'files', 'owner', 'path', 'breadcrumbs']
         fields = read_only_fields + ['name', 'folder']
+        validators = [NotSelfContainedFolderValidator()]
         # Model fields which have editable=False set, and AutoField fields will be set to read-only by default,
         # and do not need to be added to the read_only_fields option.
 

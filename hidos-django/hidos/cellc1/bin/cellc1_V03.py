@@ -107,7 +107,7 @@ def cellCount_singleTask(task_record):
         area_mean2 = round(
             np.mean(area_list2[int(len(area_list2) * 0.3):int(len(area_list2) * 0.7) + 1]))
     cellCount = 0
-    out_file = open(json_path, "w")
+    # out_file = open(json_path, "w")
     # exception
     font = cv2.FONT_HERSHEY_SIMPLEX
     if (np.isnan(area_mean2) or area_mean2 <= 0):

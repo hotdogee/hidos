@@ -201,7 +201,7 @@ def cellAngiogenesis(task_record, add_boarder=False):
 
     # 如果先resize再取gray~效果會比較差
     img_gray = cv2.cvtColor(img_ori, cv2.COLOR_BGR2GRAY)
-    img_gray = cv2.resize(img_ori, tuple(
+    img_gray = cv2.resize(img_gray, tuple(
         [max_size * d / max(img_ori.shape[:2]) for d in img_ori.shape[1::-1]]))
 
     img_thresh = feature.canny(img_gray)  # bool output
