@@ -18,6 +18,7 @@ from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from dj_rest_auth.registration.views import SocialLoginView
 
+from app import views as app_views
 from app.forms import BootstrapAuthenticationForm
 from users.views import RegisterView
 
@@ -32,6 +33,7 @@ class GoogleLogin(SocialLoginView):
 
 
 urlpatterns = [
+    re_path(r'^results/(?P<file_id>[0-9a-fA-F-]{32,36})$', app_views.task_result, name='task-result'),
     re_path(r'^login$',
         auth_views.LoginView.as_view(
             template_name='app/login.html',

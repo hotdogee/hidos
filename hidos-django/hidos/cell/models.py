@@ -12,6 +12,7 @@ from PIL import Image
 from django.db import models
 from django.conf import settings
 from django.core.files.base import ContentFile
+from django.urls import reverse
 
 from fs.models import File
 
@@ -197,6 +198,9 @@ class CellTask(Task):
     error = models.TextField(blank=True)
 
     objects = SingleImageUploadManager.from_queryset(ViewableQuerySet)()
+
+    def get_absolute_url(self):
+        return reverse('task-result', args=[self.id.hex])
 
     class Meta(Task.Meta):
         abstract = True

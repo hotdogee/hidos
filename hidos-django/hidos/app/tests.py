@@ -51,6 +51,48 @@ def test_confirm_email_link_points_to_confirm_view():
     assert reverse('account_confirm_email', args=['abc']) == '/confirm-email/abc/'
 
 
+# --- result viewer (#66) ------------------------------------------------------------
+
+def test_result_page_shows_images_fit_to_frame(client, user, auth_client, fake_cellc2):
+    data = create_task(auth_client)
+    client.force_login(user)
+    response = client.get('/results/' + data['id'])
+    assert response.status_code == 200
+    html = response.content.decode()
+    # both images start at "fit the whole image" magnification
+    assert html.count('class="viewer fit z-depth-1" data-zoom="fit"') == 2
+    assert '_uploaded_display.jpg' in html and '_result_display.jpg' in html
+    assert 'confluence' in html and '42.00' in html
+
+
+def test_result_page_while_running_refreshes(client, user, auth_client, fake_cellc2):
+    from cellc2.models import Task
+    data = create_task(auth_client)
+    Task.objects.filter(pk=data['id']).update(status='running')
+    client.force_login(user)
+    html = client.get('/results/' + data['id']).content.decode()
+    assert 'http-equiv="refresh"' in html and '_result_display.jpg' not in html
+
+
+def test_result_page_is_private(client, other_user, auth_client, fake_cellc2):
+    data = create_task(auth_client)
+    assert client.get('/results/' + data['id']).status_code == 302  # login required
+    client.force_login(other_user)
+    assert client.get('/results/' + data['id']).status_code == 404
+
+
+def test_result_page_for_folder_is_404(client, user, auth_client):
+    folder = create_folder(auth_client, 'A')
+    client.force_login(user)
+    assert client.get('/results/' + folder['id']).status_code == 404
+
+
+def test_task_absolute_url_is_the_result_page(auth_client, fake_cellc2):
+    from cellc2.models import Task
+    task = Task.objects.get(pk=create_task(auth_client)['id'])
+    assert task.get_absolute_url() == '/results/' + task.id.hex
+
+
 # --- admin ------------------------------------------------------------------------------
 
 
