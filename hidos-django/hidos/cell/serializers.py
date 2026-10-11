@@ -35,9 +35,13 @@ class TaskSerializer(FileSerializer):
         if 'upload' in attrs:
             upload = take_completed_upload(self.context['request'].user, attrs.pop('upload'))
             fh = open(upload.path, 'rb')
-            # validate the assembled file exactly like a direct upload
-            image = serializers.ImageField().run_validation(DjangoFile(fh, name=upload.filename))
-            attrs['file'] = self.validate_file(image)
+            try:
+                # validate the assembled file exactly like a direct upload
+                image = serializers.ImageField().run_validation(DjangoFile(fh, name=upload.filename))
+                attrs['file'] = self.validate_file(image)
+            except Exception:
+                fh.close()
+                raise
             self.chunked_upload = upload
         attrs.setdefault('folder', None)
         return attrs

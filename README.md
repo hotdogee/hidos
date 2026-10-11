@@ -249,6 +249,8 @@ The compose file is the reference deployment. For production:
   `tools/nginx`) and set `SESSION_COOKIE_SECURE=true` and
   `CSRF_COOKIE_SECURE=true`
 * run `python manage.py check --deploy` with the production settings
+* run `python manage.py cleanup_uploads` daily (cron, or
+  `docker compose exec web ...`) to delete abandoned chunked uploads
 
 Uploaded images and results under `/media/` are served by nginx without a
 login, like in the 2016 deployment. The paths contain the task id, which is

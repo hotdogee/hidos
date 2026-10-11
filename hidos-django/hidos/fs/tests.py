@@ -253,3 +253,25 @@ def test_abort_upload_removes_data(auth_client):
     assert not ChunkedUpload.objects.exists()
     import os
     assert not os.path.exists(path)
+
+
+def test_invalid_upload_data_is_rejected_and_kept_for_retry(auth_client):
+    upload = auth_client.post(FS + 'uploads', {'filename': 'x.png', 'size': 10}, format='json').json()
+    auth_client.put(FS + 'uploads/' + upload['id'], b'0123456789', content_type='application/octet-stream')
+    response = auth_client.post('/api/v1/cell/c2/tasks', {'upload': upload['id']}, format='json')
+    assert response.status_code == 400
+    # the file is closed again, so the upload can still be deleted
+    assert auth_client.delete(FS + 'uploads/' + upload['id']).status_code == 204
+
+
+def test_cleanup_uploads_command(auth_client, settings):
+    import datetime
+    import os
+    from django.core.management import call_command
+    old = auth_client.post(FS + 'uploads', {'filename': 'old.png', 'size': 10}, format='json').json()
+    new = auth_client.post(FS + 'uploads', {'filename': 'new.png', 'size': 10}, format='json').json()
+    ChunkedUpload.objects.filter(pk=old['id']).update(created=ChunkedUpload.objects.get(pk=old['id']).created - datetime.timedelta(days=2))
+    old_path = ChunkedUpload.objects.get(pk=old['id']).path
+    call_command('cleanup_uploads')
+    assert list(ChunkedUpload.objects.values_list('filename', flat=True)) == ['new.png']
+    assert not os.path.exists(old_path)
