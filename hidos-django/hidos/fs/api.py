@@ -6,6 +6,7 @@ from rest_framework.response import Response
 
 from .models import Folder, File
 from .serializers import FolderSerializer, FileSerializer, FolderFilesSerializer
+from .download import zip_response
 
 
 class FileViewSet(viewsets.ModelViewSet):
@@ -76,6 +77,20 @@ class FileViewSet(viewsets.ModelViewSet):
         }
 
         return Response(data)
+
+    @action(detail=False, methods=['get', 'post'])
+    def download(self, request, *args, **kwargs):
+        """
+        Batch download (#35): a zip of the result images (and a results.csv)
+        of the selected tasks. Folders are included recursively.
+        GET ?ids=<id>,<id>  or  POST {"ids": [<id>, ...]}
+        """
+        if request.method == 'POST':
+            ids = request.data.get('ids', [])
+        else:
+            ids = [i for i in request.query_params.get('ids', '').split(',') if i]
+        include_uploaded = str(request.query_params.get('uploaded', request.data.get('uploaded', ''))).lower() in ('1', 'true', 'yes')
+        return zip_response(self.get_queryset(), ids, include_uploaded=include_uploaded)
 
 
 class FolderViewSet(viewsets.ModelViewSet):

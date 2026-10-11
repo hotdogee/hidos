@@ -1,4 +1,6 @@
+import io
 import shutil
+import zipfile
 
 import pytest
 from rest_framework.authtoken.models import Token
@@ -152,3 +154,34 @@ def test_delete_folder_deletes_contents(auth_client, fake_cellc2):
     task = create_task(auth_client, folder['id'])
     assert auth_client.delete(FS + folder['id']).status_code == 204
     assert not File.objects.filter(pk__in=[folder['id'], task['id']]).exists()
+
+
+# --- batch download (#35) ---------------------------------------------------------
+
+def test_batch_download_zip_of_results(auth_client, fake_cellc2):
+    folder = create_folder(auth_client, 'Plate 1')
+    t1 = create_task(auth_client, folder['id'], image_file('well A1.png', color=(1, 2, 3)))
+    t2 = create_task(auth_client, None, image_file('b.png', color=(4, 5, 6)))
+    response = auth_client.post(FS + 'download', {'ids': [folder['id'], t2['id']]}, format='json')
+    assert response.status_code == 200
+    assert response['Content-Type'] == 'application/zip'
+    archive = zipfile.ZipFile(io.BytesIO(b''.join(response.streaming_content)))
+    names = archive.namelist()
+    assert 'results.csv' in names
+    assert any(n.startswith('Plate 1/well A1_') and n.endswith('_result.png') for n in names)
+    assert any(n.startswith('b_') and n.endswith('_result.png') for n in names)
+    csv = archive.read('results.csv').decode()
+    assert 'confluence' in csv and t1['id'] in csv and '12.34' in csv
+
+
+def test_batch_download_only_includes_own_files(auth_client, other_client, fake_cellc2):
+    task = create_task(auth_client)
+    response = other_client.get(FS + 'download', {'ids': task['id']})
+    assert response.status_code == 200
+    archive = zipfile.ZipFile(io.BytesIO(b''.join(response.streaming_content)))
+    assert archive.namelist() == ['results.csv']
+
+
+def test_batch_download_rejects_bad_ids(auth_client):
+    assert auth_client.get(FS + 'download', {'ids': 'nope'}).status_code == 400
+    assert auth_client.get(FS + 'download').status_code == 400
