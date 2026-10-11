@@ -26,7 +26,9 @@ def fake_cellc2(monkeypatch):
 
 
 def create_folder(client, name, folder=None):
-    data = {'name': name, 'folder': folder}
+    data = {'name': name}
+    if folder is not None:
+        data['folder'] = folder
     response = client.post(FS, data, format='json')
     assert response.status_code == 201, response.content
     return response.json()
@@ -42,6 +44,15 @@ def create_task(client, folder=None, image=None):
 
 
 # --- folders --------------------------------------------------------------------
+
+def test_create_folder_in_home_without_folder_field(auth_client, user):
+    folder = create_folder(auth_client, 'Experiments')
+    assert folder['folder'] is None
+    assert folder['owner'] == user.pk
+    home = auth_client.get(FS + 'home').json()
+    assert home['name'] == 'Home'
+    assert [f['id'] for f in home['files']] == [folder['id']]
+
 
 def test_nested_folder_path_and_breadcrumbs(auth_client):
     parent = create_folder(auth_client, 'A')

@@ -35,7 +35,7 @@ class FileType(models.Model):
 
 class FileManager(models.Manager):
 
-    def create(self, name, owner, folder, **kwargs): # QuerySet
+    def create(self, name, owner, folder=None, **kwargs): # QuerySet
         """
         Create a new folder given the name and parent folder
         and returns the file_model
@@ -86,7 +86,7 @@ class File(TimeStampedModel):
 
 class FolderManager(models.Manager):
 
-    def create(self, name, owner, folder, **kwargs): # QuerySet
+    def create(self, name, owner, folder=None, **kwargs): # QuerySet
         """
         Create a new folder given the name and parent folder
         """

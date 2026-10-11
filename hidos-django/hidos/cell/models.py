@@ -79,9 +79,10 @@ class ViewableQuerySet(models.query.QuerySet):
 
 class SingleImageUploadManager(models.Manager):
 
-    def create(self, file, owner, folder, **kwargs): # QuerySet, file=file, owner=user
+    def create(self, file, owner, folder=None, **kwargs): # QuerySet, file=file, owner=user
         """
-        Create a CellTaskModel from a validated UploadedFile object
+        Create a CellTaskModel from a validated UploadedFile object.
+        folder=None is the user's Home folder (#98).
         """
         # app
         app_name = self.model.__module__.split('.')[0]

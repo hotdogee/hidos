@@ -21,6 +21,22 @@ def get_task(task_id):
     return Task.objects.get(pk=task_id)
 
 
+def test_create_task_in_home_folder(auth_client, user, fake_cellc2):
+    """Tasks can be created in Home, i.e. without a folder (#98)."""
+    data = create_task(auth_client)
+    assert data['folder'] is None
+    assert data['type'] == 'cellc2'
+    assert data['name'] == 'cells.png'
+    task = get_task(data['id'])
+    # CELERY_TASK_ALWAYS_EAGER: the (fake) analysis already ran
+    assert task.status == 'success'
+    assert task.result == {'confluence': 12.5, 'count': 3}
+    assert task.owner == user
+    assert task.dequeued and task.finished
+    home = auth_client.get('/api/v1/fs/home').json()
+    assert data['id'] in [f['id'] for f in home['files']]
+
+
 def test_create_task_in_folder(auth_client, fake_cellc2):
     folder = create_folder(auth_client, 'Plate')
     data = create_task(auth_client, folder['id'])
