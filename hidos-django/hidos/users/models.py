@@ -1,3 +1,6 @@
+import uuid
+from os import path
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.utils.translation import gettext_lazy as _
@@ -33,9 +36,16 @@ class UserManager(BaseUserManager):
 
         return self._create_user( email, password, **extra_fields)
 
+def user_image_path(instance, filename):
+    """Profile images are stored under a random name, never the uploaded one."""
+    ext = path.splitext(filename)[1].lower()[:10]
+    return 'users/images/{0}{1}'.format(uuid.uuid4().hex, ext)
+
+
 class User(AbstractUser):
     """
     Email and password are required. Other fields are optional.
+    The email address is the account name (#74).
     """
     username_validator = None
     username = None
@@ -47,6 +57,12 @@ class User(AbstractUser):
             'unique': _("A user with that username already exists."),
         },
     )
+
+    # Profile (#74)
+    image = models.ImageField(_('profile image'), upload_to=user_image_path, max_length=255, blank=True)
+    organization = models.CharField(_('organization'), max_length=255, blank=True)
+    language = models.CharField(_('language'), max_length=10, blank=True, default='en',
+        help_text=_('Preferred interface language, one of settings.LANGUAGES.'))
 
     objects = UserManager()
 

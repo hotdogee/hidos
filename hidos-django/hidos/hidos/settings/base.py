@@ -82,6 +82,12 @@ AUTH_USER_MODEL = 'users.User'
 
 LANGUAGE_CODE = 'en-us'
 
+# Languages a user can pick in their profile (users.User.language)
+LANGUAGES = [
+    ('en', 'English'),
+    ('zh-hant', 'Traditional Chinese'),
+]
+
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 TIME_ZONE = env('TIME_ZONE', default='Asia/Taipei')
@@ -344,6 +350,9 @@ CELERY_TASK_EAGER_PROPAGATES = False
 # Error reports from failed analysis tasks (#63); leave empty to disable.
 SLACK_WEBHOOK_URL = env('SLACK_WEBHOOK_URL', default='')
 SLACK_CHANNEL = env('SLACK_CHANNEL', default='#image-bug')
+
+# Largest accepted profile image (#74)
+PROFILE_IMAGE_MAX_BYTES = env.int('PROFILE_IMAGE_MAX_BYTES', default=2 * 1024 * 1024)
 
 # REST framework
 # The fs and cell APIs are protected by tokens (#96): JWT from the login API,

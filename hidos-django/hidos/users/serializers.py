@@ -80,12 +80,26 @@ class JWTSerializer(BaseJWTSerializer):
 
 class UserDetailsSerializer(serializers.ModelSerializer):
     """
-    User model w/o password
+    User model w/o password, including the profile fields (#75)
     """
+    image = serializers.ImageField(required=False, allow_null=True, use_url=True)
+
     class Meta:
         model = UserModel
         read_only_fields = ('email', 'is_staff', 'is_active', 'date_joined', 'last_login', 'get_full_name', 'get_short_name')
-        fields = ('first_name', 'last_name') + read_only_fields
+        fields = ('first_name', 'last_name', 'organization', 'language', 'image') + read_only_fields
+
+    def validate_language(self, language):
+        if language and language not in dict(settings.LANGUAGES):
+            raise serializers.ValidationError(
+                _('Unsupported language. Choose one of: %s') % ', '.join(dict(settings.LANGUAGES)))
+        return language
+
+    def validate_image(self, image):
+        if image and image.size > settings.PROFILE_IMAGE_MAX_BYTES:
+            raise serializers.ValidationError(
+                _('Profile images must be smaller than %d KB.') % (settings.PROFILE_IMAGE_MAX_BYTES // 1024))
+        return image
 
 
 class RegisterSerializer(serializers.Serializer):

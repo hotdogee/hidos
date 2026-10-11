@@ -10,13 +10,14 @@ from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
 from django.core import mail
 
-from conftest import PASSWORD, make_user
+from conftest import PASSWORD, image_file, make_user
 
 pytestmark = pytest.mark.django_db
 User = get_user_model()
 
 LOGIN = '/api/v1/auth/login/'
 REGISTER = '/api/v1/auth/registration/'
+PROFILE = '/api/v1/auth/user/'
 
 
 # --- local signup (#18) ---------------------------------------------------------
@@ -103,6 +104,37 @@ def test_password_reset_round_trip(api_client, client, user):
     assert done.status_code == 302
     login = api_client.post(LOGIN, {'email': user.email, 'password': new_password}, format='json')
     assert login.status_code == 200
+
+
+# --- profile (#74, #75, #76) --------------------------------------------------------
+
+def test_profile_get_and_update(auth_client, user):
+    data = auth_client.get(PROFILE).json()
+    assert data['email'] == user.email
+    assert data['organization'] == '' and data['language'] == 'en' and data['image'] is None
+    response = auth_client.patch(PROFILE, {'organization': 'Meridigen', 'language': 'zh-hant',
+                                           'email': 'hijack@example.com', 'is_staff': True}, format='json')
+    assert response.status_code == 200, response.content
+    user.refresh_from_db()
+    assert user.organization == 'Meridigen' and user.language == 'zh-hant'
+    assert user.email == 'alice@example.com' and not user.is_staff  # read only
+
+
+def test_profile_language_must_be_supported(auth_client):
+    assert auth_client.patch(PROFILE, {'language': 'klingon'}, format='json').status_code == 400
+
+
+def test_profile_image_upload(auth_client, user, settings):
+    response = auth_client.patch(PROFILE, {'image': image_file('me.png')}, format='multipart')
+    assert response.status_code == 200, response.content
+    user.refresh_from_db()
+    assert user.image.name.startswith('users/images/') and 'me' not in user.image.name
+    settings.PROFILE_IMAGE_MAX_BYTES = 10
+    assert auth_client.patch(PROFILE, {'image': image_file('big.png')}, format='multipart').status_code == 400
+
+
+def test_profile_requires_authentication(api_client):
+    assert api_client.get(PROFILE).status_code == 401
 
 
 # --- social accounts are merged by email (#67) ---------------------------------------
