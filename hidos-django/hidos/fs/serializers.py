@@ -1,16 +1,12 @@
-from __future__ import absolute_import, unicode_literals
 import re
-import sys
-import json
 from collections import OrderedDict
+from importlib import import_module
 
-from django.db import models
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.db.models.fields.files import FieldFile
 from django.core.validators import RegexValidator
 
 from rest_framework import serializers
-from rest_framework import filters
 from rest_framework import fields
 from rest_framework import relations
 from rest_framework.exceptions import ValidationError
@@ -45,11 +41,11 @@ class ContentRelatedField(serializers.RelatedField):
         Serialize tagged objects to a simple textual representation.
         """
         content = {}
-        for k in value.__dict__:
-            if k not in self.ignore_keys and k[-6:] != '_cache':
+        for k in list(value.__dict__):
+            if k not in self.ignore_keys and not k.startswith('_') and k[-6:] != '_cache':
                 v = getattr(value, k)
                 if isinstance(v, FieldFile):
-                    content[k] = v.url
+                    content[k] = v.url if v else None
                 else:
                     content[k] = v
         return content
@@ -69,21 +65,16 @@ class FolderRelatedField(serializers.PrimaryKeyRelatedField):
 class NotSelfContainedFolderValidator(object):
 
     message = _('Can not move a folder inside itself.')
+    requires_context = True
 
     def __init__(self, message=None):
         self.message = message or self.message
 
-    def set_context(self, serializer):
-        """
-        This hook is called by the serializer instance,
-        prior to the validation call being made.
-        """
+    def __call__(self, attrs, serializer):
         # Determine the existing instance, if this is an update operation.
-        self.instance = getattr(serializer, 'instance', None)
-
-    def __call__(self, attrs):
+        instance = getattr(serializer, 'instance', None)
         folder = attrs['folder']
-        if self.instance and folder and (folder.id == self.instance.id):
+        if instance and folder and (folder.id == instance.id):
             raise ValidationError(self.message)
 
 
@@ -109,14 +100,14 @@ class FileSerializer(serializers.ModelSerializer):
         """
         # recursive check
         if type(instance).__name__ != type(instance.content).__name__:
-            # get the module, will raise KeyError if module cannot be found
+            # get the module, will raise ImportError if module cannot be found
             # get the class, will raise AttributeError if class cannot be found
             try:
                 app_label = instance.content_type.app_label
                 model_class_name = type(instance.content).__name__
-                serializer = getattr(sys.modules[app_label + '.serializers'], model_class_name + 'Serializer')()
+                serializer = getattr(import_module(app_label + '.serializers'), model_class_name + 'Serializer')(context=self.context)
                 return serializer.to_representation(instance.content)
-            except (KeyError, AttributeError):
+            except (ImportError, AttributeError):
                 pass
         ret = OrderedDict()
 
@@ -150,14 +141,14 @@ class FolderFilesSerializer(FileSerializer):
         """
         # recursive check
         if type(instance).__name__ != type(instance.content).__name__ and type(instance.content).__name__ != 'Folder':
-            # get the module, will raise KeyError if module cannot be found
+            # get the module, will raise ImportError if module cannot be found
             # get the class, will raise AttributeError if class cannot be found
             try:
                 app_label = instance.content_type.app_label
                 model_class_name = type(instance.content).__name__
-                serializer = getattr(sys.modules[app_label + '.serializers'], model_class_name + 'Serializer')()
+                serializer = getattr(import_module(app_label + '.serializers'), model_class_name + 'Serializer')(context=self.context)
                 return serializer.to_representation(instance.content)
-            except (KeyError, AttributeError):
+            except (ImportError, AttributeError):
                 pass
         ret = OrderedDict()
 

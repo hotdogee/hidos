@@ -1,43 +1,69 @@
-﻿from __future__ import absolute_import, unicode_literals
 import sys
 import json
+import math
 import time
-import urllib3
-from pytz import utc
 from os import path, stat
-from itertools import groupby
-from subprocess import Popen, PIPE
-from datetime import datetime, timedelta
 
-from PIL import Image
-
-import django
+import urllib3
 
 from celery import Task
-from celery.task.schedules import crontab
-from celery.decorators import periodic_task
 from celery.utils.log import get_task_logger
-from celery.signals import task_sent, task_success, task_failure
+from celery.signals import after_task_publish, task_success, task_failure
 
 from django.conf import settings
 from django.core.cache import cache
+from django.utils import timezone
 
 
 logger = get_task_logger(__name__)
 
 
+def json_safe(value):
+    """
+    Analysis results contain NumPy scalars and arrays (and sometimes NaN);
+    turn them into plain JSON values for the result JSONField.
+    """
+    if isinstance(value, dict):
+        return {str(k): json_safe(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [json_safe(v) for v in value]
+    if hasattr(value, 'tolist'):  # numpy arrays and scalars
+        return json_safe(value.tolist())
+    if isinstance(value, float) and (math.isnan(value) or math.isinf(value)):
+        return None
+    return value
+
+
+def report_error(app_name, task_record, error):
+    """Post a failed task to Slack (#63) when SLACK_WEBHOOK_URL is set."""
+    if not settings.SLACK_WEBHOOK_URL:
+        return
+    data = {
+        'channel': settings.SLACK_CHANNEL, 'username': app_name,
+        'icon_emoji': ':desktop_computer:',
+        'text': '{0}\n{1}\n{2}\n`{3}`'.format(
+            task_record.owner.email if task_record.owner else '-', task_record.name,
+            error, path.basename(task_record.uploaded_image.name)
+        ),
+    }
+    try:
+        slack_manager = urllib3.PoolManager(1)
+        slack_manager.request('POST', settings.SLACK_WEBHOOK_URL,
+            body=json.dumps(data), headers={'Content-Type': 'application/json'}, timeout=10)
+    except Exception:
+        logger.exception('Could not send the error report to Slack')
+
+
 class CellTask(Task):
-    abstract = True
 
     def process_image(self, app_name, task_id, logger=logger):
         app = sys.modules[app_name]
         model = app.models.Task
         func = app.run
-        django.setup()
 
         # update dequeue time, status and progress bar
         task_record = model.objects.get(id__exact=task_id)
-        task_record.dequeued = datetime.utcnow().replace(tzinfo=utc)
+        task_record.dequeued = timezone.now()
         task_record.status = 'running'
         task_record.progress = 0.1
         task_record.save()
@@ -45,24 +71,12 @@ class CellTask(Task):
 
         # run
         try:
-            task_record.result = func(task_record)
+            task_record.result = json_safe(func(task_record))
         except Exception as e:
-            task_record.stderr = e
-            # slack report templatera
-            import urllib3
-            slack_manager = urllib3.PoolManager(1)
-            data = {
-                'channel': '#image-bug', 'username': app_name,
-                'icon_emoji': ':desktop_computer:',
-                'text': '{0}\n{1}\n{2}\n`{3}`'.format(
-                    task_record.owner.username, task_record.name, e.args[0], task_record.uploaded_image.path.split('/')[-1]
-                ),
-            }
-            slack_manager.request('POST', 'https://hooks.slack.com/services/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', 
-                body=json.dumps(data), headers={'Content-Type': 'application/json'})
-            logger.error('{0} worker error: {1}'.format(app_name, data['text']))
+            # error reports go to Slack when SLACK_WEBHOOK_URL is set (#63)
+            logger.error('{0} worker error: {1} ({2}: {3})'.format(app_name, task_id, type(e).__name__, e))
+            report_error(app_name, task_record, e.args[0] if e.args else repr(e))
             raise
-            
 
         # update result state
         task_record.status = 'failed'
@@ -76,7 +90,7 @@ class CellTask(Task):
             #Image.open(task_record.result_image.path).save(task_record.result_display.path)
 
         task_record.progress = 1.0
-        task_record.finished = datetime.utcnow().replace(tzinfo=utc)
+        task_record.finished = timezone.now()
         task_record.save()
         logger.info('{0} worker {1}: {2}'.format(app_name, task_record.status, task_id))
 
@@ -90,18 +104,19 @@ if settings.USE_CACHE:
     acquire_lock = lambda: cache.add(LOCK_ID, 'true', LOCK_EXPIRE)
     release_lock = lambda: cache.delete(LOCK_ID)
 
-@task_sent.connect
-def task_sent_handler(sender=None, task_id=None, task=None, args=None, kwargs=None, **kwds):
+@after_task_publish.connect
+def task_sent_handler(sender=None, headers=None, body=None, **kwds):
     if settings.USE_CACHE:
+        task_id = (headers or {}).get('id')
+        args = body[0] if body else None
         while not acquire_lock():
             time.sleep(0.1)
         try:
             tlist = cache.get(CACHE_ID, [])
             if args:
-                bid = args[0] # blast_task_id
+                bid = args[0] # cell task id
                 tlist.append( (task_id,bid) )
-                #logger.info('[task_sent] task sent: %s. queue length: %s' % (bid, len(tlist)) )
-                print('[task_sent] task sent: %s. queue length: %s' % (bid, len(tlist)) )
+                logger.info('[task_sent] task sent: %s. queue length: %s' % (bid, len(tlist)) )
                 cache.set(CACHE_ID, tlist)
             else:
                 logger.info('[task_sent] no args. rabbit task_id: %s' % (task_id) )
@@ -125,7 +140,7 @@ def task_success_handler(sender=None, result=None, **kwds):
                 logger.info('[task_success] task done: %s. queue length: %s' % (task_id, len(tlist)) )
                 cache.set(CACHE_ID, tlist)
             else:
-                logger.info('[task_success] no queue list or blast task id.')
+                logger.info('[task_success] no queue list or cell task id.')
         finally:
             release_lock()
 

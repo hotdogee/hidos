@@ -1,12 +1,11 @@
-from __future__ import absolute_import, unicode_literals
+import logging
 
-from rest_framework import filters
-from rest_framework import generics
-from rest_framework import serializers
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
-from rest_framework import exceptions, status
+from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.decorators import list_route
+
+logger = logging.getLogger(__name__)
 
 
 from .models import Task
@@ -26,8 +25,8 @@ class TaskViewSet(viewsets.ModelViewSet):
      * move(destination)
     """
     lookup_field = 'id'
-    filter_backends = (filters.DjangoFilterBackend,)
-    filter_fields = ('id', )
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('id', )
     pagination_class = None
 
     def get_queryset(self):
@@ -58,7 +57,7 @@ class TaskViewSet(viewsets.ModelViewSet):
     #     serializer = self.get_serializer(queryset, many=True)
     #     return Response(serializer.data)
 
-    @list_route()
+    @action(detail=False)
     def running(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         running_tasks = queryset.filter(owner=request.user, status__in=['queued', 'running'])

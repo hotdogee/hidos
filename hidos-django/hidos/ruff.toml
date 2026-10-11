@@ -1,0 +1,17 @@
+# Lint for correctness (syntax errors, undefined names, unused imports in the
+# web code) without restyling the 2016 code base.
+target-version = "py312"
+line-length = 120
+extend-exclude = [
+    "env",
+    ".venv",
+    "old_views",
+    "*.ipynb",  # 2016 scratch notebooks (Python 2 kernel)
+    "cell/pymorph.py",  # verbatim port of pymorph 0.96, see its header
+]
+
+[lint]
+select = ["E9", "F63", "F7", "F82"]
+
+[lint.per-file-ignores]
+"*/bin/*" = ["F821"]

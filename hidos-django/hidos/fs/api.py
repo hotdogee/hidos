@@ -1,12 +1,7 @@
-from __future__ import absolute_import, unicode_literals
-
-from rest_framework import filters
-from rest_framework import generics
-from rest_framework import serializers
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
-from rest_framework import exceptions, status
+from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.decorators import list_route
 
 
 from .models import Folder, File
@@ -24,8 +19,8 @@ class FileViewSet(viewsets.ModelViewSet):
     """
     queryset = File.objects.all()
     serializer_class = FileSerializer
-    filter_backends = (filters.DjangoFilterBackend,)
-    filter_fields = ('type', 'folder')
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('type', 'folder')
     pagination_class = None
 
     def get_queryset(self): # GenericAPIView
@@ -41,7 +36,7 @@ class FileViewSet(viewsets.ModelViewSet):
         (Eg. return a list of items that is specific to the user)
         """
         if not self.request.user.is_anonymous:
-            return File.objects.filter(owner=self.request.user)
+            return File.objects.filter(owner=self.request.user).select_related('content_type').prefetch_related('content')
         else:
             return File.objects.none()
 
@@ -50,17 +45,22 @@ class FileViewSet(viewsets.ModelViewSet):
         # and username will be an empty string.
         obj = serializer.save(owner=self.request.user) # returns create model instance
 
+    def perform_update(self, serializer): # UpdateModelMixin
+        instance = serializer.save()
+        # re-read so the response doesn't show the prefetched (stale) content
+        serializer.instance = self.get_queryset().get(pk=instance.pk)
 
-    @list_route()
+
+    @action(detail=False)
     def home(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset()).filter(folder__isnull=True)
 
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = FolderFilesSerializer(page, many=True)
+            serializer = FolderFilesSerializer(page, many=True, context=self.get_serializer_context())
             return self.get_paginated_response(serializer.data)
 
-        serializer = FolderFilesSerializer(queryset, many=True)
+        serializer = FolderFilesSerializer(queryset, many=True, context=self.get_serializer_context())
 
         data = {
             'id': None,
@@ -94,8 +94,8 @@ class FolderViewSet(viewsets.ModelViewSet):
     """
     queryset = Folder.objects.all()
     serializer_class = FolderSerializer
-    filter_backends = (filters.DjangoFilterBackend,)
-    filter_fields = ('folder',)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('folder',)
     pagination_class = None
 
     def get_queryset(self): # GenericAPIView

@@ -1,18 +1,13 @@
-from __future__ import absolute_import, unicode_literals
-import re
 import sys
 import uuid
-from os import path
 
 from django.db import models
 from django.conf import settings
-from django.core.validators import RegexValidator
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 
 from django_extensions.db.models import TimeStampedModel
 
-from . import app_name, verbose_name, version
 
 # class TimeStampedModel(models.Model):
 #     """ TimeStampedModel
@@ -73,11 +68,11 @@ class File(TimeStampedModel):
 
     objects = FileManager()
 
-    def __unicode__(self):
+    def __str__(self):
         return '{0} ({1})'.format(self.name, self.id.hex[:6])
 
     class Meta(TimeStampedModel.Meta):
-        pass
+        ordering = ('-modified', '-created',)
 
 
 class FolderManager(models.Manager):
@@ -131,7 +126,8 @@ class Folder(File):
             return self.folder.breadcrumbs(folder_list)
 
     class Meta(File.Meta):
-        pass
+        # File.Meta resolves to TimeStampedModel.Meta here, so repeat the ordering
+        ordering = ('-modified', '-created',)
 
     # built in
     # def to_python(self, value): # CharField

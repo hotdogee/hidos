@@ -3,7 +3,7 @@ from os import path
 
 from django.db import models
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from cell.models import File, CellTask, ViewableQuerySet, SingleImageUploadManager
 from .tasks import analysis

@@ -1,9 +1,6 @@
-﻿from __future__ import absolute_import, unicode_literals
-
-from django.conf.urls import url
+﻿from django.urls import re_path as url
 
 from . import api
-from . import views
 from . import app_name # application namespace
 
 # url(r'^api/v1/fs/', include('fs.urls', namespace='fs')),

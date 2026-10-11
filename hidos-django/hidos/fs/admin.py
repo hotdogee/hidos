@@ -7,8 +7,8 @@ class FileAdmin(admin.ModelAdmin):
     fields = ('id', 'owner', 'folder', 'name', 'type', 'content_type', 'content_id',
             'created', 'modified')
     readonly_fields = ('id', 'created', 'modified')
-    search_fields = ['id', 'owner', 'type', 'name']
+    search_fields = ['id', 'owner__email', 'type', 'name']
     list_filter = ('owner', 'content_type')
-    list_display = ('__unicode__', 'type', 'folder', 'owner', 'modified')
+    list_display = ('__str__', 'type', 'folder', 'owner', 'modified')
 
 admin.site.register(File, FileAdmin)

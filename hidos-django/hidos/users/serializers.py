@@ -1,17 +1,15 @@
-from django.contrib.auth import get_user_model, authenticate
 from django.conf import settings
-from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
-from django.contrib.auth.tokens import default_token_generator
-from django.utils.http import urlsafe_base64_decode as uid_decoder
-from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import force_text
+from django.contrib.auth import get_user_model, authenticate
+from django.utils.translation import gettext_lazy as _
 
 from rest_framework import serializers, exceptions
-from rest_framework.exceptions import ValidationError
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from allauth.utils import email_address_exists
+from allauth.account import app_settings as allauth_account_settings
 from allauth.account.adapter import get_adapter
+from allauth.account.models import EmailAddress
 from allauth.account.utils import setup_user_email
+from dj_rest_auth.serializers import JWTSerializer as BaseJWTSerializer
 
 # Get the UserModel
 UserModel = get_user_model()
@@ -25,7 +23,7 @@ class LoginSerializer(serializers.Serializer):
         user = None
 
         if email and password:
-            user = authenticate(email=email, password=password)
+            user = authenticate(self.context.get('request'), email=email, password=password)
         else:
             msg = _('Must include "email" and "password".')
             raise exceptions.ValidationError(msg)
@@ -48,22 +46,36 @@ class LoginSerializer(serializers.Serializer):
             raise exceptions.ValidationError(msg)
 
         # If required, is the email verified?
-        if 'rest_auth.registration' in settings.INSTALLED_APPS:
-            from allauth.account import app_settings
-            if app_settings.EMAIL_VERIFICATION == app_settings.EmailVerificationMethod.MANDATORY:
-                email_address = user.emailaddress_set.get(email=user.email)
-                if not email_address.verified:
+        if 'dj_rest_auth.registration' in settings.INSTALLED_APPS:
+            if allauth_account_settings.EMAIL_VERIFICATION == allauth_account_settings.EmailVerificationMethod.MANDATORY:
+                if not user.emailaddress_set.filter(email__iexact=user.email, verified=True).exists():
                     raise serializers.ValidationError(_('E-mail is not verified.'))
 
         attrs['user'] = user
         return attrs
 
 
-class JWTSerializer(serializers.Serializer):
+class TokenClaimsSerializer(TokenObtainPairSerializer):
+    """
+    JWT claims. The token identifies the user by id; email and full_name are
+    included for clients (the username is not, see #95).
+    """
+
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        token['email'] = user.email
+        token['full_name'] = user.get_full_name()
+        return token
+
+
+class JWTSerializer(BaseJWTSerializer):
     """
     Serializer for JWT authentication.
+    `token` is the access token, kept for clients written against the
+    djangorestframework-jwt API; `access`, `refresh` and `user` are new.
     """
-    token = serializers.CharField()
+    token = serializers.CharField(source='access', read_only=True)
 
 
 class UserDetailsSerializer(serializers.ModelSerializer):
@@ -78,11 +90,11 @@ class UserDetailsSerializer(serializers.ModelSerializer):
 
 class RegisterSerializer(serializers.Serializer):
     first_name = serializers.CharField(
-        required=False, max_length=30,
+        required=False, max_length=150,
         style={'placeholder': '(Optional)'}
     )
     last_name = serializers.CharField(
-        required=False, max_length=30,
+        required=False, max_length=150,
         style={'placeholder': '(Optional)'}
     )
     email = serializers.EmailField(
@@ -99,7 +111,8 @@ class RegisterSerializer(serializers.Serializer):
 
     def validate_email(self, email):
         email = get_adapter().clean_email(email)
-        if email and email_address_exists(email):
+        if email and (UserModel.objects.filter(email__iexact=email).exists()
+                      or EmailAddress.objects.filter(email__iexact=email).exists()):
             raise serializers.ValidationError(
                 _("A user is already registered with this e-mail address."))
         return email

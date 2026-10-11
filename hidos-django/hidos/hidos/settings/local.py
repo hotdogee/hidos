@@ -1,46 +1,33 @@
-﻿"""
+"""
 local settings
 """
-from __future__ import absolute_import, unicode_literals
+from .base import *  # noqa: F401,F403
+from .base import ALLOWED_HOSTS, CORS_ALLOWED_ORIGINS, LOG_LEVEL, REPO_ROOT, REST_FRAMEWORK, build_logging, env, path
 
-from .base import *
+DEBUG = env.bool('DJANGO_DEBUG', default=True)
 
-DEBUG = True
+# Development only; production requires DJANGO_SECRET_KEY.
+SECRET_KEY = env('DJANGO_SECRET_KEY', default='django-insecure-local-development-key-do-not-use-in-production')
 
 ALLOWED_HOSTS = ALLOWED_HOSTS + [
     '127.0.0.1',
     'localhost',
-    '10.1.80.2',
-    '10.0.20.86',
 ]
 
-CORS_ORIGIN_ALLOW_ALL = False
-
-CORS_ORIGIN_WHITELIST = (
-    'localhost:8080',
-    'localhost:8082',
-    '10.1.80.2:8082',
-    '10.0.20.86:8082',
-    '.hotdogee.com',
-    '.hidos.io',
-)
-
-INSTALLED_APPS = INSTALLED_APPS + [
-    'corsheaders',
+CORS_ALLOWED_ORIGINS = CORS_ALLOWED_ORIGINS + [
+    'http://localhost:8080',
+    'http://localhost:8082',
 ]
 
-# EMAIL
-DEFAULT_FROM_EMAIL = 'cellcloud@meridigen.com'
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'mail.meridigen.com'
-EMAIL_HOST_USER = 'cellcloud'
-EMAIL_HOST_PASSWORD = 'Meriuser123'
-EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-
+CSRF_TRUSTED_ORIGINS = ['http://localhost:8000', 'http://127.0.0.1:8000']
 
 # REST framework
 REST_FRAMEWORK['DEFAULT_THROTTLE_RATES'] = {
+    **REST_FRAMEWORK['DEFAULT_THROTTLE_RATES'],
     'anon': '100/h',
-    'register_view':'20/h', # rest_auth.register.views.RegisterView
+    'register_view': '20/h',  # users.views.RegisterView
 }
+
+# Keep the old ../../log/*.log files during development
+LOG_DIR = env('LOG_DIR', default=path.join(REPO_ROOT, 'log'))
+LOGGING = build_logging(LOG_LEVEL, LOG_DIR)

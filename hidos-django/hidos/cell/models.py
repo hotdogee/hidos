@@ -1,28 +1,58 @@
-from __future__ import absolute_import, unicode_literals
-import re
+import hashlib
+import io
+import logging
 import sys
 import uuid
-import hashlib
-import imghdr
-import stat as Perm
 import posixpath as path
-from os import makedirs, chmod
 
 import cv2
 import numpy as np
+from PIL import Image
 
 from django.db import models
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
-from django.core.validators import RegexValidator
-from django.contrib.postgres.fields import JSONField
-
-from django_extensions.db.models import TimeStampedModel
 
 from fs.models import File
 
-from . import app_name, verbose_name, version
+logger = logging.getLogger(__name__)
+
+# Pillow format name -> file extension used for the stored upload
+# (the same names imghdr returned before Python 3.13 removed it)
+IMAGE_TYPES = {'mpo': 'jpeg'}
+
+
+def image_type_of(data):
+    """'jpeg', 'png', 'tiff', ... for the image bytes `data`"""
+    with Image.open(io.BytesIO(data)) as img:
+        fmt = (img.format or 'bin').lower()
+    return IMAGE_TYPES.get(fmt, fmt)
+
+
+def display_jpeg(data):
+    """8-bit JPEG version of an uploaded image for web display"""
+    decoded = cv2.imdecode(np.frombuffer(data, dtype=np.uint8), cv2.IMREAD_COLOR)
+    if decoded is not None:
+        flag, encoded = cv2.imencode('.jpg', decoded)
+        if flag:
+            return encoded.tobytes()
+    # formats OpenCV can't read (e.g. GIF); Pillow validated the upload already
+    with Image.open(io.BytesIO(data)) as img:
+        out = io.BytesIO()
+        img.convert('RGB').save(out, 'JPEG', quality=90)
+        return out.getvalue()
+
+
+def task_id_for(version, owner, data):
+    """
+    Task ids are derived from the app version, the owner and the image, so
+    uploading the same image twice returns the existing task.
+    """
+    m = hashlib.md5()
+    m.update(version.encode('utf-8'))
+    m.update(owner.email.encode('utf-8'))
+    m.update(data)
+    return m.hexdigest()
 
 # Abstract model for a user submitted task
 class Task(File):
@@ -37,12 +67,14 @@ class Task(File):
 
     class Meta(File.Meta):
         abstract = True
+        # File.Meta resolves to TimeStampedModel.Meta here, so repeat the ordering
+        ordering = ('-modified', '-created',)
 
 
 class ViewableQuerySet(models.query.QuerySet):
 
     def viewable_by(self, user):
-        return self.filter(user=user)
+        return self.filter(owner=user)
 
 
 class SingleImageUploadManager(models.Manager):
@@ -54,17 +86,13 @@ class SingleImageUploadManager(models.Manager):
         # app
         app_name = self.model.__module__.split('.')[0]
         app = sys.modules[app_name]
-        print app_name, app
 
         # read to memory
+        file.seek(0)
         uploaded_file_data = file.read()
 
         # Generate task id
-        m = hashlib.md5()
-        m.update(app.version)
-        m.update(owner.email) # if anonymous, username is ''
-        m.update(uploaded_file_data)
-        task_id = m.hexdigest()
+        task_id = task_id_for(app.version, owner, uploaded_file_data)
 
         existing_queryset = self.filter(id=task_id)
         if existing_queryset.exists():
@@ -72,7 +100,7 @@ class SingleImageUploadManager(models.Manager):
             return existing_queryset[0]
 
         # get image format
-        image_type = imghdr.what('', uploaded_file_data)
+        image_type = image_type_of(uploaded_file_data)
         # path_prefix relative to MEDIA_ROOT
         path_prefix = path.join(app_name, 'task', task_id, task_id)
         # avoid exploits, don't any part of the user filename
@@ -102,14 +130,13 @@ class SingleImageUploadManager(models.Manager):
         obj = super(SingleImageUploadManager, self).create(**data)
         obj.content = obj
 
-        # chmod(path.dirname(path.join(settings.MEDIA_ROOT, app_name, 'task', task_id, task_id)), Perm.S_IRWXU | Perm.S_IRWXG | Perm.S_IRWXO)
         # save uploaded image data to file
-        obj.uploaded_image.save(uploaded_image_path, file, save=False)
+        # (FILE_UPLOAD_DIRECTORY_PERMISSIONS lets the worker write results)
+        obj.uploaded_image.save(uploaded_image_path, ContentFile(uploaded_file_data), save=False)
 
         # convert to jpeg for web display
-        uploaded_image_array = np.asarray(bytearray(uploaded_file_data), dtype=np.uint8)
-        flag, uploaded_display_array = cv2.imencode('.jpg', cv2.imdecode(uploaded_image_array, cv2.IMREAD_COLOR))
-        obj.uploaded_display.save(uploaded_display_path, ContentFile(bytearray(uploaded_display_array)), save=False)
+        display_data = display_jpeg(uploaded_file_data)
+        obj.uploaded_display.save(uploaded_display_path, ContentFile(display_data), save=False)
 
         # TODO: Make thumbnail
 
@@ -147,7 +174,7 @@ class CellTask(Task):
     result_image = models.ImageField(max_length=255, blank=True)
     uploaded_display = models.ImageField(max_length=255, blank=True)
     result_display = models.ImageField(max_length=255, blank=True)
-    result = JSONField(default=dict, blank=True) # requires postgres
+    result = models.JSONField(default=dict, blank=True)
     error = models.TextField(blank=True)
 
     objects = SingleImageUploadManager.from_queryset(ViewableQuerySet)()
