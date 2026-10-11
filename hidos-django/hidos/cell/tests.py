@@ -45,6 +45,47 @@ def test_create_task_in_folder(auth_client, fake_cellc2):
     assert [f['id'] for f in listed] == [data['id']]
 
 
+def test_failed_analysis_is_recorded(auth_client, monkeypatch):
+    """A crashing algorithm marks the task failed instead of leaving it 'running' (#12)."""
+    import cellc2
+
+    def broken(task_record):
+        raise ValueError('cannot analyze this image')
+    monkeypatch.setattr(cellc2, 'run', broken)
+    task = get_task(create_task(auth_client)['id'])
+    assert task.status == 'failed'
+    assert 'cannot analyze this image' in task.error
+    assert task.finished is not None
+
+
+def test_failed_task_is_reported_to_slack_only_when_configured(auth_client, monkeypatch, settings):
+    import cellc2
+    import urllib3
+    calls = []
+
+    class Pool:
+        def __init__(self, *a, **k):
+            pass
+
+        def request(self, method, url, **kwargs):
+            calls.append((method, url, kwargs['body']))
+
+    monkeypatch.setattr(urllib3, 'PoolManager', Pool)
+    monkeypatch.setattr(cellc2, 'run', lambda record: 1 / 0)
+    create_task(auth_client, image=image_file(color=(1, 1, 1)))
+    assert calls == []
+    settings.SLACK_WEBHOOK_URL = 'https://hooks.slack.invalid/T000/B000/XXX'
+    create_task(auth_client, image=image_file(color=(2, 2, 2)))
+    assert len(calls) == 1 and calls[0][1] == settings.SLACK_WEBHOOK_URL
+    assert 'alice@example.com' in calls[0][2]
+
+
+def test_missing_result_image_status(auth_client, monkeypatch):
+    import cellc2
+    monkeypatch.setattr(cellc2, 'run', lambda record: {'ratio': 1})
+    assert get_task(create_task(auth_client)['id']).status == 'NO_OUT_JPG'
+
+
 def test_invalid_upload_is_rejected(auth_client):
     bad = image_file()
     bad = type(bad)(b'not an image')

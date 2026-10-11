@@ -68,6 +68,7 @@ class TaskViewSet(viewsets.ModelViewSet):
         # Anonymous users are rejected by the IsAuthenticated permission
         task = serializer.save(owner=self.request.user) # returns create model instance
         # put task in queue
+        logger.info('%s: queued task %s for user %s', task.type, task.id.hex, task.owner_id)
         task.enqueue()
 
     # built-in

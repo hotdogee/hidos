@@ -2,6 +2,7 @@ import sys
 import json
 import math
 import time
+import traceback
 from os import path, stat
 
 import urllib3
@@ -73,8 +74,13 @@ class CellTask(Task):
         try:
             task_record.result = json_safe(func(task_record))
         except Exception as e:
-            # error reports go to Slack when SLACK_WEBHOOK_URL is set (#63)
-            logger.error('{0} worker error: {1} ({2}: {3})'.format(app_name, task_id, type(e).__name__, e))
+            # record the failure so the task doesn't stay 'running' forever (#12)
+            task_record.status = 'failed'
+            task_record.error = traceback.format_exc()
+            task_record.progress = 1.0
+            task_record.finished = timezone.now()
+            task_record.save()
+            logger.error('{0} worker failed: {1} ({2}: {3})'.format(app_name, task_id, type(e).__name__, e))
             report_error(app_name, task_record, e.args[0] if e.args else repr(e))
             raise
 
