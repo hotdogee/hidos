@@ -42,6 +42,14 @@ def test_logout_is_post_only(client, user):
     assert '_auth_user_id' not in client.session
 
 
+def test_account_menu_shows_the_user_and_posts_logout(client, user):
+    """#49: the menu showed the (non-existent) username and opened over its button."""
+    client.force_login(user)
+    html = client.get('/login').content.decode()
+    assert '>Alice<i class="material-icons right">arrow_drop_down' in html
+    assert 'action="/logout" method="post"' in html
+    assert 'belowOrigin: true, alignment: "right"' in html
+
 def test_allauth_pages_are_under_accounts(client):
     assert reverse('account_login') == '/accounts/login/'
     assert client.get('/accounts/signup/').status_code == 200

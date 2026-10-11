@@ -63,6 +63,8 @@
   <script>
     $(document).ready(function(){
       $(".button-collapse").sideNav();
+      // open the account menu below its button, right aligned (#49)
+      $(".dropdown-button").dropdown({belowOrigin: true, alignment: "right", constrain_width: false});
     });
   </script>
 {% block scripts %}{% endblock %}
