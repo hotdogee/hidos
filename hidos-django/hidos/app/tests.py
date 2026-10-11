@@ -101,6 +101,18 @@ def test_task_absolute_url_is_the_result_page(auth_client, fake_cellc2):
     assert task.get_absolute_url() == '/results/' + task.id.hex
 
 
+# --- Google Analytics (#13, #14) ---------------------------------------------------------
+
+def test_google_analytics_off_by_default(client):
+    assert 'googletagmanager' not in client.get('/login').content.decode()
+
+
+def test_google_analytics_when_configured(client, settings):
+    settings.GOOGLE_ANALYTICS_ID = 'G-TEST123'
+    html = client.get('/login').content.decode()
+    assert 'googletagmanager.com/gtag/js?id=G-TEST123' in html
+
+
 # --- admin ------------------------------------------------------------------------------
 
 

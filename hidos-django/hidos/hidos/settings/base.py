@@ -212,6 +212,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 # `allauth` needs this from django
                 'django.template.context_processors.request',
+                'app.context_processors.site_settings',
             ],
         },
     },
@@ -354,6 +355,9 @@ CELERY_TASK_EAGER_PROPAGATES = False
 # Error reports from failed analysis tasks (#63); leave empty to disable.
 SLACK_WEBHOOK_URL = env('SLACK_WEBHOOK_URL', default='')
 SLACK_CHANNEL = env('SLACK_CHANNEL', default='#image-bug')
+
+# Google Analytics (#13); off unless a measurement ID is configured.
+GOOGLE_ANALYTICS_ID = env('GOOGLE_ANALYTICS_ID', default='')
 
 # Largest accepted image for an analysis task
 TASK_UPLOAD_MAX_BYTES = env.int('TASK_UPLOAD_MAX_BYTES', default=200 * 1024 * 1024)

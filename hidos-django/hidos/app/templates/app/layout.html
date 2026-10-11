@@ -25,6 +25,16 @@
     }
   </style>
   {% block head-styles %}{% endblock %}
+  {% if GOOGLE_ANALYTICS_ID %}
+  <!-- Google Analytics (#13), only when GOOGLE_ANALYTICS_ID is configured -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id={{ GOOGLE_ANALYTICS_ID|urlencode }}"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', '{{ GOOGLE_ANALYTICS_ID|escapejs }}');
+  </script>
+  {% endif %}
 </head>
 
 <body>
