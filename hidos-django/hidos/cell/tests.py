@@ -242,3 +242,41 @@ def test_examples_api_is_public(api_client):
 def test_every_app_has_task_endpoints(auth_client):
     for prefix in ('a1', 'c1', 'c2', 'm1', 'm3', 'n1'):
         assert auth_client.get('/api/v1/cell/%s/tasks' % prefix).status_code == 200
+
+
+def corrupt_png():
+    """A PNG whose chunk CRCs are valid (Pillow's verify() passes) but whose pixel data is not."""
+    import struct
+    import zlib
+    data = image_file(size=(32, 32)).getvalue()
+    i = data.index(b'IDAT')
+    length = struct.unpack('>I', data[i - 4:i])[0]
+    payload = b'\x00' * length
+    chunk = b'IDAT' + payload
+    return data[:i] + chunk + struct.pack('>I', zlib.crc32(chunk) & 0xffffffff) + data[i + 4 + length + 4:]
+
+
+def test_undecodable_image_is_rejected_without_leaving_a_task(auth_client, settings):
+    """It used to answer 500 and leave a 'queued' task that was never analyzed."""
+    upload = image_file()
+    upload = type(upload)(corrupt_png())
+    upload.name = 'broken.png'
+    response = auth_client.post(TASKS, {'file': upload}, format='multipart')
+    assert response.status_code == 400, response.content
+    assert 'file' in response.json()
+    assert not File.objects.exists()
+    assert not os.path.exists(os.path.join(settings.MEDIA_ROOT, 'cellc2', 'task')) or \
+        not os.listdir(os.path.join(settings.MEDIA_ROOT, 'cellc2', 'task'))
+
+
+def test_email_change_does_not_hand_over_tasks(auth_client, other_client, user, other_user, fake_cellc2):
+    first = create_task(auth_client)
+    old_email = user.email
+    user.email = 'alice.new@example.com'
+    user.save()
+    other_user.email = old_email
+    other_user.save()
+    second = create_task(other_client)
+    assert second['id'] != first['id']
+    assert second['owner'] == other_user.pk
+    assert get_task(first['id']).owner == user

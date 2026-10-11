@@ -6,6 +6,8 @@ from rest_framework import serializers
 from fs.serializers import FileSerializer
 from fs.uploads import take_completed_upload
 
+from .models import UnreadableImage
+
 
 class TaskSerializer(FileSerializer):
     """
@@ -49,6 +51,8 @@ class TaskSerializer(FileSerializer):
     def create(self, validated_data):
         try:
             return self.Meta.model.objects.create(**validated_data)
+        except UnreadableImage:
+            raise serializers.ValidationError({'file': [_('The image could not be read; it may be damaged.')]})
         finally:
             upload = getattr(self, 'chunked_upload', None)
             if upload is not None:

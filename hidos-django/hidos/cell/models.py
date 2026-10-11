@@ -4,12 +4,13 @@ import logging
 import sys
 import uuid
 import posixpath as path
+import shutil
 
 import cv2
 import numpy as np
 from PIL import Image
 
-from django.db import models
+from django.db import IntegrityError, models, transaction
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.urls import reverse
@@ -55,15 +56,20 @@ def thumbnail_jpeg(display_data, size=None):
         return out.getvalue()
 
 
+class UnreadableImage(ValueError):
+    """The upload passed validation but cannot be decoded."""
+
+
 def task_id_for(version, owner, data):
     """
     Task ids are derived from the app version, the owner and the image, so
     uploading the same image twice returns the existing task. The digest is
-    keyed with SECRET_KEY because the id is also part of the media URLs.
+    keyed with SECRET_KEY because the id is also part of the media URLs, and
+    uses the owner's id, which (unlike the email) never changes.
     """
     m = hmac.new(settings.SECRET_KEY.encode('utf-8'), digestmod='md5')
     m.update(version.encode('utf-8'))
-    m.update((owner.email if not owner.is_anonymous else '').encode('utf-8'))
+    m.update(str(owner.pk).encode('utf-8'))
     m.update(data)
     return m.hexdigest()
 
@@ -108,15 +114,19 @@ class SingleImageUploadManager(models.Manager):
         # Generate task id
         task_id = task_id_for(app.version, owner, uploaded_file_data)
 
-        existing_queryset = self.filter(id=task_id)
-        if existing_queryset.exists():
+        existing = self._existing(task_id, owner)
+        if existing is not None:
             logger.info('%s: task %s already exists', app_name, task_id)
-            existing = existing_queryset[0]
-            existing.is_existing = True
             return existing
 
-        # get image format
-        image_type = image_type_of(uploaded_file_data)
+        # decode before anything is stored: an image Pillow can verify but
+        # not decode must not leave a task behind
+        try:
+            image_type = image_type_of(uploaded_file_data)
+            display_data = display_jpeg(uploaded_file_data)
+            thumbnail_data = thumbnail_jpeg(display_data)
+        except Exception as e:
+            raise UnreadableImage(str(e)) from e
         # path_prefix relative to MEDIA_ROOT
         path_prefix = path.join(app_name, 'task', task_id, task_id)
         # avoid exploits, don't any part of the user filename
@@ -145,23 +155,39 @@ class SingleImageUploadManager(models.Manager):
         }
         if not owner.is_anonymous:
             data['owner'] = owner
-        obj = super(SingleImageUploadManager, self).create(**data)
-        obj.content = obj
+        try:
+            with transaction.atomic():
+                obj = super(SingleImageUploadManager, self).create(**data)
+                obj.content = obj
 
-        # save uploaded image data to file
-        # (FILE_UPLOAD_DIRECTORY_PERMISSIONS lets the worker write results)
-        obj.uploaded_image.save(uploaded_image_path, ContentFile(uploaded_file_data), save=False)
+                # save uploaded image data to file
+                # (FILE_UPLOAD_DIRECTORY_PERMISSIONS lets the worker write results)
+                obj.uploaded_image.save(uploaded_image_path, ContentFile(uploaded_file_data), save=False)
 
-        # convert to jpeg for web display
-        display_data = display_jpeg(uploaded_file_data)
-        obj.uploaded_display.save(uploaded_display_path, ContentFile(display_data), save=False)
+                # jpeg for web display
+                obj.uploaded_display.save(uploaded_display_path, ContentFile(display_data), save=False)
 
-        # thumbnail for previews (#38)
-        obj.thumbnail.save(thumbnail_path, ContentFile(thumbnail_jpeg(display_data)), save=False)
+                # thumbnail for previews (#38)
+                obj.thumbnail.save(thumbnail_path, ContentFile(thumbnail_data), save=False)
 
-        # save to database
-        obj.save()
+                # save to database
+                obj.save()
+        except IntegrityError:
+            # the same image was submitted twice at the same time
+            existing = self._existing(task_id, owner)
+            if existing is None:
+                raise
+            return existing
+        except Exception:
+            shutil.rmtree(path.dirname(path.join(settings.MEDIA_ROOT, uploaded_image_path)), ignore_errors=True)
+            raise
         return obj
+
+    def _existing(self, task_id, owner):
+        existing = self.filter(id=task_id, owner=owner if not owner.is_anonymous else None).first()
+        if existing is not None:
+            existing.is_existing = True
+        return existing
 
     # built-in
     # run create(file=UploadedFile object)
