@@ -9,10 +9,11 @@ import subprocess
 import sys
 
 import pytest
+from allauth.account.models import EmailAddress
 from django.contrib import admin
 from django.urls import reverse
 
-from conftest import PASSWORD
+from conftest import LOOKALIKE, PASSWORD, VICTIM, make_user
 from hidos.settings.base import PROJECT_ROOT, REPO_ROOT
 from fs.tests import create_folder, create_task, fake_run
 
@@ -43,13 +44,22 @@ def test_login_page_logs_in_and_redirects(client, user):
 
 def test_login_page_refuses_unconfirmed_email(client, api_client):
     """Like the login API: signing up with someone else's address must not give a session."""
-    from conftest import make_user
     make_user('unv@example.com', verified=False)
     response = client.post('/login', {'username': 'unv@example.com', 'password': PASSWORD, 'next': '/admin/'})
     assert response.status_code == 200
     assert '_auth_user_id' not in client.session
     assert 'has not been confirmed yet' in response.content.decode()
     assert client.get('/accounts/3rdparty/').status_code == 302  # to the login page
+
+
+def test_login_refuses_unconfirmed_email_with_a_confirmed_lookalike(client, api_client):
+    """Confirming victim@gmaıl.com doesn't confirm victim@gmail.com, whatever PostgreSQL's iexact says."""
+    user = make_user(VICTIM, verified=False)  # e.g. a Facebook login with someone else's address
+    EmailAddress.objects.create(user=user, email=LOOKALIKE, verified=True)  # then added under /accounts/email/
+    response = client.post('/login', {'username': VICTIM, 'password': PASSWORD})
+    assert response.status_code == 200 and '_auth_user_id' not in client.session
+    response = api_client.post('/api/v1/auth/login/', {'email': VICTIM, 'password': PASSWORD}, format='json')
+    assert response.status_code == 400
 
 
 def test_login_page_wrong_password(client, user):

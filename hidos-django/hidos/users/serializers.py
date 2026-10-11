@@ -13,6 +13,8 @@ from allauth.account.utils import setup_user_email
 from dj_rest_auth.registration.serializers import SocialLoginSerializer
 from dj_rest_auth.serializers import JWTSerializer as BaseJWTSerializer
 
+from .emails import has_confirmed_email, same_email
+
 # Get the UserModel
 UserModel = get_user_model()
 
@@ -50,7 +52,7 @@ class LoginSerializer(serializers.Serializer):
         # If required, is the email verified?
         if 'dj_rest_auth.registration' in settings.INSTALLED_APPS:
             if allauth_account_settings.EMAIL_VERIFICATION == allauth_account_settings.EmailVerificationMethod.MANDATORY:
-                if not user.emailaddress_set.filter(email__iexact=user.email, verified=True).exists():
+                if not has_confirmed_email(user):
                     raise serializers.ValidationError(_('E-mail is not verified.'))
 
         attrs['user'] = user
@@ -127,8 +129,11 @@ class RegisterSerializer(serializers.Serializer):
 
     def validate_email(self, email):
         email = get_adapter().clean_email(email)
-        if email and (UserModel.objects.filter(email__iexact=email).exists()
-                      or EmailAddress.objects.filter(email__iexact=email).exists()):
+        # compared as allauth will store it: lower-cased, and str.lower() turns e.g. a Kelvin sign into a k
+        stored = email.lower()
+        if email and any(same_email(existing, stored)
+                         for model in (UserModel, EmailAddress)
+                         for existing in model.objects.filter(email__iexact=stored).values_list('email', flat=True)):
             raise serializers.ValidationError(
                 _("A user is already registered with this e-mail address."))
         return email

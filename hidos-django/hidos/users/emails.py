@@ -26,3 +26,9 @@ def email_key(email):
 
 def same_email(a, b):
     return bool(a) and email_key(a) == email_key(b)
+
+
+def has_confirmed_email(user):
+    """Whether the user confirmed the account's own address (user.email)."""
+    return any(same_email(address.email, user.email)
+               for address in user.emailaddress_set.filter(verified=True))

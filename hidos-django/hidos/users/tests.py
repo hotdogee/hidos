@@ -10,7 +10,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
 from django.core import mail
 
-from conftest import LOOKALIKE, PASSWORD, VICTIM, image_file, make_user
+from conftest import KELVIN, LOOKALIKE, PASSWORD, VICTIM, image_file, make_user
 
 pytestmark = pytest.mark.django_db
 User = get_user_model()
@@ -296,6 +296,54 @@ def test_google_login_is_not_merged_into_account_with_lookalike_address(api_clie
     payload = jwt.decode(response.json()['access'], options={'verify_signature': False})
     assert str(payload['user_id']) == str(victim.pk)
     assert SocialAccount.objects.get(provider='google').user == victim
+
+
+@pytest.mark.parametrize('first, second', [(LOOKALIKE, VICTIM), (VICTIM, LOOKALIKE)])
+def test_lookalike_addresses_are_registered_as_different_accounts(api_client, first, second):
+    """iexact on PostgreSQL refused the second signup: a look-alike could block someone's registration."""
+    first_user = register_and_confirm(api_client, first)
+    second_user = register_and_confirm(api_client, second)
+    assert first_user != second_user
+    for email, user in ((first, first_user), (second, second_user)):
+        response = api_client.post(LOGIN, {'email': email, 'password': PASSWORD}, format='json')
+        assert response.status_code == 200, response.content
+        payload = jwt.decode(response.json()['access'], options={'verify_signature': False})
+        assert str(payload['user_id']) == str(user.pk)
+
+
+def test_register_refuses_address_stored_like_an_existing_one(api_client):
+    """allauth stores addresses with str.lower(), which turns KELVIN into kate@example.com."""
+    make_user('kate@example.com')
+    response = api_client.post(REGISTER, {'email': KELVIN, 'password1': PASSWORD, 'password2': PASSWORD},
+                               format='json')
+    assert response.status_code == 400
+    assert 'email' in response.json()
+    assert User.objects.count() == 1
+
+
+def reset_links():
+    """(recipients, user) of every password reset link in the mail outbox."""
+    from allauth.account.utils import url_str_to_user_pk
+    return [(message.to, User.objects.get(pk=url_str_to_user_pk(uid)))
+            for message in mail.outbox
+            for uid in re.findall(r'/accounts/password/reset/key/([0-9a-z]+)-', message.body)]
+
+
+@pytest.mark.parametrize('url', ['/api/v1/auth/password/reset/', '/accounts/password/reset/'])
+def test_password_reset_link_is_mailed_to_the_stored_address_only(client, url):
+    """
+    Both forms (allauth's, and dj-rest-auth's subclass of it) lower-case the typed address,
+    look it up exactly (not with iexact) and mail the link to it, i.e. to the stored address.
+    """
+    kate, victim, attacker = make_user('kate@example.com'), make_user(VICTIM), make_user(LOOKALIKE)
+    for typed, expected in [
+            (VICTIM, [([VICTIM], victim)]),
+            (LOOKALIKE, [([LOOKALIKE], attacker)]),
+            ('Victim@GMAIL.com', [([VICTIM], victim)]),
+            (KELVIN, [(['kate@example.com'], kate)])]:  # lower-cased into kate's own address
+        mail.outbox.clear()
+        assert client.post(url, {'email': typed}).status_code in (200, 302)
+        assert reset_links() == expected, typed
 
 
 # --- sites (#78) -------------------------------------------------------------------

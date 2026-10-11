@@ -70,7 +70,9 @@ failing or creating a second user. Both sides must have verified the address:
   (`users/emails.py`). Unicode case mapping isn't used: PostgreSQL's
   `UPPER()`, behind Django's `iexact`, turns the dotless ı of
   `victim@gmaıl.com` into an I, but mail to that address goes to another
-  domain (`xn--gmal-nza.com`) that anyone can register.
+  domain (`xn--gmal-nza.com`) that anyone can register. Signup and the
+  confirmed-email checks at login compare addresses the same way, so such a
+  look-alike is a separate account.
 
 The `/login` page, like the login API, refuses accounts whose email hasn't
 been confirmed.

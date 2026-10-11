@@ -9,10 +9,12 @@ PASSWORD = 'correct-horse-battery-staple'
 
 # Look-alike addresses (#67). PostgreSQL's UPPER(), which Django's iexact uses,
 # maps the dotless i U+0131 to an ASCII "I", so iexact takes LOOKALIKE, a mailbox
-# at another domain (xn--gmal-nza.com), for VICTIM. On SQLite, whose LIKE only
-# folds ASCII, the tests about iexact pass either way; CI runs them on PostgreSQL.
+# at another domain (xn--gmal-nza.com), for VICTIM. Python's str.lower() maps the
+# Kelvin sign U+212A to an ASCII "k". On SQLite, whose LIKE only folds ASCII,
+# the tests about iexact pass either way; CI runs them on PostgreSQL.
 VICTIM = 'victim@gmail.com'
 LOOKALIKE = 'victim@gma\u0131l.com'
+KELVIN = '\u212aate@example.com'  # .lower() is kate@example.com
 
 
 @pytest.fixture(autouse=True)

@@ -7,6 +7,8 @@ from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 from django.utils.translation import gettext_lazy as _
 
+from users.emails import has_confirmed_email
+
 class BootstrapAuthenticationForm(AuthenticationForm):
     """Authentication form which uses boostrap CSS."""
 
@@ -14,7 +16,7 @@ class BootstrapAuthenticationForm(AuthenticationForm):
         super().confirm_login_allowed(user)
         # like the login API (users.serializers.LoginSerializer)
         if (allauth_account_settings.EMAIL_VERIFICATION == allauth_account_settings.EmailVerificationMethod.MANDATORY
-                and not user.emailaddress_set.filter(email__iexact=user.email, verified=True).exists()):
+                and not has_confirmed_email(user)):
             raise forms.ValidationError(
                 _('This email address has not been confirmed yet. Use the link in the confirmation email.'),
                 code='unverified')
