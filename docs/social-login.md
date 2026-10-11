@@ -66,6 +66,11 @@ failing or creating a second user. Both sides must have verified the address:
   signing in with Google would end up in their account. Such a Google login
   fails like before #67 if the unconfirmed address is the account's main
   email, and otherwise creates a separate account.
+* The two addresses must be the same apart from the case of ASCII letters
+  (`users/emails.py`). Unicode case mapping isn't used: PostgreSQL's
+  `UPPER()`, behind Django's `iexact`, turns the dotless ı of
+  `victim@gmaıl.com` into an I, but mail to that address goes to another
+  domain (`xn--gmal-nza.com`) that anyone can register.
 
 The `/login` page, like the login API, refuses accounts whose email hasn't
 been confirmed.

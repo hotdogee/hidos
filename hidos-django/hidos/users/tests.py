@@ -10,7 +10,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
 from django.core import mail
 
-from conftest import PASSWORD, image_file, make_user
+from conftest import LOOKALIKE, PASSWORD, VICTIM, image_file, make_user
 
 pytestmark = pytest.mark.django_db
 User = get_user_model()
@@ -249,6 +249,53 @@ def test_unverified_social_email_is_not_merged(api_client, user, google_app):
     assert not SocialAccount.objects.filter(user=user).exists()
     assert User.objects.filter(email=user.email).count() == 1
     assert response.status_code == 400
+
+
+def test_social_login_merges_regardless_of_ascii_case(api_client, user, google_app):
+    response = google_login(api_client, 'Alice@Example.COM')
+    assert response.status_code == 200, response.content
+    assert SocialAccount.objects.get(provider='google').user == user
+
+
+# --- look-alike addresses (#67) -----------------------------------------------------
+# Addresses are the same only if equal after lower-casing ASCII A-Z (users.emails).
+
+def register_and_confirm(api_client, email):
+    """Sign up through the API and follow the confirmation link mailed to the address."""
+    mail.outbox.clear()
+    response = api_client.post(REGISTER, {'email': email, 'password1': PASSWORD, 'password2': PASSWORD},
+                               format='json')
+    assert response.status_code == 201, response.content
+    assert [message.to for message in mail.outbox] == [[email]]
+    key = re.search(r'/confirm-email/(\S+)/', mail.outbox[0].body).group(1)
+    assert api_client.post('/confirm-email/%s/' % key).status_code in (200, 302)
+    assert EmailAddress.objects.get(email=email).verified
+    return User.objects.get(email=email)
+
+
+def test_postgresql_iexact_takes_the_lookalike_for_the_address():
+    """The premise of these tests: with iexact matching, they fail on PostgreSQL."""
+    from django.db import connection
+    if connection.vendor != 'postgresql':
+        pytest.skip('only PostgreSQL folds non-ASCII letters to ASCII ones')
+    make_user(LOOKALIKE)
+    assert EmailAddress.objects.filter(email__iexact=VICTIM).exists()
+    assert User.objects.filter(email__iexact=VICTIM).exists()
+
+
+def test_google_login_is_not_merged_into_account_with_lookalike_address(api_client, google_app):
+    """Confirming victim@gmaıl.com, mailed to another domain, must not capture victim@gmail.com's Google login."""
+    from django.core.mail.message import sanitize_address
+    assert sanitize_address(LOOKALIKE, 'utf-8') == 'victim@xn--gmal-nza.com'
+    attacker = register_and_confirm(api_client, LOOKALIKE)
+    response = google_login(api_client, VICTIM, uid='google-victim')
+    assert response.status_code == 200, response.content
+    assert response.json()['user']['email'] == VICTIM  # not the attacker's account
+    victim = User.objects.get(email=VICTIM)
+    assert victim != attacker
+    payload = jwt.decode(response.json()['access'], options={'verify_signature': False})
+    assert str(payload['user_id']) == str(victim.pk)
+    assert SocialAccount.objects.get(provider='google').user == victim
 
 
 # --- sites (#78) -------------------------------------------------------------------

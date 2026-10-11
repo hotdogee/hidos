@@ -442,7 +442,7 @@ ACCOUNT_EMAIL_VERIFICATION = env('ACCOUNT_EMAIL_VERIFICATION', default='mandator
 SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
 # Social and local accounts are merged by email address (#67). Only emails the
 # provider reports as verified are matched, and only with local accounts that
-# confirmed the same address (users.adapter).
+# confirmed the same address (users.adapter, compared with users.emails).
 SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
 SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 SOCIALACCOUNT_ADAPTER = 'users.adapter.SocialAccountAdapter'

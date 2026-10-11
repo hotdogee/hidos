@@ -1,6 +1,8 @@
 from allauth.account.models import EmailAddress
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 
+from .emails import same_email
+
 
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
     """
@@ -13,6 +15,10 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
     or a second address added under /accounts/email/) would keep access
     through their other social logins, addresses and password resets, and
     the person signing in with Google would end up in their account.
+
+    The addresses must be the same under ASCII-only case folding
+    (users.emails): iexact on PostgreSQL also takes victim@gmaıl.com, a
+    mailbox at another domain, for victim@gmail.com.
     """
 
     def authenticate_by_email(self, sociallogin):
@@ -20,7 +26,8 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
             if not self.can_authenticate_by_email(sociallogin, email):
                 continue
             users = {address.user for address in
-                     EmailAddress.objects.filter(email__iexact=email, verified=True).select_related('user')}
+                     EmailAddress.objects.filter(email__iexact=email, verified=True).select_related('user')
+                     if same_email(address.email, email)}
             if len(users) == 1:
                 return users.pop(), email
         return None
