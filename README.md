@@ -211,21 +211,26 @@ cd ../../hidos-express && npm ci && npm test
 The tests use SQLite unless `DATABASE_URL` is set; CI runs them against
 PostgreSQL on Python 3.12, 3.13 and 3.14. Celery runs eagerly in the tests.
 
-`cell/test_analysis.py` runs every algorithm on its example image. It
-checks that the results equal what the original Python 2.7 / scikit-image
-0.12 / OpenCV 3 stack produced in 2016. The exception is Cell M1, whose
-example JPEG decodes slightly differently today (details in
-[tools/py2-baseline](tools/py2-baseline)). `tools/py2-baseline` rebuilds that
-2016 environment in Docker. Reproducing the old numbers needed a few
-compatibility shims for library changes since 2016, collected in
-`cell/skimage_compat.py`:
+`cell/test_analysis.py` runs every algorithm on its example image and on two
+colour photos (`cell/testdata`). It checks that the results equal what the
+original Python 2.7 / scikit-image 0.12 / OpenCV 3 stack produced in 2016.
+The exceptions are Cell M1 on its example, whose JPEG decodes slightly
+differently today, and Cell M1 on one of the photos, where the 2016 number
+depended on the CPU (details in [tools/py2-baseline](tools/py2-baseline)).
+`tools/py2-baseline` rebuilds that 2016 environment in Docker. Reproducing
+the old numbers needed a few compatibility shims for library changes since
+2016, collected in `cell/skimage_compat.py`:
 
 * thresholds of `remove_small_objects` and `remove_small_holes`
-* `resize` defaults
-* edge filter borders
+* `resize` defaults, with an exact scaling matrix
+* edge filter borders and 0.12's integer to float conversion
 * the 0.12 `canny`
-* OpenCV 3's `GaussianBlur`
-* Python 2 rounding
+* OpenCV 3's `GaussianBlur` and colour to grey conversion
+* Python 2 rounding, also with digits (`round(x, 3)`)
+
+The shims avoid library functions whose last bits depend on the CPU, so the
+algorithms give the same numbers on Linux and Windows, with or without
+AVX-512.
 
 pymorph has no Python 3 release, so the functions the algorithms use are
 ported in `cell/pymorph.py`.

@@ -9,11 +9,19 @@ the same numbers:
   `max_size`, which removes objects smaller than *or equal to* it.
 * resize: scikit-image 0.15 switched the default mode from 'constant' to
   'reflect', turned on anti-aliasing when downsampling, and later moved to
-  ndimage.zoom; this is the 0.12 implementation.
+  ndimage.zoom; this is the 0.12 implementation, with an exact scaling
+  matrix (see resize).
 * prewitt, roberts, sobel, laplace: scikit-image 0.12 set the one pixel
   image border of the edge filters to 0 when no mask was given; newer
-  versions keep the (reflect-padded) border values.
-* canny: the scikit-image 0.12 implementation (see below).
+  versions keep the (reflect-padded) border values. 0.12 also converted
+  integer images to float by dividing by the maximum (x / 255) where newer
+  versions multiply by its reciprocal (x * (1 / 255)), which differs in the
+  last bit and moves the later img_as_ubyte rounding.
+* canny: the scikit-image 0.12 implementation (see below), computed so that
+  it gives the same result on every platform.
+* bgr2gray: OpenCV 4 changed the fixed point arithmetic of
+  cv2.cvtColor(..., COLOR_BGR2GRAY), which moves some colour pixels by one
+  grey level; this is the OpenCV 3 formula.
 * gaussian_blur: OpenCV 4 made cv2.GaussianBlur bit-exact (fixed point) for
   8-bit images; OpenCV 3 filtered with the floating point kernel, which
   this reproduces.
@@ -22,6 +30,7 @@ the same numbers:
   NaN.
 """
 import math
+from decimal import ROUND_HALF_UP, Context, Decimal
 
 import cv2
 import numpy as np
@@ -50,10 +59,17 @@ def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True, pre
     'constant' padding. (Newer versions use ndimage.zoom, whose rounding
     noise flips the astype(uint8) truncation the algorithms apply to
     resized 0/1 masks.)
+
+    0.12 estimated the matrix from the corners with an SVD, whose last bits
+    depend on the LAPACK build and the CPU (OpenBLAS picks different kernels
+    for AVX-512, AVX2 and older CPUs), and so did the truncated results.
+    The exact matrix gives the same result on every machine.
     """
     if image.dtype == bool and order != 0:
         # 0.12 interpolated boolean images as floats; 0.26 refuses to
         image = image.astype(np.float64)
+    elif not preserve_range and image.dtype.kind in 'ui':
+        image = _img_as_float(image)
     rows, cols = output_shape[0], output_shape[1]
     if len(output_shape) == 3 and (image.ndim == 2 or output_shape[2] != image.shape[2]):
         return transform.resize(image, output_shape, order=order, mode=mode, cval=cval, clip=clip,
@@ -64,15 +80,26 @@ def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True, pre
     if rows == 1 and cols == 1:
         tform = transform.AffineTransform(translation=(orig_cols / 2.0 - 0.5, orig_rows / 2.0 - 0.5))
     else:
-        # 3 control points necessary to estimate exact AffineTransform
-        src_corners = np.array([[1, 1], [1, rows], [cols, rows]]) - 1
-        dst_corners = np.zeros(src_corners.shape, dtype=np.double)
-        # take into account that 0th pixel is at position (0.5, 0.5)
-        dst_corners[:, 0] = col_scale * (src_corners[:, 0] + 0.5) - 0.5
-        dst_corners[:, 1] = row_scale * (src_corners[:, 1] + 0.5) - 0.5
-        tform = transform.AffineTransform.from_estimate(src_corners, dst_corners)
+        # the transform 0.12 estimated from three corners; the 0th pixel is
+        # at position (0.5, 0.5)
+        tform = transform.AffineTransform(matrix=np.array([
+            [col_scale, 0, col_scale * 0.5 - 0.5],
+            [0, row_scale, row_scale * 0.5 - 0.5],
+            [0, 0, 1]]))
     return transform.warp(image, tform, output_shape=output_shape, order=order, mode=mode, cval=cval,
                           clip=clip, preserve_range=preserve_range)
+
+
+def _img_as_float(image):
+    """skimage.img_as_float of scikit-image 0.12 (see above)."""
+    if image.dtype.kind == 'u':
+        return image.astype(np.float64) / np.iinfo(image.dtype).max
+    if image.dtype.kind == 'i':
+        info = np.iinfo(image.dtype)
+        return (image.astype(np.float64) * 2.0 + 1.0) / (info.max - info.min)
+    if image.dtype.kind == 'b':
+        return image.astype(np.float64)
+    return image
 
 
 def _mask_filter_result(result, mask):
@@ -87,19 +114,19 @@ def _mask_filter_result(result, mask):
 
 
 def prewitt(image, mask=None):
-    return _mask_filter_result(filters.prewitt(image, mask=mask), mask)
+    return _mask_filter_result(filters.prewitt(_img_as_float(image), mask=mask), mask)
 
 
 def roberts(image, mask=None):
-    return _mask_filter_result(filters.roberts(image, mask=mask), mask)
+    return _mask_filter_result(filters.roberts(_img_as_float(image), mask=mask), mask)
 
 
 def sobel(image, mask=None):
-    return _mask_filter_result(filters.sobel(image, mask=mask), mask)
+    return _mask_filter_result(filters.sobel(_img_as_float(image), mask=mask), mask)
 
 
 def laplace(image, ksize=3, mask=None):
-    return _mask_filter_result(filters.laplace(image, ksize=ksize, mask=mask), mask)
+    return _mask_filter_result(filters.laplace(_img_as_float(image), ksize=ksize, mask=mask), mask)
 
 
 def gaussian_blur(src, ksize, sigmaX, sigmaY=0):
@@ -109,11 +136,28 @@ def gaussian_blur(src, ksize, sigmaX, sigmaY=0):
     return cv2.sepFilter2D(src, -1, kx, ky, borderType=cv2.BORDER_REFLECT_101)
 
 
-def py2_round(x):
-    """round(x) as in Python 2."""
+def bgr2gray(img):
+    """cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) as computed by OpenCV 3 for 8-bit images."""
+    if img.dtype != np.uint8 or img.ndim != 3 or img.shape[2] != 3:
+        return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    # Y = (1868 B + 9617 G + 4899 R + 2**13) >> 14, as in OpenCV 3.x color.cpp
+    gray = img[..., 0] * np.uint32(1868)
+    gray += img[..., 1] * np.uint32(9617)
+    gray += img[..., 2] * np.uint32(4899)
+    gray += 1 << 13
+    gray >>= 14
+    return gray.astype(np.uint8)
+
+
+def py2_round(x, ndigits=None):
+    """round(x) and round(x, ndigits) as in Python 2."""
     x = float(x)
     if math.isnan(x) or math.isinf(x):
         return x
+    if ndigits is not None:
+        # the exact binary value, rounded half away from zero
+        return float(Decimal(x).quantize(Decimal(1).scaleb(-ndigits), ROUND_HALF_UP,
+                                         Context(prec=325 + max(ndigits, 0))))
     ax = abs(x)
     r = math.floor(ax)
     if ax - r >= 0.5:
@@ -127,6 +171,39 @@ def py2_round(x):
 # Copyright (c) 2009-2011 Broad Institute; BSD license; original author Lee
 # Kamentsky). Newer versions convert the image to float before smoothing and
 # changed the hysteresis, which moves the detected edges by a few pixels.
+#
+# The non-maximum suppression compares gradient magnitudes exactly, so a one
+# ulp difference moves edges. np.hypot and the Gaussian kernel of today's
+# scipy.ndimage.gaussian_filter (np.exp) round differently depending on the
+# platform's libm and numpy's SIMD code (e.g. AVX-512 on Linux); the kernel
+# and the magnitude are therefore computed with correctly rounded operations.
+
+def _gaussian_kernel(sigma, truncate=4.0):
+    """scipy 0.17 gaussian_filter1d weights, with a correctly rounded exp."""
+    sd = float(sigma)
+    lw = int(truncate * sd + 0.5)
+    weights = [0.0] * (2 * lw + 1)
+    weights[lw] = 1.0
+    total = 1.0
+    sd = sd * sd
+    for ii in range(1, lw + 1):
+        tmp = float(Decimal(-0.5 * float(ii * ii) / sd).exp(Context(prec=40)))
+        weights[lw + ii] = tmp
+        weights[lw - ii] = tmp
+        total += 2.0 * tmp
+    return np.array(weights) / total
+
+
+def _gaussian_filter(image, sigma):
+    """scipy.ndimage.gaussian_filter(image, sigma, mode='constant') with _gaussian_kernel."""
+    from scipy.ndimage import correlate1d
+    weights = _gaussian_kernel(sigma)
+    output = np.zeros(image.shape, image.dtype)
+    for axis in range(image.ndim):
+        correlate1d(image, weights, axis, output, mode='constant', cval=0.0)
+        image = output
+    return output
+
 
 def _smooth_with_function_and_mask(image, function, mask):
     bleed_over = function(mask.astype(float))
@@ -141,7 +218,7 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
           use_quantiles=False):
     """Canny edge detector with the scikit-image 0.12 implementation."""
     import scipy.ndimage as ndi
-    from scipy.ndimage import binary_erosion, gaussian_filter, generate_binary_structure, label
+    from scipy.ndimage import binary_erosion, generate_binary_structure, label
     from skimage.util import dtype_limits
 
     if image.ndim != 2:
@@ -154,14 +231,14 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
         mask = np.ones(image.shape, dtype=bool)
 
     def fsmooth(x):
-        return gaussian_filter(x, sigma, mode='constant')
+        return _gaussian_filter(x, sigma)
 
     smoothed = _smooth_with_function_and_mask(image, fsmooth, mask)
     jsobel = ndi.sobel(smoothed, axis=1)
     isobel = ndi.sobel(smoothed, axis=0)
     abs_isobel = np.abs(isobel)
     abs_jsobel = np.abs(jsobel)
-    magnitude = np.hypot(isobel, jsobel)
+    magnitude = np.sqrt(isobel * isobel + jsobel * jsobel)  # not np.hypot, see above
 
     # Make the eroded mask. Setting the border value to zero will wipe
     # out the image edges for us.

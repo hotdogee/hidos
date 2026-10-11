@@ -112,7 +112,7 @@ def CellNOne(task_record):
     # resize to 1200
 
     ori_img = cv2.imread(task_record.uploaded_image.path)
-    img_gray = cv2.cvtColor(ori_img, cv2.COLOR_BGR2GRAY)
+    img_gray = compat.bgr2gray(ori_img)
     ori_img_int8 = img_as_ubyte(img_gray)
     height = np.size(ori_img_int8, 0)
     width = np.size(ori_img_int8, 1)
@@ -311,9 +311,9 @@ def CellNOne(task_record):
     result = cv2.resize(result, (width, height))
     # calculate the output
     count_branches = sum_jp
-    mean_length = round(float(count_length)/count_cellbody,3)
-    mean_branch = round(float(count_branches)/count_cellbody,3)
-    mean_outgrowth = round(float(count_attpoint)/count_cellbody,3)
+    mean_length = compat.py2_round(float(count_length)/count_cellbody,3)
+    mean_branch = compat.py2_round(float(count_branches)/count_cellbody,3)
+    mean_outgrowth = compat.py2_round(float(count_attpoint)/count_cellbody,3)
 
     # draw text count on image
 #     display_3 = Image.fromarray(display_3)
@@ -491,7 +491,7 @@ def CellNOne(task_record):
     # resize to 1200
 
     ori_img = cv2.imread(task_record.uploaded_image.path)
-    img_gray = cv2.cvtColor(ori_img, cv2.COLOR_BGR2GRAY)
+    img_gray = compat.bgr2gray(ori_img)
     ori_img_int8 = img_as_ubyte(img_gray)
     height = np.size(ori_img_int8, 0)
     width = np.size(ori_img_int8, 1)
@@ -690,9 +690,9 @@ def CellNOne(task_record):
     result = cv2.resize(result, (width, height))
     # calculate the output
     count_branches = sum_jp
-    mean_length = round(float(count_length)/count_cellbody,3)
-    mean_branch = round(float(count_branches)/count_cellbody,3)
-    mean_outgrowth = round(float(count_attpoint)/count_cellbody,3)
+    mean_length = compat.py2_round(float(count_length)/count_cellbody,3)
+    mean_branch = compat.py2_round(float(count_branches)/count_cellbody,3)
+    mean_outgrowth = compat.py2_round(float(count_attpoint)/count_cellbody,3)
 
     # draw text count on image
 #     display_3 = Image.fromarray(display_3)

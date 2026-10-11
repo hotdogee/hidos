@@ -86,7 +86,7 @@ def cellConfluence_singleTask(task_record):
     ###################################
 
     #如果先resize再取gray~效果會比較差
-    img_gray=cv2.cvtColor(img_ori, cv2.COLOR_BGR2GRAY)
+    img_gray=compat.bgr2gray(img_ori)
     img_gray=img_resize(img_gray,1024)  #resize
     ##################################################
 

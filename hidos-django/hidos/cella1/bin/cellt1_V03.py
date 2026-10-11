@@ -199,7 +199,7 @@ def cellAngiogenesis(task_record, add_boarder=True):
 #    io.show()
 
     #如果先resize再取gray~效果會比較差
-    img_gray=cv2.cvtColor(img_ori, cv2.COLOR_BGR2GRAY)
+    img_gray=compat.bgr2gray(img_ori)
 
     #######################for validation
 #    mask1= np.where(img_ori[:,:,0]>200)
@@ -860,10 +860,10 @@ def cellAngiogenesis(task_record, add_boarder=True):
     angiogenesis_result = {
                            '#Extremity':num_extremity,'#Junction':num_junction,
                            'Connectivity':total_num_of_seg*2+total_num_of_branch,'Tot. network length':int(tot_len*factor),
-                           '#Branch':total_num_of_branch,'Tot. branch length':int(tot_branch_len*factor),'Mean branch length':round(mean_branch*factor,3),'Std. branch Length':round(std_branch*factor,3),
-                           '#Segment':total_num_of_seg,'Tot. segment length':int(tot_seg_len*factor),'Mean segment length':round(mean_seg*factor,3),'Std. segment length':round(std_seg*factor,3),
-                           '#Mesh':num_mesh,'Tot. mesh area':int(tot_mesh_area*factor*factor),'Mean mesh area':round(mean_mesh_area*factor*factor,3),'Std. mesh area':round(std_mesh_area*factor*factor,3),
-                           'Tot. mesh perimeter':int(tot_mesh_perimeter*factor),'Mean mesh perimeter':round(mean_mesh_perimeter*factor,3),'Std. mesh perimeter':round(std_mesh_perimeter*factor,3)
+                           '#Branch':total_num_of_branch,'Tot. branch length':int(tot_branch_len*factor),'Mean branch length':compat.py2_round(mean_branch*factor,3),'Std. branch Length':compat.py2_round(std_branch*factor,3),
+                           '#Segment':total_num_of_seg,'Tot. segment length':int(tot_seg_len*factor),'Mean segment length':compat.py2_round(mean_seg*factor,3),'Std. segment length':compat.py2_round(std_seg*factor,3),
+                           '#Mesh':num_mesh,'Tot. mesh area':int(tot_mesh_area*factor*factor),'Mean mesh area':compat.py2_round(mean_mesh_area*factor*factor,3),'Std. mesh area':compat.py2_round(std_mesh_area*factor*factor,3),
+                           'Tot. mesh perimeter':int(tot_mesh_perimeter*factor),'Mean mesh perimeter':compat.py2_round(mean_mesh_perimeter*factor,3),'Std. mesh perimeter':compat.py2_round(std_mesh_perimeter*factor,3)
                            }
 
     return angiogenesis_result

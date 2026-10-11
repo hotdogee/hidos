@@ -1,7 +1,9 @@
-# Runs every analysis app on its example image and prints the results as
-# JSON. Works with the 2016 Python 2.7 code and with the ported code.
+# Runs every analysis app on its example image (and on every other image
+# given) and prints the results as JSON. Works with the 2016 Python 2.7 code
+# and with the ported code.
 #
-#   python run.py <hidos-django/hidos of the code to run> <hidos-django/hidos with the Example images> [out.json]
+#   python run.py <hidos-django/hidos of the code to run> <hidos-django/hidos with the Example images> \
+#       [out.json] [image ...]
 from __future__ import print_function
 import glob
 import json
@@ -13,6 +15,8 @@ import types
 import importlib
 
 src, examples = sys.argv[1], sys.argv[2]
+out = sys.argv[3] if len(sys.argv) > 3 and sys.argv[3].endswith('.json') else None
+extra_images = sys.argv[4 if out else 3:]
 sys.path.insert(0, src)
 try:
     from django.conf import settings
@@ -43,17 +47,24 @@ def plain(value):
     return json.loads(json.dumps(value, default=lambda o: o.tolist() if hasattr(o, 'tolist') else str(o)))
 
 
-results = {}
-for app_name in ('cella1', 'cellc1', 'cellc2', 'cellm1', 'cellm3', 'celln1'):
+APPS = ('cella1', 'cellc1', 'cellc2', 'cellm1', 'cellm3', 'celln1')
+runs = []
+for app_name in APPS:
     image = [p for p in glob.glob(os.path.join(examples, app_name, 'static', app_name, 'images', 'Example.*'))
              if not p.endswith('.json')][0]
+    runs.append((app_name, app_name, image))
+for image in extra_images:
+    runs.extend((os.path.basename(image) + ' ' + app_name, app_name, image) for app_name in APPS)
+
+results = {}
+for key, app_name, image in runs:
     workdir = tempfile.mkdtemp()
     try:
-        results[app_name] = plain(importlib.import_module(app_name).run(Record(image, workdir)))
+        results[key] = plain(importlib.import_module(app_name).run(Record(image, workdir)))
     finally:
         shutil.rmtree(workdir)
-    print(app_name, json.dumps(results[app_name], sort_keys=True))
+    print(key, json.dumps(results[key], sort_keys=True))
     sys.stdout.flush()
-if len(sys.argv) > 3:
-    with open(sys.argv[3], 'w') as fh:
+if out:
+    with open(out, 'w') as fh:
         json.dump(results, fh, indent=2, sort_keys=True)

@@ -8,7 +8,7 @@ from PIL import Image
 #%matplotlib qt
 import numpy as np
 from skimage import io, morphology, data, color, img_as_ubyte
-from cell.skimage_compat import laplace, remove_small_holes, resize
+from cell.skimage_compat import bgr2gray, laplace, remove_small_holes, resize
 from skimage.filters import gabor, gaussian
 from skimage.util import img_as_ubyte
 from skimage.morphology import erosion, dilation, opening, closing, white_tophat, skeletonize, disk
@@ -51,7 +51,7 @@ def mask_create(image_phase):
 def cellm3(task_record):
 
     ori_img = cv2.imread(task_record.uploaded_image.path)
-    img_gray = cv2.cvtColor(ori_img, cv2.COLOR_BGR2GRAY)
+    img_gray = bgr2gray(ori_img)
     ori_img_int8 = img_as_ubyte(img_gray)
 
     # image resize
