@@ -43,3 +43,13 @@ migration. Don't do both for the same provider.
 
 Provider settings (scopes, Facebook API version, ...) are in
 `SOCIALACCOUNT_PROVIDERS` in `hidos/settings/base.py`.
+
+## Accounts are merged by email (#67)
+
+If someone signs in with Google and an account with the same email already
+exists, the Google login is connected to that account instead of failing or
+creating a second user. This only happens when the provider says the email is
+verified. Google does; Facebook doesn't guarantee it (`VERIFIED_EMAIL: False`),
+so Facebook logins are never merged. If the existing local account's email was
+never confirmed, allauth also removes its password, so whoever registered it
+can't keep access to the account.

@@ -393,6 +393,11 @@ ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_EMAIL_VERIFICATION = env('ACCOUNT_EMAIL_VERIFICATION', default='mandatory')
 SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
+# Social and local accounts are merged by email address (#67). Only emails the
+# provider reports as verified are matched, and allauth wipes the local
+# password when the local address was never verified (pre-account-takeover).
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 
 SOCIALACCOUNT_PROVIDERS = {
     'facebook': {

@@ -1,14 +1,16 @@
 import re
+from unittest import mock
 
 import jwt
 import pytest
 from allauth.account.models import EmailAddress
+from allauth.socialaccount.models import SocialAccount, SocialApp
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
 from django.core import mail
 
-from conftest import PASSWORD
+from conftest import PASSWORD, make_user
 
 pytestmark = pytest.mark.django_db
 User = get_user_model()
@@ -101,6 +103,65 @@ def test_password_reset_round_trip(api_client, client, user):
     assert done.status_code == 302
     login = api_client.post(LOGIN, {'email': user.email, 'password': new_password}, format='json')
     assert login.status_code == 200
+
+
+# --- social accounts are merged by email (#67) ---------------------------------------
+
+@pytest.fixture
+def google_app():
+    app = SocialApp.objects.create(provider='google', name='Google', client_id='id', secret='secret')
+    app.sites.add(Site.objects.get_current())
+    return app
+
+
+def google_login(api_client, email, email_verified=True, uid='google-uid-1'):
+    from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+
+    def complete_login(self, request, app, token, response=None, **kwargs):
+        provider = self.get_provider()
+        return provider.sociallogin_from_response(request, {
+            'id': uid, 'sub': uid, 'email': email, 'email_verified': email_verified,
+            'verified_email': email_verified, 'name': 'Google User', 'given_name': 'Google', 'family_name': 'User'})
+
+    with mock.patch.object(GoogleOAuth2Adapter, 'complete_login', complete_login):
+        return api_client.post('/api/v1/auth/google/', {'access_token': 'fake-token'}, format='json')
+
+
+def test_social_login_merges_with_local_account(api_client, user, google_app):
+    response = google_login(api_client, user.email)
+    assert response.status_code == 200, response.content
+    assert response.json()['user']['email'] == user.email
+    assert User.objects.count() == 1
+    account = SocialAccount.objects.get(provider='google')
+    assert account.user == user
+    user.refresh_from_db()
+    assert user.has_usable_password()  # local login keeps working
+
+
+def test_social_login_creates_account_for_new_email(api_client, google_app):
+    response = google_login(api_client, 'carol@example.com', uid='google-uid-2')
+    assert response.status_code == 200, response.content
+    user = User.objects.get(email='carol@example.com')
+    assert SocialAccount.objects.get(provider='google').user == user
+    # then a local signup with the same email is refused instead of creating a duplicate
+    assert api_client.post(REGISTER, {'email': 'carol@example.com', 'password1': PASSWORD,
+                                      'password2': PASSWORD}, format='json').status_code == 400
+
+
+def test_social_login_into_unverified_local_account_locks_out_the_password(api_client, google_app):
+    """Someone who signed up with another person's (unverified) email must not keep access."""
+    squatter = make_user('dave@example.com', verified=False)
+    response = google_login(api_client, 'dave@example.com', uid='google-uid-3')
+    assert response.status_code == 200, response.content
+    squatter.refresh_from_db()
+    assert not squatter.has_usable_password()
+
+
+def test_unverified_social_email_is_not_merged(api_client, user, google_app):
+    response = google_login(api_client, user.email, email_verified=False, uid='google-uid-4')
+    assert not SocialAccount.objects.filter(user=user).exists()
+    assert User.objects.filter(email=user.email).count() == 1
+    assert response.status_code == 400
 
 
 # --- sites (#78) -------------------------------------------------------------------
