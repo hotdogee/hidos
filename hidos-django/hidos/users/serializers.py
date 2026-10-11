@@ -1,3 +1,4 @@
+import requests
 from django.conf import settings
 from django.contrib.auth import get_user_model, authenticate
 from django.utils.translation import gettext_lazy as _
@@ -9,6 +10,7 @@ from allauth.account import app_settings as allauth_account_settings
 from allauth.account.adapter import get_adapter
 from allauth.account.models import EmailAddress
 from allauth.account.utils import setup_user_email
+from dj_rest_auth.registration.serializers import SocialLoginSerializer
 from dj_rest_auth.serializers import JWTSerializer as BaseJWTSerializer
 
 # Get the UserModel
@@ -158,3 +160,33 @@ class RegisterSerializer(serializers.Serializer):
         self.custom_signup(request, user)
         setup_user_email(request, user, [])
         return user
+
+
+GOOGLE_TOKENINFO_URL = 'https://oauth2.googleapis.com/tokeninfo'
+
+
+class GoogleLoginSerializer(SocialLoginSerializer):
+    """
+    Social login with a Google access token (POST /api/v1/auth/google/).
+
+    An access token does not say which application it was issued to, so a
+    token obtained by another site's "Sign in with Google" could be replayed
+    here to log in as that Google user, and through email authentication
+    (#67) into a local account with the same email. The token must have
+    been issued to our Google client id. (ID tokens and the authorization
+    code flow are checked by allauth.)
+    """
+
+    def validate(self, attrs):
+        access_token = attrs.get('access_token')
+        if access_token and not attrs.get('id_token'):
+            view = self.context.get('view')
+            app = view.adapter_class(self._get_request()).get_provider().app
+            try:
+                response = requests.get(GOOGLE_TOKENINFO_URL, params={'access_token': access_token}, timeout=10)
+                info = response.json() if response.status_code == 200 else {}
+            except (requests.RequestException, ValueError):
+                info = {}
+            if not app.client_id or app.client_id not in (info.get('aud'), info.get('azp')):
+                raise serializers.ValidationError(_('This Google token was not issued to this application.'))
+        return super().validate(attrs)

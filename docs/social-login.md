@@ -40,6 +40,9 @@ migration. Don't do both for the same provider.
 * Single page app: get an access token from the provider's JavaScript SDK,
   then `POST /api/v1/auth/google/ {"access_token": "..."}`. The response is
   the same JWT as `/api/v1/auth/login/`.
+  A Google access token is only accepted if Google's tokeninfo says it was
+  issued to the configured client id. Otherwise a token from another site's
+  "Sign in with Google" could be replayed here.
 
 Provider settings (scopes, Facebook API version, ...) are in
 `SOCIALACCOUNT_PROVIDERS` in `hidos/settings/base.py`.

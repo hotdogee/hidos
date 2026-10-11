@@ -146,7 +146,7 @@ def google_app():
     return app
 
 
-def google_login(api_client, email, email_verified=True, uid='google-uid-1'):
+def google_login(api_client, email, email_verified=True, uid='google-uid-1', audience='id'):
     from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 
     def complete_login(self, request, app, token, response=None, **kwargs):
@@ -155,8 +155,11 @@ def google_login(api_client, email, email_verified=True, uid='google-uid-1'):
             'id': uid, 'sub': uid, 'email': email, 'email_verified': email_verified,
             'verified_email': email_verified, 'name': 'Google User', 'given_name': 'Google', 'family_name': 'User'})
 
-    with mock.patch.object(GoogleOAuth2Adapter, 'complete_login', complete_login):
-        return api_client.post('/api/v1/auth/google/', {'access_token': 'fake-token'}, format='json')
+    tokeninfo = mock.Mock(status_code=200, json=lambda: {'aud': audience, 'azp': audience, 'email': email})
+    with mock.patch.object(GoogleOAuth2Adapter, 'complete_login', complete_login),             mock.patch('users.serializers.requests.get', return_value=tokeninfo) as get:
+        response = api_client.post('/api/v1/auth/google/', {'access_token': 'fake-token'}, format='json')
+    assert get.call_args.kwargs['params'] == {'access_token': 'fake-token'}
+    return response
 
 
 def test_social_login_merges_with_local_account(api_client, user, google_app):
@@ -187,6 +190,14 @@ def test_social_login_into_unverified_local_account_locks_out_the_password(api_c
     assert response.status_code == 200, response.content
     squatter.refresh_from_db()
     assert not squatter.has_usable_password()
+
+
+def test_google_token_issued_to_another_app_is_rejected(api_client, user, google_app):
+    """A token from another site's Google sign-in must not log into the matching local account."""
+    response = google_login(api_client, user.email, audience='someone-elses-client-id')
+    assert response.status_code == 400
+    assert 'access' not in response.json()
+    assert not SocialAccount.objects.exists()
 
 
 def test_unverified_social_email_is_not_merged(api_client, user, google_app):

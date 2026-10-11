@@ -20,6 +20,7 @@ from dj_rest_auth.registration.views import SocialLoginView
 
 from app import views as app_views
 from app.forms import BootstrapAuthenticationForm
+from users.serializers import GoogleLoginSerializer
 from users.views import RegisterView
 
 
@@ -30,6 +31,7 @@ class FacebookLogin(SocialLoginView):
 class GoogleLogin(SocialLoginView):
     adapter_class = GoogleOAuth2Adapter
     client_class = OAuth2Client
+    serializer_class = GoogleLoginSerializer  # checks the token's audience
 
 
 urlpatterns = [
