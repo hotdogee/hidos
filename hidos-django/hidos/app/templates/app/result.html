@@ -1,5 +1,7 @@
 {% extends "app/layout.html" %}
 
+{% block analytics_title %}Result{% endblock %}
+
 {% block head-styles %}
 {% if not finished %}<meta http-equiv="refresh" content="5">{% endif %}
 <style type="text/css">

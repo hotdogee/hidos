@@ -134,6 +134,21 @@ def test_google_analytics_when_configured(client, settings):
     settings.GOOGLE_ANALYTICS_ID = 'G-TEST123'
     html = client.get('/login').content.decode()
     assert 'googletagmanager.com/gtag/js?id=G-TEST123' in html
+    assert "page_title: 'Log in'" in html
+
+
+def test_google_analytics_does_not_get_task_ids_or_names(client, user, auth_client, settings, fake_cellc2):
+    """Task ids are in the public media URLs, so the result page must not report them (#13)."""
+    settings.GOOGLE_ANALYTICS_ID = 'G-TEST123'
+    data = create_task(auth_client)
+    client.force_login(user)
+    html = client.get('/results/' + data['id']).content.decode()
+    gtag = html[html.index("gtag('config'"):]
+    gtag = gtag[:gtag.index('</script>')]
+    assert "page_title: 'Result'" in gtag
+    assert data['id'] not in gtag and data['name'] not in gtag
+    assert r"location.pathname.replace(/^\/results\/.*/, '/results/')" in gtag
+    assert 'location.href' not in gtag and 'location.search' not in gtag
 
 
 # --- admin ------------------------------------------------------------------------------

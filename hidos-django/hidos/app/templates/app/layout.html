@@ -32,7 +32,14 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', '{{ GOOGLE_ANALYTICS_ID|escapejs }}');
+    // Task ids give access to the uploaded images under /media/, so Google
+    // gets neither the result pages' paths and titles nor query strings
+    // (/login?next=/results/<id>) or referrer paths.
+    gtag('config', '{{ GOOGLE_ANALYTICS_ID|escapejs }}', {
+      page_location: location.origin + location.pathname.replace(/^\/results\/.*/, '/results/'),
+      page_referrer: document.referrer ? new URL(document.referrer).origin + '/' : '',
+      page_title: '{% block analytics_title %}{{ title|escapejs }}{% endblock %}'
+    });
   </script>
   {% endif %}
 </head>

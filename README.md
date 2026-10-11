@@ -262,9 +262,12 @@ The compose file is the reference deployment. For production:
 
 Uploaded images and results under `/media/` are served by nginx without a
 login, like in the 2016 deployment. The paths contain the task id, which is
-keyed with `DJANGO_SECRET_KEY` and can't be guessed. If images must only be
-visible to their owner, serve media through Django with nginx
-`X-Accel-Redirect` (an owner decision; it changes how clients load images).
+keyed with `DJANGO_SECRET_KEY` and can't be guessed, so task ids must stay
+private: the Google Analytics snippet (`GOOGLE_ANALYTICS_ID`) reports result
+pages as `/results/` without the id or file name, and drops query strings and
+referrer paths. If images must only be visible to their owner, serve media
+through Django with nginx `X-Accel-Redirect` (an owner decision; it changes
+how clients load images).
 
 ### Backups
 
