@@ -11,6 +11,7 @@ import sys
 import pytest
 from allauth.account.models import EmailAddress
 from django.contrib import admin
+from django.core import mail
 from django.urls import reverse
 
 from conftest import LOOKALIKE, PASSWORD, VICTIM, make_user
@@ -52,6 +53,19 @@ def test_login_page_refuses_unconfirmed_email(client, api_client):
     assert client.get('/accounts/3rdparty/').status_code == 302  # to the login page
 
 
+def test_login_page_refuses_self_registered_account_until_confirmed(client, api_client):
+    response = api_client.post('/api/v1/auth/registration/', {
+        'email': 'new@example.com', 'password1': PASSWORD, 'password2': PASSWORD}, format='json')
+    assert response.status_code == 201, response.content
+    response = client.post('/login', {'username': 'new@example.com', 'password': PASSWORD})
+    assert response.status_code == 200 and '_auth_user_id' not in client.session
+    assert 'has not been confirmed yet' in response.content.decode()
+    key = re.search(r'/confirm-email/(\S+)/', mail.outbox[0].body).group(1)
+    assert client.post('/confirm-email/%s/' % key).status_code in (200, 302)
+    response = client.post('/login', {'username': 'new@example.com', 'password': PASSWORD})
+    assert response.status_code == 302 and '_auth_user_id' in client.session
+
+
 def test_login_refuses_unconfirmed_email_with_a_confirmed_lookalike(client, api_client):
     """Confirming victim@gmaıl.com doesn't confirm victim@gmail.com, whatever PostgreSQL's iexact says."""
     user = make_user(VICTIM, verified=False)  # e.g. a Facebook login with someone else's address
@@ -60,6 +74,28 @@ def test_login_refuses_unconfirmed_email_with_a_confirmed_lookalike(client, api_
     assert response.status_code == 200 and '_auth_user_id' not in client.session
     response = api_client.post('/api/v1/auth/login/', {'email': VICTIM, 'password': PASSWORD}, format='json')
     assert response.status_code == 400
+
+
+def test_login_page_lets_in_superuser_from_createsuperuser(client, api_client, monkeypatch):
+    """README Quick start: `manage.py createsuperuser`, then log in at /login."""
+    from django.core.management import call_command
+    monkeypatch.setenv('DJANGO_SUPERUSER_PASSWORD', PASSWORD)
+    call_command('createsuperuser', interactive=False, email='root@example.com', verbosity=0)
+    assert not EmailAddress.objects.exists()
+    response = client.post('/login', {'username': 'root@example.com', 'password': PASSWORD, 'next': '/admin/'})
+    assert response.status_code == 302 and response['Location'] == '/admin/'
+    assert '_auth_user_id' in client.session
+    # allauth adds an unconfirmed address row on its own, e.g. for a password reset
+    client.logout()
+    client.post('/accounts/password/reset/', {'email': 'root@example.com'})
+    assert EmailAddress.objects.filter(email='root@example.com', verified=False).exists()
+    response = client.post('/login', {'username': 'root@example.com', 'password': PASSWORD})
+    assert response.status_code == 302 and '_auth_user_id' in client.session
+    # the login API still wants the address confirmed (README)
+    login = {'email': 'root@example.com', 'password': PASSWORD}
+    assert api_client.post('/api/v1/auth/login/', login, format='json').status_code == 400
+    EmailAddress.objects.filter(email='root@example.com').update(verified=True)
+    assert api_client.post('/api/v1/auth/login/', login, format='json').status_code == 200
 
 
 def test_login_page_wrong_password(client, user):

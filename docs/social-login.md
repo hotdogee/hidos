@@ -75,4 +75,5 @@ failing or creating a second user. Both sides must have verified the address:
   look-alike is a separate account.
 
 The `/login` page, like the login API, refuses accounts whose email hasn't
-been confirmed.
+been confirmed. Staff accounts (e.g. from `manage.py createsuperuser`) are
+let in anyway, as `/admin/login/` does.

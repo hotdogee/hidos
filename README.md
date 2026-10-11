@@ -50,6 +50,11 @@ Then open:
 * <http://localhost:8080/login>: login page; after logging in, results are
   viewable at `/results/<task id>`
 
+`createsuperuser` doesn't confirm the email address. Staff accounts don't need
+that for `/admin/` and `/login`, but the login API (`/api/v1/auth/login/`)
+refuses them until the address is added with *Verified* ticked in the admin
+under *Accounts → Email addresses*.
+
 The stack is nginx, the Django web app (gunicorn), a Celery worker running the
 analyses, the landing page (`hidos-express`), PostgreSQL and RabbitMQ. Data
 lives in named volumes (`pgdata`, `media`, ...); `docker/backup.sh` backs up
