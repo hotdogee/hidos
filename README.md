@@ -315,7 +315,8 @@ list.
 * logging and failed-task status (#12)
 * permissions and security review (#15, #16, #23)
 * local and social signup (#18, #19)
-* social accounts merged by email (#67)
+* Google logins merged into local accounts by confirmed email (#67; Facebook
+  emails aren't verified, so those logins still fail for existing emails)
 * rate limiting (#26)
 * user profile model, serializer and API (#74, #75, #76)
 * sites migration (#78)
