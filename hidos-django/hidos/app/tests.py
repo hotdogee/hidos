@@ -136,3 +136,25 @@ def test_admin_pages_load(client, auth_client, fake_cellc2):
             assert change.status_code == 200, info
         add = client.get(reverse('admin:%s_%s_add' % info))
         assert add.status_code in (200, 403), info
+
+
+def test_healthz_ignores_host_and_https_settings(client, settings):
+    """The container health check calls http://127.0.0.1:8000/healthz."""
+    settings.ALLOWED_HOSTS = ['cell.example.org']
+    settings.SECURE_SSL_REDIRECT = True
+    assert client.get('/healthz', HTTP_HOST='127.0.0.1:8000').status_code == 200
+    assert client.get('/login', HTTP_HOST='127.0.0.1:8000').status_code == 400
+
+
+def test_throttling_uses_the_proxy_address(settings, rf):
+    """With NUM_PROXIES a client can't get fresh rate limits by sending X-Forwarded-For."""
+    from rest_framework.settings import api_settings
+    from rest_framework.throttling import AnonRateThrottle
+    settings.REST_FRAMEWORK = {**settings.REST_FRAMEWORK, 'NUM_PROXIES': 1}
+    api_settings.reload()
+    try:
+        idents = {AnonRateThrottle().get_ident(rf.get('/', HTTP_X_FORWARDED_FOR='%s, 10.0.0.9' % fake, REMOTE_ADDR='172.18.0.5'))
+                  for fake in ('1.1.1.1', '2.2.2.2')}
+        assert idents == {'10.0.0.9'}
+    finally:
+        api_settings.reload()

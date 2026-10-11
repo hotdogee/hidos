@@ -35,7 +35,6 @@ class GoogleLogin(SocialLoginView):
 
 
 urlpatterns = [
-    path('healthz', app_views.healthz, name='healthz'),
     re_path(r'^results/(?P<file_id>[0-9a-fA-F-]{32,36})$', app_views.task_result, name='task-result'),
     re_path(r'^login$',
         auth_views.LoginView.as_view(

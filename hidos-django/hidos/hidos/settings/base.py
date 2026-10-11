@@ -180,6 +180,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'app.middleware.HealthCheckMiddleware',  # before host validation and HTTPS redirects
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -409,7 +410,16 @@ REST_FRAMEWORK = {
     },
     'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',),
     'DEFAULT_PAGINATION_CLASS': None,
+    # Number of reverse proxies in front of Django (nginx in docker compose: 1).
+    # Throttling then uses the address the proxy saw instead of trusting a
+    # client supplied X-Forwarded-For header.
+    'NUM_PROXIES': env.int('NUM_PROXIES', default=None),
 }
+
+# Cache, also where the rate limit counters are kept. The default per
+# process memory cache gives every gunicorn worker its own counters; docker
+# compose uses the database (CACHE_URL=dbcache://hidos_cache).
+CACHES = {'default': env.cache_url('CACHE_URL', default='locmemcache://')}
 
 # Email (EMAIL_URL, e.g. smtp+tls://user:password@smtp.example.com:587)
 vars().update(env.email_url('EMAIL_URL', default='consolemail://'))

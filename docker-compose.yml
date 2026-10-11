@@ -21,6 +21,8 @@ x-django: &django
     DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1,web}
     CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-http://localhost:8080}
     SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-false}
+    NUM_PROXIES: ${NUM_PROXIES:-1}
+    CACHE_URL: ${CACHE_URL:-dbcache://hidos_cache}
     CSRF_COOKIE_SECURE: ${CSRF_COOKIE_SECURE:-false}
   volumes:
     - media:/data/media
@@ -37,6 +39,7 @@ services:
     build: ./hidos-django/hidos
     command: >-
       sh -c "python manage.py migrate --noinput &&
+             python manage.py createcachetable &&
              gunicorn hidos.wsgi --bind 0.0.0.0:8000 --workers 3 --timeout 120 --access-logfile -"
     volumes:
       - media:/data/media
