@@ -141,7 +141,8 @@ STATICFILES_FINDERS = (
 # Application definition
 
 SITE_ID = 1
-# Written to the django_site row by app/migrations/0001_site_domain.py
+# Written to the django_site row by app/migrations/0001_site_domain.py, i.e. by
+# the first migrate only; change the site in the admin afterwards.
 SITE_DOMAIN = env('SITE_DOMAIN', default='hidos.io')
 SITE_NAME = env('SITE_NAME', default='HiDOS')
 

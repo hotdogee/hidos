@@ -37,6 +37,7 @@ git clone https://github.com/hotdogee/hidos.git
 cd hidos
 cp .env.example .env
 # set DJANGO_SECRET_KEY in .env, e.g. python -c "import secrets; print(secrets.token_urlsafe(50))"
+# (beyond a local trial, also the passwords and SITE_DOMAIN, see Deployment)
 docker compose up -d --build --wait
 docker compose exec web python manage.py createsuperuser
 ```
@@ -60,7 +61,10 @@ the database and the uploaded images (see [Backups](#backups)).
 Works on Linux, macOS and Windows. You need:
 
 * Python 3.12, 3.13 or 3.14
-* PostgreSQL 13+ (SQLite works for the test suite only)
+* PostgreSQL 14+, the oldest version Django 5.2 supports (SQLite works for
+  the test suite only). A database from the 2016 deployment must first be
+  upgraded to PostgreSQL 14 or later (`pg_upgrade`, or `pg_dump` and
+  restore) before `migrate` can run on it.
 * RabbitMQ, or set `CELERY_TASK_ALWAYS_EAGER=true` to run analyses inside the
   web process during development
 * No compilers: NumPy, SciPy, scikit-image, mahotas and OpenCV install as
@@ -75,11 +79,23 @@ pip install -r requirements/local.txt
 cp ../../.env.example .env          # the settings read hidos-django/hidos/.env
 ```
 
-Create the database (the default `DATABASE_URL` is `postgres://django@localhost:5432/django`):
+Create a database user with a password, and its database. Run the commands
+as a PostgreSQL superuser:
 
 ```sh
-createuser -s -U postgres django
-createdb -U postgres --owner django django
+# Linux packages (local connections of the postgres user use peer authentication)
+sudo -u postgres createuser -s -P django     # -P asks for the new user's password
+sudo -u postgres createdb --owner django django
+# Windows (EDB installer): createuser -s -P -U postgres django, createdb -U postgres --owner django django
+# macOS (Homebrew, your own user is the superuser): createuser -s -P django, createdb --owner django django
+```
+
+Then put the password into `hidos-django/hidos/.env`. The default
+`DATABASE_URL` (`postgres://django@localhost:5432/django`) has no password,
+which only works where PostgreSQL trusts local connections:
+
+```sh
+DATABASE_URL=postgres://django:<password>@localhost:5432/django
 ```
 
 Then:
@@ -115,7 +131,7 @@ All deployment settings come from environment variables (or a `.env` file).
 | `DATABASE_URL` | `postgres://django@localhost:5432/django` | |
 | `CELERY_BROKER_URL` | `amqp://guest:guest@localhost:5672//` | |
 | `EMAIL_URL` | `consolemail://` | e.g. `smtp+tls://user:password@smtp.example.com:587` |
-| `SITE_DOMAIN` | `hidos.io` | Used in account emails |
+| `SITE_DOMAIN`, `SITE_NAME` | `hidos.io`, `HiDOS` | Used in account emails. Written to the *Sites* table by the first `migrate` only (with docker compose: the first `up`); change it later in the admin under *Sites* |
 | `CORS_ALLOWED_ORIGINS` | none | Origin(s) of the single page app |
 | `API_SESSION_AUTH` | `false` (`true` in local settings) | Allow browser sessions on the API |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`, `FACEBOOK_CLIENT_ID` / `FACEBOOK_CLIENT_SECRET` | none | Social login. Alternatively add *Social applications* in the admin ([docs/social-login.md](docs/social-login.md)) |
@@ -249,7 +265,15 @@ Dependabot proposes grouped dependency updates once a month.
 The compose file is the reference deployment. For production:
 
 * set a strong `DJANGO_SECRET_KEY`, `DJANGO_ALLOWED_HOSTS`,
-  `CSRF_TRUSTED_ORIGINS`, `EMAIL_URL`, and new database and broker passwords
+  `CSRF_TRUSTED_ORIGINS` and `EMAIL_URL`
+* set `POSTGRES_PASSWORD`, `RABBITMQ_PASSWORD` and `SITE_DOMAIN` before the
+  first `docker compose up`. The postgres and rabbitmq images only apply the
+  passwords when they create their volumes (`pgdata`, `rabbitmq`), and the
+  first `migrate` writes `SITE_DOMAIN` to the *Sites* table. To change a
+  password later, change it in the running service first
+  (`docker compose exec db psql -U django -c "ALTER ROLE django PASSWORD '...'"`,
+  `docker compose exec broker rabbitmqctl change_password hidos '...'`), then
+  in `.env`, or recreate the volumes, which deletes their data
 * terminate TLS in front of nginx (the 2016 hidos.io setup is in
   `tools/nginx`) and set `SESSION_COOKIE_SECURE=true` and
   `CSRF_COOKIE_SECURE=true`

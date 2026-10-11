@@ -3,7 +3,8 @@ Set the django.contrib.sites domain (default example.com) to the real site
 domain, hidos.io unless SITE_DOMAIN says otherwise (#78).
 
 allauth uses the Site domain and name in email confirmation and password
-reset messages.
+reset messages. Like any migration this runs once, so a SITE_DOMAIN set
+after the first migrate has no effect; change the site in the admin.
 """
 from django.conf import settings
 from django.db import migrations
