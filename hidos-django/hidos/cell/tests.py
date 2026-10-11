@@ -280,3 +280,29 @@ def test_email_change_does_not_hand_over_tasks(auth_client, other_client, user, 
     assert second['id'] != first['id']
     assert second['owner'] == other_user.pk
     assert get_task(first['id']).owner == user
+
+
+def test_rename_during_analysis_is_kept(auth_client, monkeypatch):
+    import cellc2
+    run = fake_run()
+
+    def renaming_run(task_record):
+        File.objects.filter(pk=task_record.pk).update(name='renamed while running')
+        return run(task_record)
+    monkeypatch.setattr(cellc2, 'run', renaming_run)
+    task = get_task(create_task(auth_client)['id'])
+    assert task.status == 'success'
+    assert task.name == 'renamed while running'
+
+
+def test_task_deleted_during_analysis_stays_deleted(auth_client, monkeypatch):
+    import cellc2
+    run = fake_run()
+
+    def deleting_run(task_record):
+        File.objects.filter(pk=task_record.pk).delete()
+        return run(task_record)
+    monkeypatch.setattr(cellc2, 'run', deleting_run)
+    response = auth_client.post(TASKS, {'file': image_file()}, format='multipart')
+    assert response.status_code == 201
+    assert not File.objects.exists()

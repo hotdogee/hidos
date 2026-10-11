@@ -13,6 +13,7 @@ from celery.signals import after_task_publish, task_success, task_failure
 
 from django.conf import settings
 from django.core.cache import cache
+from django.db import DatabaseError, transaction
 from django.utils import timezone
 
 
@@ -55,6 +56,20 @@ def report_error(app_name, task_record, error):
         logger.exception('Could not send the error report to Slack')
 
 
+def save_fields(task_record, fields):
+    """
+    Save only the fields the worker changes, so a rename or move made while
+    the analysis runs is kept. Returns False if the task was deleted
+    meanwhile (a full save would have inserted it again).
+    """
+    try:
+        with transaction.atomic():  # savepoint, in case we run inside a transaction
+            task_record.save(update_fields=fields + ['modified'])
+        return True
+    except DatabaseError:  # "Save with update_fields did not affect any rows."
+        return False
+
+
 class CellTask(Task):
 
     def process_image(self, app_name, task_id, logger=logger):
@@ -63,11 +78,15 @@ class CellTask(Task):
         func = app.run
 
         # update dequeue time, status and progress bar
-        task_record = model.objects.get(id__exact=task_id)
+        task_record = model.objects.filter(id__exact=task_id).first()
+        if task_record is None:
+            logger.info('{0} worker: task {1} was deleted before it started'.format(app_name, task_id))
+            return task_id
         task_record.dequeued = timezone.now()
         task_record.status = 'running'
         task_record.progress = 0.1
-        task_record.save()
+        if not save_fields(task_record, ['dequeued', 'status', 'progress']):
+            return task_id
         logger.info('{0} worker {1}: {2}'.format(app_name, task_record.status, task_id))
 
         # run
@@ -79,7 +98,9 @@ class CellTask(Task):
             task_record.error = traceback.format_exc()
             task_record.progress = 1.0
             task_record.finished = timezone.now()
-            task_record.save()
+            if not save_fields(task_record, ['status', 'error', 'progress', 'finished']):
+                logger.info('{0} worker: task {1} was deleted during the analysis'.format(app_name, task_id))
+                return task_id
             logger.error('{0} worker failed: {1} ({2}: {3})'.format(app_name, task_id, type(e).__name__, e))
             report_error(app_name, task_record, e.args[0] if e.args else repr(e))
             raise
@@ -97,7 +118,9 @@ class CellTask(Task):
 
         task_record.progress = 1.0
         task_record.finished = timezone.now()
-        task_record.save()
+        if not save_fields(task_record, ['result', 'status', 'progress', 'finished']):
+            logger.info('{0} worker: task {1} was deleted during the analysis'.format(app_name, task_id))
+            return task_id
         logger.info('{0} worker {1}: {2}'.format(app_name, task_record.status, task_id))
 
         return task_id # passed to 'result' argument of task_success_handler
