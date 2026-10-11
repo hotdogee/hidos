@@ -28,6 +28,18 @@ def same_email(a, b):
     return bool(a) and email_key(a) == email_key(b)
 
 
+def has_ascii_local_part(email):
+    """
+    Whether the part before the @ is ASCII, which is all that can be mailed.
+
+    Django's EmailValidator means to allow only ASCII there, but under
+    re.IGNORECASE its [a-z] also matches İ, ı, ſ and the Kelvin sign. Django
+    mails such a local part as an RFC 2047 encoded word, which reaches no
+    mailbox, and fails on a long one (ValueError, an HTTP 500).
+    """
+    return (email or '').rpartition('@')[0].isascii()
+
+
 def has_confirmed_email(user):
     """Whether the user confirmed the account's own address (user.email)."""
     return any(same_email(address.email, user.email)

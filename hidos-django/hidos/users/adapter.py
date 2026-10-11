@@ -2,12 +2,18 @@ from allauth.account.adapter import DefaultAccountAdapter
 from allauth.account.models import EmailAddress
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from django.contrib.auth.views import redirect_to_login
+from django.core.exceptions import ValidationError
+from django.core.validators import EmailValidator, MaxLengthValidator
 
-from .emails import same_email
+from .emails import has_ascii_local_part, same_email
 
 
 class AccountAdapter(DefaultAccountAdapter):
     """
+    clean_email refuses addresses that allauth would store as another one
+    (cut to fit User.email) or that can't be mailed (users.emails). Signups,
+    added addresses, password resets and social logins all go through it.
+
     An address that an account added under /accounts/email/ is only confirmed
     by that account (#67): the link has to be opened while logged in as it.
     The account's own address (user.email, the one it signed up with) is
@@ -24,6 +30,21 @@ class AccountAdapter(DefaultAccountAdapter):
     signed up but not confirmed yet couldn't confirm their own account any
     more, either.
     """
+
+    def clean_email(self, email):
+        email = super().clean_email(email)
+        stored = email.lower()  # as allauth stores and mails it
+        if not has_ascii_local_part(stored):
+            raise ValidationError(EmailValidator.message, code=EmailValidator.code)
+        # allauth would cut a longer one to fit User.email, i.e. register and mail another address;
+        # str.lower() can make an address longer (it turns İ into i and a combining dot)
+        MaxLengthValidator(EmailAddress._meta.get_field('email').max_length)(stored)
+        return email
+
+    def send_mail(self, template_prefix, email, context):
+        # such an address, stored before clean_email refused them, can't be mailed (users.emails)
+        if has_ascii_local_part(email):
+            super().send_mail(template_prefix, email, context)
 
     def confirm_email(self, request, email_address):
         if (not same_email(email_address.email, email_address.user.email)

@@ -80,6 +80,10 @@ failing or creating a second user. Both sides must have verified the address:
   domain (`xn--gmal-nza.com`) that anyone can register. Signup and the
   confirmed-email checks at login compare addresses the same way, so such a
   look-alike is a separate account.
+* Addresses are refused if anything but ASCII comes before the @, which
+  Django can't mail (its validator lets İ, ı, ſ and K through there), or if
+  they are longer than 254 characters lower-cased, which allauth would cut
+  to fit and register as another address (`users/adapter.py`).
 
 The `/login` page, like the login API, refuses accounts whose email hasn't
 been confirmed. Staff accounts (e.g. from `manage.py createsuperuser`) are
