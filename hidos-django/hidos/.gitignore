@@ -35,5 +35,8 @@ jspm_packages
 
 # media
 media/ 
-# unfinished chunked uploads
+
+# collectstatic output, unfinished chunked uploads, local virtualenvs
+/static/
 /chunked_uploads/
+.venv/

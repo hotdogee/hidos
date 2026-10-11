@@ -18,6 +18,11 @@ def fake_cellc2(monkeypatch):
     monkeypatch.setattr(cellc2, 'run', fake_run({'confluence': '42.00'}))
 
 
+def test_healthz(client):
+    response = client.get('/healthz')
+    assert response.status_code == 200 and response.json() == {'status': 'ok'}
+
+
 def test_login_page_logs_in_and_redirects(client, user):
     page = client.get('/login?next=/results/abc')
     assert page.status_code == 200
@@ -114,7 +119,6 @@ def test_google_analytics_when_configured(client, settings):
 
 
 # --- admin ------------------------------------------------------------------------------
-
 
 def test_admin_pages_load(client, auth_client, fake_cellc2):
     from django.contrib.auth import get_user_model

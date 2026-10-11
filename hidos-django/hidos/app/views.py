@@ -6,13 +6,25 @@ import uuid
 from datetime import datetime
 
 from django.contrib.auth.decorators import login_required
-from django.http import Http404
+from django.db import connection
+from django.http import Http404, JsonResponse
 from django.shortcuts import render
 
 from cell.models import CellTask
 from fs.models import File
 
 logger = logging.getLogger(__name__)
+
+
+def healthz(request):
+    """Liveness/readiness probe used by docker compose and load balancers."""
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT 1')
+    except Exception:  # pragma: no cover - only when the database is down
+        logger.exception('Health check failed')
+        return JsonResponse({'status': 'error'}, status=503)
+    return JsonResponse({'status': 'ok'})
 
 
 @login_required
