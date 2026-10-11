@@ -12,10 +12,11 @@ from skimage import filters, morphology, feature
 import json
 import time
 from os import listdir
-import matplotlib.pyplot as plt
 from skimage import io
 from skimage import img_as_ubyte
-import pymorph as m
+from cell import pymorph as m
+from cell import skimage_compat as compat
+from cell.skimage_compat import remove_small_holes, remove_small_objects
 from skimage import exposure
 
 
@@ -95,13 +96,13 @@ def cellConfluence_singleTask(task_record):
     kernel3=np.array([[1,1],[1,1]],np.ubyte)
 
     alpha=1
-    img_tmp1=feature.canny(img_gray)
+    img_tmp1=compat.canny(img_gray)
 
 #    print img_gray.std()
     if (img_gray.std()<25): #對比不夠強
         alpha=15
     img_gray_tmp=contrast_saturated(img_gray,alpha)
-    img_tmp2=feature.canny(img_gray_tmp)
+    img_tmp2=compat.canny(img_gray_tmp)
 
 
 
@@ -116,7 +117,7 @@ def cellConfluence_singleTask(task_record):
     if (pixel_diff>12 and alpha==15): #新增偽前景，要避免(當pixel_diff太大時，因強化對比使背景被誤判為前景)
         alpha=1
         img_gray_tmp=contrast_saturated(img_gray,alpha)
-        img_tmp2=feature.canny(img_gray_tmp)
+        img_tmp2=compat.canny(img_gray_tmp)
 
     tmp1=img_tmp1.sum()
     tmp2=img_tmp2.sum()
@@ -143,30 +144,30 @@ def cellConfluence_singleTask(task_record):
     ##################################################
 
 #    img_gray=filters.rank.enhance_contrast(img_gray,kernel2)
-    img_prewitt=filters.prewitt(img_gray)    #detect edge
+    img_prewitt=compat.prewitt(img_gray)    #detect edge
 #    plt.figure()
 #    io.imshow(img_prewitt)
 #    io.show()
 #    binarization
     img_enhance=img_as_ubyte(img_prewitt)
-    img_enhance = cv2.GaussianBlur(img_enhance,(5,5),0)
+    img_enhance = compat.gaussian_blur(img_enhance,(5,5),0)
     thresh,img_thresh=cv2.threshold(img_enhance,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
     img_thresh_1=img_enhance>=thresh
 
 
 
-    img_roberts=filters.roberts(img_gray)    #detect edge
+    img_roberts=compat.roberts(img_gray)    #detect edge
 #    plt.figure()
 #    io.imshow(img_prewitt)
 #    io.show()
 #    binarization
     img_enhance=img_as_ubyte(img_roberts)
-    img_enhance = cv2.GaussianBlur(img_enhance,(5,5),0)
+    img_enhance = compat.gaussian_blur(img_enhance,(5,5),0)
     thresh,img_thresh=cv2.threshold(img_enhance,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
     img_thresh_2=img_enhance>=thresh
 
 
-    img_thresh_3=feature.canny(img_gray)
+    img_thresh_3=compat.canny(img_gray)
 
     img_thresh=np.uint8(np.logical_or(img_thresh_1,img_thresh_2))
     img_thresh=np.uint8(np.logical_or(img_thresh,img_thresh_3))
@@ -219,12 +220,12 @@ def cellConfluence_singleTask(task_record):
 #        minimum_size=10
 #        if (minimum_size<10):
 #            minimum_size=10
-        img_opening=morphology.remove_small_holes(img_opening,min_size=minimum_size*minimum_size)
-#        img_opening=morphology.remove_small_holes(img_opening,min_size=10*10)
+        img_opening=remove_small_holes(img_opening,min_size=minimum_size*minimum_size)
+#        img_opening=remove_small_holes(img_opening,min_size=10*10)
 #        if (float(img_opening.sum())/img_opening.size<0.6):
-#            img_opening=morphology.remove_small_holes(img_opening,min_size=10*10)
+#            img_opening=remove_small_holes(img_opening,min_size=10*10)
 #        else:
-#            img_opening=morphology.remove_small_holes(img_opening,min_size=10*10)
+#            img_opening=remove_small_holes(img_opening,min_size=10*10)
 
 
 
@@ -249,14 +250,14 @@ def cellConfluence_singleTask(task_record):
     img_opening=cv2.dilate(img_opening,kernel3,iterations=1)
     img_opening=cv2.erode(img_opening,kernel2,iterations=1)
     if alpha>1:
-        img_opening=morphology.remove_small_holes(img_opening,min_size=50)
+        img_opening=remove_small_holes(img_opening,min_size=50)
 #    if (max(img_opening.shape)>=1024 and float(img_opening.sum())/img_opening.size<0.8):
 #        if float(img_opening.sum())/img_opening.size>0.7:
-#            img_opening=morphology.remove_small_holes(img_opening,min_size=50)
+#            img_opening=remove_small_holes(img_opening,min_size=50)
 #        elif float(img_opening.sum())/img_opening.size>0.6:
-#            img_opening=morphology.remove_small_holes(img_opening,min_size=50)
+#            img_opening=remove_small_holes(img_opening,min_size=50)
 #        else:
-#            img_opening=morphology.remove_small_holes(img_opening,min_size=50)
+#            img_opening=remove_small_holes(img_opening,min_size=50)
 
     ###################################################
 
@@ -295,7 +296,7 @@ def cellConfluence_singleTask(task_record):
 
 
     ret, img_label, stats, centroids = cv2.connectedComponentsWithStats(img_opening)
-    img_label=morphology.remove_small_objects(img_label,min_size=100)
+    img_label=remove_small_objects(img_label,min_size=100)
     img_opening=np.zeros_like(img_label)
     mask=np.where(img_label>0)
     img_opening[mask]=1

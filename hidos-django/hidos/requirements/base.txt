@@ -1,23 +1,33 @@
-celery>=3.1.24
-docutils>=0.12
-urllib3>=1.18
-psycopg2>=2.6.2
-numpy==1.11.1
-matplotlib==1.5.1
-Markdown>=2.6.7
-Pillow==3.3.0
-Django[bcrypt]>=1.10.2
-django-extensions>=1.7.4
-django-rest-auth[with_social]>=0.8.1
-django-model-utils>=2.6
-django-vanilla-views>=1.0.4
-django-filter>=0.13.3
-django-material>=0.9.1
-django-crispy-forms>=1.6.1
-djangorestframework>=3.5.1
-djangorestframework-jwt>=1.8.0
+# Runtime requirements (Python 3.12 - 3.14).
+# Pinned for reproducible builds; Dependabot proposes monthly grouped updates.
 
-scikit-image>=0.12.3
-scipy==0.17.1
-mahotas>=1.4.3
-pymorph>=0.96
+# Web framework and REST API
+Django[bcrypt]==5.2.18
+djangorestframework==3.18.3
+djangorestframework-simplejwt==5.5.1
+dj-rest-auth[with-social]==7.2.0
+django-allauth[socialaccount]==65.19.7
+django-filter==26.2
+django-cors-headers==4.9.0
+django-extensions==4.1
+django-environ==0.14.0
+Markdown==3.11
+docutils==0.23
+whitenoise==6.12.0
+
+# Database
+psycopg[binary]==3.3.6
+
+# Task queue
+celery==5.6.3
+
+# Error reporting (Slack webhook)
+urllib3==2.8.0
+
+# Image analysis
+Pillow==12.3.0
+numpy==2.5.4
+scipy==1.18.1
+scikit-image==0.26.0
+mahotas==1.4.19
+opencv-python-headless==4.14.0.94

@@ -8,8 +8,8 @@ from PIL import Image
 #%matplotlib qt
 import numpy as np
 from skimage import io, morphology, data, color, img_as_ubyte
-from skimage.transform import resize
-from skimage.filters import gabor, laplace, gaussian
+from cell.skimage_compat import laplace, remove_small_holes, resize
+from skimage.filters import gabor, gaussian
 from skimage.util import img_as_ubyte
 from skimage.morphology import erosion, dilation, opening, closing, white_tophat, skeletonize, disk
 import cv2
@@ -39,11 +39,11 @@ def mask_create(image_phase):
     # remove the small white dot
     img_p3_inv = img_p3 == 0
     small_obj_thres = 800
-    img_p4 = morphology.remove_small_holes(img_p3_inv, small_obj_thres)
+    img_p4 = remove_small_holes(img_p3_inv, small_obj_thres)
 
     # remove the small black dot
     img_p4_inv = img_p4 == 0
-    img_p5 = morphology.remove_small_holes(img_p4_inv, small_obj_thres)
+    img_p5 = remove_small_holes(img_p4_inv, small_obj_thres)
 
     return img_p5
 

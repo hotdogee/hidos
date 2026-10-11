@@ -7,14 +7,15 @@ Created on Wed May 11 16:55:18 2016
 
 import cv2
 import scipy
-import pymorph as m
+from cell import pymorph as m
+from cell import skimage_compat as compat
+from cell.skimage_compat import remove_small_holes, remove_small_objects
 from skimage import feature, color, morphology, measure, filters
 from skimage import img_as_ubyte
 import numpy as np
 import json
 #import time
 from os import listdir
-import matplotlib.pyplot as plt
 from skimage import io
 import mahotas
 from skimage import exposure
@@ -221,7 +222,7 @@ def cellAngiogenesis(task_record, add_boarder=True):
 
     #20161101
     img_gray=contrast_saturated(img_gray)
-#    img_gray = cv2.GaussianBlur(img_gray,(5,5),0)
+#    img_gray = compat.gaussian_blur(img_gray,(5,5),0)
 
 #    img_gray_mean=np.mean(img_gray)
 #    img_gray_var=np.var(img_gray)
@@ -245,7 +246,7 @@ def cellAngiogenesis(task_record, add_boarder=True):
 #    print np.mean(img_gray)
 #    print np.var(img_gray)
 
-#    img_thresh=feature.canny(img_gray) #bool output
+#    img_thresh=compat.canny(img_gray) #bool output
 #    img_thresh=np.uint8(img_thresh)
 #
 #    plt.figure()
@@ -254,25 +255,25 @@ def cellAngiogenesis(task_record, add_boarder=True):
 
 
     #####################################################
-    img_prewitt=filters.prewitt(img_gray)    #detect edge
+    img_prewitt=compat.prewitt(img_gray)    #detect edge
     img_enhance=img_as_ubyte(img_prewitt)
-    img_enhance = cv2.GaussianBlur(img_enhance,(5,5),0)
+    img_enhance = compat.gaussian_blur(img_enhance,(5,5),0)
     thresh,img_thresh=cv2.threshold(img_enhance,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
     img_thresh_1=img_enhance>=thresh
 
-    img_sobel=filters.sobel(img_gray)    #detect edge
+    img_sobel=compat.sobel(img_gray)    #detect edge
     img_enhance=img_as_ubyte(img_sobel)
-    img_enhance = cv2.GaussianBlur(img_enhance,(5,5),0)
+    img_enhance = compat.gaussian_blur(img_enhance,(5,5),0)
     thresh,img_thresh=cv2.threshold(img_enhance,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
     img_thresh_2=img_enhance>=thresh
 
-    img_roberts=filters.roberts(img_gray)    #detect edge
+    img_roberts=compat.roberts(img_gray)    #detect edge
     img_enhance=img_as_ubyte(img_roberts)
-    img_enhance = cv2.GaussianBlur(img_enhance,(5,5),0)
+    img_enhance = compat.gaussian_blur(img_enhance,(5,5),0)
     thresh,img_thresh=cv2.threshold(img_enhance,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
     img_thresh_3=img_enhance>=thresh
 
-    img_thresh_4=feature.canny(img_gray,sigma=2)
+    img_thresh_4=compat.canny(img_gray,sigma=2)
 
     img_thresh=np.uint8(np.logical_or(img_thresh_1,img_thresh_2))
     img_thresh=np.uint8(np.logical_or(img_thresh,img_thresh_3))
@@ -302,7 +303,7 @@ def cellAngiogenesis(task_record, add_boarder=True):
         kernel=np.array(m.sedisk(6),np.ubyte)
     else:
         kernel=np.array(m.sedisk(5),np.ubyte)
-    img_dilation = np.array(cv2.dilate(img_thresh,kernel),np.bool)
+    img_dilation = np.array(cv2.dilate(img_thresh,kernel),bool)
 
     if (min(img_thresh.shape)>500):
         kernel=np.array([[1,1,1],[1,1,1],[1,1,1]],np.ubyte)
@@ -312,7 +313,7 @@ def cellAngiogenesis(task_record, add_boarder=True):
     img_dilation = cv2.morphologyEx(np.uint8(img_dilation), cv2.MORPH_OPEN, kernel,iterations=3)
     img_dilation = cv2.morphologyEx(np.uint8(img_dilation), cv2.MORPH_CLOSE, kernel,iterations=3)
 
-    img_dilation = np.array(cv2.erode(img_dilation,kernel),np.bool)
+    img_dilation = np.array(cv2.erode(img_dilation,kernel),bool)
 
     if (add_boarder):
         board_value=img_dilation.max()
@@ -406,7 +407,7 @@ def cellAngiogenesis(task_record, add_boarder=True):
 #    io.imshow(img_skeleton)
 #    io.show()
 
-    img_remove_small_hole=morphology.remove_small_holes(img_skeleton,min_size=size_thresh)
+    img_remove_small_hole=remove_small_holes(img_skeleton,min_size=size_thresh)
 #    plt.figure()
 #    io.imshow(img_remove_small_hole)
 #    io.show()
@@ -427,7 +428,7 @@ def cellAngiogenesis(task_record, add_boarder=True):
 #        io.imshow(img_remove_small_branch)
 #        io.show()
         ret,img_label=cv2.connectedComponents(np.uint8(img_remove_small_branch))
-        img_remove_small_object=morphology.remove_small_objects(img_label,min_size=10)
+        img_remove_small_object=remove_small_objects(img_label,min_size=10)
         img_remove_small_object=img_remove_small_object>0
 #        plt.figure()
 #        io.imshow(img_remove_small_object)
@@ -450,7 +451,7 @@ def cellAngiogenesis(task_record, add_boarder=True):
 #    io.imshow(np.copy(img_final))
 #    io.show()
 
-    img_remove_small_hole=morphology.remove_small_holes(img_final,min_size=size_thresh)
+    img_remove_small_hole=remove_small_holes(img_final,min_size=size_thresh)
     img_final=morphology.skeletonize(img_remove_small_hole) #remove small hole by skeleton
 
 #    plt.figure()
@@ -527,7 +528,7 @@ def cellAngiogenesis(task_record, add_boarder=True):
     img_final = cv2.dilate(np.uint8(img_final),kernel)
     img_final=morphology.skeletonize(img_final)
 
-    img_remove_small_hole=morphology.remove_small_holes(img_final,min_size=size_thresh)
+    img_remove_small_hole=remove_small_holes(img_final,min_size=size_thresh)
     img_final=morphology.skeletonize(img_remove_small_hole)
 
     extremityMap=findExtremities(img_final)
@@ -720,9 +721,9 @@ def cellAngiogenesis(task_record, add_boarder=True):
     t0=np.zeros(len(mask[0]),np.ubyte)
     t1=np.ones(len(mask[1]),np.ubyte)
     t2=t1+t1
-    mask0=[mask[0],mask[1],t0]
-    mask1=[mask[0],mask[1],t1]
-    mask2=[mask[0],mask[1],t2]
+    mask0=(mask[0],mask[1],t0)
+    mask1=(mask[0],mask[1],t1)
+    mask2=(mask[0],mask[1],t2)
     img_ori_resize=np.array(img_ori_resize,float)
     img_ori_resize[mask0]=(img_ori_resize[mask0]*0.7)+(img_label_color[mask0]*0.3)
     img_ori_resize[mask1]=(img_ori_resize[mask1]*0.7)+(img_label_color[mask1]*0.3)
@@ -740,7 +741,7 @@ def cellAngiogenesis(task_record, add_boarder=True):
 
     img_final2=allSegment+allBranch+junctionMap+extremityMap+img_fill_holes_tmp
     mask=np.where(img_final2>0)
-    img_final2=np.zeros_like(img_final2,np.bool)
+    img_final2=np.zeros_like(img_final2,bool)
     img_final2[mask]=1
     img_final2=morphology.skeletonize(img_final2)
 

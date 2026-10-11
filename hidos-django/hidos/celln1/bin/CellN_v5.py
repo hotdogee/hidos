@@ -6,7 +6,7 @@
 import cv2
 import numpy as np
 import json
-import pymorph
+from cell import pymorph
 import mahotas as ma
 import copy
 
@@ -17,7 +17,9 @@ from skimage.util import img_as_ubyte
 from scipy import ndimage
 from skimage.morphology import erosion, dilation, opening, closing, white_tophat, skeletonize, disk
 from skimage import color
-from pymorph import overlay, se2hmt, supcanon
+from cell.pymorph import overlay, se2hmt, supcanon
+from cell import skimage_compat as compat
+from cell.skimage_compat import remove_small_objects
 from skimage.filters.rank import enhance_contrast
 from skimage import feature
 from skimage import exposure
@@ -115,9 +117,9 @@ def CellNOne(task_record):
     height = np.size(ori_img_int8, 0)
     width = np.size(ori_img_int8, 1)
     if (width > 1200):
-        factor = width / 1200
-        dheight = height / factor
-        dwidth = width / factor
+        factor = width // 1200
+        dheight = height // factor
+        dwidth = width // factor
         img = cv2.resize(ori_img_int8, (dwidth, dheight))
     else :
         img = ori_img_int8.copy()
@@ -125,7 +127,7 @@ def CellNOne(task_record):
 
     # --------------------------------------------------------------------------------------------
     # edge thershold
-    blur = cv2.GaussianBlur(img,(5,5),0)
+    blur = compat.gaussian_blur(img,(5,5),0)
     thresh = skimage.filters.threshold_otsu(blur)
     edge = cv2.Canny(blur, 0, thresh)
     kernel = np.ones((5,5), np.uint8)
@@ -133,29 +135,29 @@ def CellNOne(task_record):
     img_thrs = img_thrs >= 1
     img_thrs = dilation(img_thrs, disk(1))
     img_thrs_reverse = 1 - img_thrs
-    img_thrs_reverse = np.array(img_thrs_reverse, dtype=np.bool)
+    img_thrs_reverse = np.array(img_thrs_reverse, dtype=bool)
     small_holes = 300
-    img_binary_reverse = morphology.remove_small_objects(img_thrs_reverse, small_holes)
+    img_binary_reverse = remove_small_objects(img_thrs_reverse, small_holes)
     img_binary = 1 - img_binary_reverse
     # otsu thershold
     re3, img_thrs_1 = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-    img_thrs_1 = np.array(img_thrs_1, dtype=np.bool)
+    img_thrs_1 = np.array(img_thrs_1, dtype=bool)
     # combined those threshold result
     img_bi_or = np.logical_or(img_binary, img_thrs_1)
 
 #     re3,img_thrs_1 = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-#     img_thrs_1 = np.array(img_thrs_1, dtype=np.bool)
+#     img_thrs_1 = np.array(img_thrs_1, dtype=bool)
 #     img_thrs_2 = cv2.adaptiveThreshold(blur, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 55, 0)
-#     img_thrs_2 = np.array(img_thrs_2, dtype=np.bool)
+#     img_thrs_2 = np.array(img_thrs_2, dtype=bool)
 #     img_thrs = np.logical_or(img_thrs_1, img_thrs_2)
 #     kernel = np.array([(0,0,1,0,0), (0,1,1,1,0), (1,1,1,1,1), (0,1,1,1,0), (0,0,1,0,0)], np.uint8)
 #     equ = cv2.equalizeHist(img)
 
     # --------------------------------------------------------------------------------------------
     # remove small object 100
-    img_bi_or_bool = np.array(img_bi_or, dtype=np.bool)
+    img_bi_or_bool = np.array(img_bi_or, dtype=bool)
     small_obj_thres = 100
-    img_p3 = morphology.remove_small_objects(img_bi_or_bool, small_obj_thres)
+    img_p3 = remove_small_objects(img_bi_or_bool, small_obj_thres)
 
     # --------------------------------------------------------------------------------------------
     # clear border for small object or not
@@ -163,7 +165,7 @@ def CellNOne(task_record):
 #     ret, label_image, stats, centroids = cv2.connectedComponentsWithStats(img_thrs_uint8)
     img_p4 = clear_border(img_p3)
     img_tmp = img_p3 ^ img_p4
-    clear_labeled = morphology.label(img_tmp, 8, background=0)
+    clear_labeled = morphology.label(img_tmp, connectivity=2, background=0)
     for i in range(1, clear_labeled.max() + 1):
         clear_obj = clear_labeled == i
         temp = np.sum(clear_obj)
@@ -212,7 +214,7 @@ def CellNOne(task_record):
         if (np.sum(tmap_obj)*0.8 > np.sum(tmap_obj_soma)):
             cellbody = np.logical_or(cellbody, tmap_obj_soma)
 
-    cellbody = morphology.remove_small_objects(cellbody, 100)
+    cellbody = remove_small_objects(cellbody, 100)
     img_cellbody = dilation(cellbody, disk(2))
     img_cellbody = ndimage.binary_fill_holes(img_cellbody)
 
@@ -223,10 +225,10 @@ def CellNOne(task_record):
     img_body2 = np.zeros(img_cellbody.shape, dtype=bool)
     img_2 = np.zeros(img_cellbody.shape, dtype=bool)
     img_dead = np.zeros(img_cellbody.shape, dtype=bool)
-    labeled_im, im = ndimage.measurements.label(img_p4)
+    labeled_im, im = ndimage.label(img_p4)
     for i in range(1, labeled_im.max() + 1):
         img_obj = np.logical_and((labeled_im == i), img_cellbody)
-        a, b = ndimage.measurements.label(img_obj)
+        a, b = ndimage.label(img_obj)
         if b >= 2:
             img_2 = np.logical_or(img_2, (labeled_im == i))
             img_body2 = np.logical_or(img_body2, img_obj)
@@ -242,8 +244,8 @@ def CellNOne(task_record):
 
 
     img_cellbody = img_body2
-    labeled_cellbody, count_cellbody = ndimage.measurements.label(img_cellbody)
-    labeled_dead, count_dead = ndimage.measurements.label(img_dead)
+    labeled_cellbody, count_cellbody = ndimage.label(img_cellbody)
+    labeled_dead, count_dead = ndimage.label(img_dead)
     # --------------------------------------------------------------------------------------------
     # skeleton after dilation
     selem = disk(1)
@@ -256,7 +258,7 @@ def CellNOne(task_record):
     # Dendrite inside and outside
     dendrine_in = img_cellbody & img_skel
     dendrine_out = img_skel ^ dendrine_in
-    img_s1 = morphology.remove_small_objects(dendrine_out, 20, connectivity = 2)
+    img_s1 = remove_small_objects(dendrine_out, 20, connectivity = 2)
     dendrine_dila = dilation(img_s1, disk(1))
 
     img_r1 = img_s1.astype(np.uint8)
@@ -271,7 +273,7 @@ def CellNOne(task_record):
     # edges_soma = measure.find_contours(img_p2, 0.8)
     attpoint = dilation(img_cellbody, disk(2)) & img_s1
     soma_points = dilation(attpoint, disk(3))
-    labeled_attpoint, count_attpoint = ndimage.measurements.label(attpoint)
+    labeled_attpoint, count_attpoint = ndimage.label(attpoint)
 
 #     edges_soma2 = feature.canny(img_cellbody, sigma=0.5)
 #     attpoint2 = edges_soma2 & img_p6
@@ -384,7 +386,7 @@ def CellNOne(task_record):
 import cv2
 import numpy as np
 import json
-import pymorph
+from cell import pymorph
 import mahotas as ma
 import copy
 
@@ -395,7 +397,9 @@ from skimage.util import img_as_ubyte
 from scipy import ndimage
 from skimage.morphology import erosion, dilation, opening, closing, white_tophat, skeletonize, disk
 from skimage import color
-from pymorph import overlay, se2hmt, supcanon
+from cell.pymorph import overlay, se2hmt, supcanon
+from cell import skimage_compat as compat
+from cell.skimage_compat import remove_small_objects
 from skimage.filters.rank import enhance_contrast
 from skimage import feature
 from skimage import exposure
@@ -492,9 +496,9 @@ def CellNOne(task_record):
     height = np.size(ori_img_int8, 0)
     width = np.size(ori_img_int8, 1)
     if (width > 1200):
-        factor = width / 1200
-        dheight = height / factor
-        dwidth = width / factor
+        factor = width // 1200
+        dheight = height // factor
+        dwidth = width // factor
         img = cv2.resize(ori_img_int8, (dwidth, dheight))
     else :
         img = ori_img_int8.copy()
@@ -502,7 +506,7 @@ def CellNOne(task_record):
 
     # --------------------------------------------------------------------------------------------
     # edge thershold
-    blur = cv2.GaussianBlur(img,(5,5),0)
+    blur = compat.gaussian_blur(img,(5,5),0)
     thresh = skimage.filters.threshold_otsu(blur)
     edge = cv2.Canny(blur, 0, thresh)
     kernel = np.ones((5,5), np.uint8)
@@ -510,29 +514,29 @@ def CellNOne(task_record):
     img_thrs = img_thrs >= 1
     img_thrs = dilation(img_thrs, disk(1))
     img_thrs_reverse = 1 - img_thrs
-    img_thrs_reverse = np.array(img_thrs_reverse, dtype=np.bool)
+    img_thrs_reverse = np.array(img_thrs_reverse, dtype=bool)
     small_holes = 300
-    img_binary_reverse = morphology.remove_small_objects(img_thrs_reverse, small_holes)
+    img_binary_reverse = remove_small_objects(img_thrs_reverse, small_holes)
     img_binary = 1 - img_binary_reverse
     # otsu thershold
     re3, img_thrs_1 = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-    img_thrs_1 = np.array(img_thrs_1, dtype=np.bool)
+    img_thrs_1 = np.array(img_thrs_1, dtype=bool)
     # combined those threshold result
     img_bi_or = np.logical_or(img_binary, img_thrs_1)
 
 #     re3,img_thrs_1 = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-#     img_thrs_1 = np.array(img_thrs_1, dtype=np.bool)
+#     img_thrs_1 = np.array(img_thrs_1, dtype=bool)
 #     img_thrs_2 = cv2.adaptiveThreshold(blur, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 55, 0)
-#     img_thrs_2 = np.array(img_thrs_2, dtype=np.bool)
+#     img_thrs_2 = np.array(img_thrs_2, dtype=bool)
 #     img_thrs = np.logical_or(img_thrs_1, img_thrs_2)
 #     kernel = np.array([(0,0,1,0,0), (0,1,1,1,0), (1,1,1,1,1), (0,1,1,1,0), (0,0,1,0,0)], np.uint8)
 #     equ = cv2.equalizeHist(img)
 
     # --------------------------------------------------------------------------------------------
     # remove small object 100
-    img_bi_or_bool = np.array(img_bi_or, dtype=np.bool)
+    img_bi_or_bool = np.array(img_bi_or, dtype=bool)
     small_obj_thres = 100
-    img_p3 = morphology.remove_small_objects(img_bi_or_bool, small_obj_thres)
+    img_p3 = remove_small_objects(img_bi_or_bool, small_obj_thres)
 
     # --------------------------------------------------------------------------------------------
     # clear border for small object or not
@@ -540,7 +544,7 @@ def CellNOne(task_record):
 #     ret, label_image, stats, centroids = cv2.connectedComponentsWithStats(img_thrs_uint8)
     img_p4 = clear_border(img_p3)
     img_tmp = img_p3 ^ img_p4
-    clear_labeled = morphology.label(img_tmp, 8, background=0)
+    clear_labeled = morphology.label(img_tmp, connectivity=2, background=0)
     for i in range(1, clear_labeled.max() + 1):
         clear_obj = clear_labeled == i
         temp = np.sum(clear_obj)
@@ -589,7 +593,7 @@ def CellNOne(task_record):
         if (np.sum(tmap_obj)*0.8 > np.sum(tmap_obj_soma)):
             cellbody = np.logical_or(cellbody, tmap_obj_soma)
 
-    cellbody = morphology.remove_small_objects(cellbody, 100)
+    cellbody = remove_small_objects(cellbody, 100)
     img_cellbody = dilation(cellbody, disk(2))
     img_cellbody = ndimage.binary_fill_holes(img_cellbody)
 
@@ -600,10 +604,10 @@ def CellNOne(task_record):
     img_body2 = np.zeros(img_cellbody.shape, dtype=bool)
     img_2 = np.zeros(img_cellbody.shape, dtype=bool)
     img_dead = np.zeros(img_cellbody.shape, dtype=bool)
-    labeled_im, im = ndimage.measurements.label(img_p4)
+    labeled_im, im = ndimage.label(img_p4)
     for i in range(1, labeled_im.max() + 1):
         img_obj = np.logical_and((labeled_im == i), img_cellbody)
-        a, b = ndimage.measurements.label(img_obj)
+        a, b = ndimage.label(img_obj)
         if b >= 2:
             img_2 = np.logical_or(img_2, (labeled_im == i))
             img_body2 = np.logical_or(img_body2, img_obj)
@@ -619,8 +623,8 @@ def CellNOne(task_record):
 
 
     img_cellbody = img_body2
-    labeled_cellbody, count_cellbody = ndimage.measurements.label(img_cellbody)
-    labeled_dead, count_dead = ndimage.measurements.label(img_dead)
+    labeled_cellbody, count_cellbody = ndimage.label(img_cellbody)
+    labeled_dead, count_dead = ndimage.label(img_dead)
     # --------------------------------------------------------------------------------------------
     # skeleton after dilation
     selem = disk(1)
@@ -633,7 +637,7 @@ def CellNOne(task_record):
     # Dendrite inside and outside
     dendrine_in = img_cellbody & img_skel
     dendrine_out = img_skel ^ dendrine_in
-    img_s1 = morphology.remove_small_objects(dendrine_out, 20, connectivity = 2)
+    img_s1 = remove_small_objects(dendrine_out, 20, connectivity = 2)
     dendrine_dila = dilation(img_s1, disk(1))
 
     img_r1 = img_s1.astype(np.uint8)
@@ -648,7 +652,7 @@ def CellNOne(task_record):
     # edges_soma = measure.find_contours(img_p2, 0.8)
     attpoint = dilation(img_cellbody, disk(2)) & img_s1
     soma_points = dilation(attpoint, disk(3))
-    labeled_attpoint, count_attpoint = ndimage.measurements.label(attpoint)
+    labeled_attpoint, count_attpoint = ndimage.label(attpoint)
 
 #     edges_soma2 = feature.canny(img_cellbody, sigma=0.5)
 #     attpoint2 = edges_soma2 & img_p6

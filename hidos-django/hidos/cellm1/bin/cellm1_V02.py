@@ -3,7 +3,7 @@ from PIL import Image
 import numpy as np
 import mahotas as mh
 from skimage import io, morphology, data, color, img_as_ubyte
-from skimage.transform import resize
+from cell.skimage_compat import resize
 from skimage.util import img_as_ubyte
 from skimage.morphology import erosion, dilation, disk
 from PIL import ImageFont, ImageDraw
@@ -33,7 +33,7 @@ def cellm1(task_record):
 
     p1_norm2 = ((I / float(255)))
 
-    map_std = np.zeros((scale_x_size, scale_y_size), dtype=np.float)
+    map_std = np.zeros((scale_x_size, scale_y_size), dtype=float)
 
     for x_inx in range(0, scale_x_size):
         for y_inx in range(0, scale_y_size):

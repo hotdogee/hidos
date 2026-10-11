@@ -9,7 +9,7 @@ Created on Thu Apr 28 11:30:31 2016
 #import time
 import cv2
 import numpy as np
-from skimage.morphology import remove_small_objects
+from cell.skimage_compat import py2_round, remove_small_objects
 import mahotas
 import json
 #from os import listdir
@@ -25,7 +25,7 @@ def cellCount_singleTask(task_record):
     # load image
     img_ori = cv2.imread(task_record.uploaded_image.path)
     img_ori_resize = cv2.resize(img_ori, tuple(
-        [max_size * d / max(img_ori.shape[:2]) for d in img_ori.shape[1::-1]]))
+        [max_size * d // max(img_ori.shape[:2]) for d in img_ori.shape[1::-1]]))
 
     # automatically determine using which layer to analyze
     otsu_all = np.empty_like(img_ori_resize)
@@ -36,7 +36,7 @@ def cellCount_singleTask(task_record):
             img_ori_resize[:, :, i], 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
         tmp_sum[i] = otsu_all[:, :, i].sum()
 
-    tmp_sum /= (tmp_sum.max() / 4)  # size如果差4倍以上,就不需考慮
+    tmp_sum //= (tmp_sum.max() // 4)  # size如果差4倍以上,就不需考慮
     if (np.logical_and(ret_all > 30, tmp_sum > 0).sum() == 0):
         inx = 0
     else:
@@ -80,7 +80,7 @@ def cellCount_singleTask(task_record):
 
     area_list = stats[1:, 4].copy()
     area_list.sort()
-    area_mean = round(
+    area_mean = py2_round(
         np.mean(area_list[int(len(area_list) * 0.1):int(len(area_list) * 0.9) + 1]))
 
     # remove small object
@@ -101,10 +101,10 @@ def cellCount_singleTask(task_record):
     area_list2 = stats2[1:, 4].copy()
     area_list2.sort()
     if (len(area_list2) < 40):
-        area_mean2 = round(
+        area_mean2 = py2_round(
             np.mean(area_list2[int(len(area_list2) * 0.2):int(len(area_list2) * 0.8) + 1]))
     else:
-        area_mean2 = round(
+        area_mean2 = py2_round(
             np.mean(area_list2[int(len(area_list2) * 0.3):int(len(area_list2) * 0.7) + 1]))
     cellCount = 0
     # out_file = open(json_path, "w")
@@ -120,7 +120,7 @@ def cellCount_singleTask(task_record):
             if (tmpCount >= 0.2 and tmpCount < 1):
                 cellCount += 1
                 cv2.putText(img_ori_resize, '1', (int(centroids2[i, 0]), int(
-                    centroids2[i, 1])), font, 1, color_text[inx, :], 1)
+                    centroids2[i, 1])), font, 1, tuple(color_text[inx, :].tolist()), 1)
             elif (np.floor(tmpCount)):
                 if (float((max(stats2[i, 2:4]))) / min(stats2[i, 2:4]) > 1.5):  # 長條形
                     cellSubCount = np.round(tmpCount)
@@ -132,7 +132,7 @@ def cellCount_singleTask(task_record):
 #                cellCount +=np.floor(tmpCount)
                 cellCount += cellSubCount
                 cv2.putText(img_ori_resize, str(int(cellSubCount)), (int(
-                    centroids2[i, 0]), int(centroids2[i, 1])), font, 1, color_text[inx, :], 1)
+                    centroids2[i, 0]), int(centroids2[i, 1])), font, 1, tuple(color_text[inx, :].tolist()), 1)
         cv2.putText(img_ori_resize, 'counts=' + str(int(cellCount)),
                     (40, 80), font, 2, (255, 255, 255), 3)
         cellCount_result = {'count': int(cellCount)}
