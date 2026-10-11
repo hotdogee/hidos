@@ -156,6 +156,20 @@ def test_delete_folder_deletes_contents(auth_client, fake_cellc2):
     assert not File.objects.filter(pk__in=[folder['id'], task['id']]).exists()
 
 
+def test_list_filter_and_optional_pagination(auth_client):
+    """?limit/?offset paginate for infinite scrolling (#40); without them it is a plain list."""
+    parent = create_folder(auth_client, 'Parent')
+    for i in range(5):
+        create_folder(auth_client, 'F%d' % i, parent['id'])
+    assert len(auth_client.get(FS, {'folder': parent['id']}).json()) == 5
+    page = auth_client.get(FS, {'folder': parent['id'], 'limit': 2, 'offset': 2}).json()
+    assert page['count'] == 5
+    assert len(page['results']) == 2
+    assert page['next'] and page['previous']
+    home_page = auth_client.get(FS + 'home', {'limit': 1}).json()
+    assert home_page['count'] == 1
+
+
 # --- batch download (#35) ---------------------------------------------------------
 
 def test_batch_download_zip_of_results(auth_client, fake_cellc2):

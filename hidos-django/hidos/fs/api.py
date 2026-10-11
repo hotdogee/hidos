@@ -1,12 +1,22 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.decorators import action
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 
 
 from .models import Folder, File
 from .serializers import FolderSerializer, FileSerializer, FolderFilesSerializer
 from .download import zip_response
+
+
+class OptionalLimitOffsetPagination(LimitOffsetPagination):
+    """
+    Lists are only paginated when the client asks for it with ?limit=N
+    (&offset=M), e.g. for infinite scrolling (#40); without it the response
+    is the plain list it has always been.
+    """
+    max_limit = 1000
 
 
 class FileViewSet(viewsets.ModelViewSet):
@@ -22,7 +32,7 @@ class FileViewSet(viewsets.ModelViewSet):
     serializer_class = FileSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('type', 'folder')
-    pagination_class = None
+    pagination_class = OptionalLimitOffsetPagination
 
     def get_queryset(self): # GenericAPIView
         """
