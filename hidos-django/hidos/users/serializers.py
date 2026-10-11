@@ -12,8 +12,10 @@ from allauth.account.models import EmailAddress
 from allauth.account.utils import setup_user_email
 from dj_rest_auth.registration.serializers import SocialLoginSerializer
 from dj_rest_auth.serializers import JWTSerializer as BaseJWTSerializer
+from dj_rest_auth.serializers import PasswordResetSerializer as BasePasswordResetSerializer
 
 from .emails import has_confirmed_email, same_email
+from .forms import PasswordResetForm
 
 # Get the UserModel
 UserModel = get_user_model()
@@ -165,6 +167,11 @@ class RegisterSerializer(serializers.Serializer):
         self.custom_signup(request, user)
         setup_user_email(request, user, [])
         return user
+
+
+class PasswordResetSerializer(BasePasswordResetSerializer):
+    """Mails reset links only for the accounts that own the address (users.forms, #67)."""
+    password_reset_form_class = PasswordResetForm
 
 
 GOOGLE_TOKENINFO_URL = 'https://oauth2.googleapis.com/tokeninfo'

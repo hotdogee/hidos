@@ -441,6 +441,10 @@ ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_EMAIL_VERIFICATION = env('ACCOUNT_EMAIL_VERIFICATION', default='mandatory')
 # Addresses added to an account are only confirmed while logged in as it (#67)
 ACCOUNT_ADAPTER = 'users.adapter.AccountAdapter'
+# Password reset links are only mailed for the account that owns the address (#67)
+ACCOUNT_FORMS = {
+    'reset_password': 'users.forms.ResetPasswordForm',
+}
 SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
 # Social and local accounts are merged by email address (#67). Only emails the
 # provider reports as verified are matched, and only with local accounts that
@@ -496,6 +500,7 @@ REST_AUTH = {
     'JWT_SERIALIZER': 'users.serializers.JWTSerializer',
     'JWT_TOKEN_CLAIMS_SERIALIZER': 'users.serializers.TokenClaimsSerializer',
     'REGISTER_SERIALIZER': 'users.serializers.RegisterSerializer',
+    'PASSWORD_RESET_SERIALIZER': 'users.serializers.PasswordResetSerializer',
 }
 
 # djangorestframework-simplejwt (replaces djangorestframework-jwt)

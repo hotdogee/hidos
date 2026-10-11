@@ -349,6 +349,29 @@ def test_password_reset_link_is_mailed_to_the_stored_address_only(client, url):
         assert reset_links() == expected, typed
 
 
+@pytest.mark.parametrize('confirmed_by_owner', [False, True])
+@pytest.mark.parametrize('url', ['/api/v1/auth/password/reset/', '/accounts/password/reset/'])
+def test_password_reset_link_is_not_mailed_for_an_account_that_merely_added_the_address(
+        client, url, confirmed_by_owner):
+    """
+    The look-alike account added victim@gmail.com before anyone had it. A reset for the address must not
+    mail the victim a link for that account, nor once the victim added the address and confirmed it.
+    """
+    attacker = make_user(LOOKALIKE)
+    add_address(attacker, VICTIM)
+    expected = []
+    if confirmed_by_owner:
+        victim = make_user('victim@example.com')
+        cache.clear()  # a few minutes later: allauth mails an address at most every 3 minutes
+        browser = add_address(victim, VICTIM)
+        confirm(confirmation_key(VICTIM), 'link', browser)
+        assert EmailAddress.objects.get(user=victim, email=VICTIM).verified
+        expected = [([VICTIM], victim)]
+    mail.outbox.clear()
+    assert client.post(url, {'email': VICTIM}).status_code in (200, 302)
+    assert reset_links() == expected
+
+
 # --- addresses added under /accounts/email/ (#67) ---------------------------------------
 
 def add_address(user, email):

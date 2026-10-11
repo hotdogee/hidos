@@ -44,3 +44,18 @@ def has_confirmed_email(user):
     """Whether the user confirmed the account's own address (user.email)."""
     return any(same_email(address.email, user.email)
                for address in user.emailaddress_set.filter(verified=True))
+
+
+def email_owners(email):
+    """
+    The accounts whose own address (user.email) or a confirmed one is the
+    address, not those that merely added it under /accounts/email/.
+    """
+    from allauth.account.models import EmailAddress
+    from django.contrib.auth import get_user_model
+    owners = {user for user in get_user_model().objects.filter(email__iexact=email)
+              if same_email(user.email, email)}
+    owners.update(address.user for address in
+                  EmailAddress.objects.filter(email__iexact=email, verified=True).select_related('user')
+                  if same_email(address.email, email))
+    return owners
