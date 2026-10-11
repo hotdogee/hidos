@@ -89,6 +89,10 @@ failing or creating a second user. Both sides must have verified the address:
   Django can't mail (its validator lets İ, ı, ſ and K through there), or if
   they are longer than 254 characters lower-cased, which allauth would cut
   to fit and register as another address (`users/adapter.py`).
+* Addresses are stored lower-cased, as allauth looks them up exactly. Those
+  from `manage.py createsuperuser` and the admin used to keep the case before
+  the @, so allauth took `Root@example.com` for another address than
+  `root@example.com`; the migration `users.0004` lower-cases them.
 
 The `/login` page, like the login API, refuses accounts whose email hasn't
 been confirmed. Staff accounts (e.g. from `manage.py createsuperuser`) are

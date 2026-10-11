@@ -490,3 +490,54 @@ def test_create_superuser_with_email_only():
     assert admin.is_staff and admin.is_superuser
     assert str(admin) == 'root@example.com'
     assert admin.get_short_name() == 'root'
+
+
+@pytest.mark.parametrize('via', ['rest', 'allauth', 'google', 'add'])
+def test_operator_created_address_is_one_account(api_client, google_app, facebook_app, monkeypatch, via):
+    """
+    allauth stores addresses lower-cased and looks them up exactly, but createsuperuser (README Quick
+    start) and the admin kept the case before the @. allauth took root@example.com for another address
+    than Root@example.com: its signup and Google logins created a second account, and an account without
+    a confirmed address could add it, make it its own and have the operator confirm it by the link alone,
+    then got the operator's Google logins.
+    """
+    from django.core.management import call_command
+    monkeypatch.setenv('DJANGO_SUPERUSER_PASSWORD', PASSWORD)
+    call_command('createsuperuser', interactive=False, email='Root@Example.com', verbosity=0)
+    root = User.objects.get()
+    assert root.email == 'root@example.com'
+    signup = {'email': 'root@example.com', 'password1': PASSWORD, 'password2': PASSWORD}
+    if via == 'rest':
+        assert api_client.post(REGISTER, signup, format='json').status_code == 400
+    elif via == 'allauth':
+        Client().post('/accounts/signup/', signup)
+    elif via == 'google':
+        assert google_login(api_client, 'root@example.com', uid='google-root').status_code == 400
+    else:
+        assert facebook_login(api_client, 'mallory@example.com', uid='fb-mallory').status_code == 200
+        browser = Client()
+        browser.force_login(User.objects.get(email='mallory@example.com'))
+        assert browser.post('/accounts/email/', {'action_add': '', 'email': 'root@example.com'}).status_code == 200
+        assert not EmailAddress.objects.filter(email='root@example.com').exists()
+    assert list(User.objects.filter(email__iexact='root@example.com')) == [root]
+
+
+def test_admin_stores_addresses_lower_cased():
+    from users.admin import UserCreationForm
+    form = UserCreationForm({'email': 'Admin@Example.com', 'password1': PASSWORD, 'password2': PASSWORD})
+    assert form.is_valid(), form.errors
+    assert form.save().email == 'admin@example.com'
+
+
+def test_migration_lower_cases_addresses_of_operator_created_accounts():
+    from importlib import import_module
+    from types import SimpleNamespace
+    from django.apps import apps
+    from django.db import connection
+    migration = import_module('users.migrations.0004_lower_case_emails')
+    User.objects.bulk_create([User(email=email) for email in
+                              ('Root@example.com', 'Kate@example.com', 'kate@example.com', 'bob@example.com')])
+    migration.lower_case_emails(apps, SimpleNamespace(connection=connection))
+    # an address whose lower-cased form another account has is left alone
+    assert sorted(User.objects.values_list('email', flat=True)) == [
+        'Kate@example.com', 'bob@example.com', 'kate@example.com', 'root@example.com']

@@ -8,6 +8,16 @@ from django.utils.translation import gettext_lazy as _
 class UserManager(BaseUserManager):
     use_in_migrations = True
 
+    @classmethod
+    def normalize_email(cls, email):
+        """
+        Lower-cases the whole address, not only the domain (#67): allauth
+        stores addresses lower-cased and looks them up exactly, so it took
+        Root@example.com, e.g. from createsuperuser or the admin, for
+        another address than root@example.com.
+        """
+        return super().normalize_email(email).lower()
+
     def _create_user(self, email, password, **extra_fields):
         """
         Creates and saves a User with the given email and password.
