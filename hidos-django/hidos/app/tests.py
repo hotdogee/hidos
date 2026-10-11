@@ -98,6 +98,17 @@ def test_login_page_lets_in_superuser_from_createsuperuser(client, api_client, m
     assert api_client.post('/api/v1/auth/login/', login, format='json').status_code == 200
 
 
+def test_signups_dont_make_staff_accounts(client, api_client):
+    """The staff exemption at /login relies on it (as on is_staff being read-only in the profile API)."""
+    from django.contrib.auth import get_user_model
+    data = {'password1': PASSWORD, 'password2': PASSWORD, 'is_staff': True, 'is_superuser': True}
+    api_client.post('/api/v1/auth/registration/', {'email': 'rest@example.com', **data}, format='json')
+    client.post('/accounts/signup/', {'email': 'web@example.com', **data})
+    users = get_user_model().objects.all()
+    assert sorted(user.email for user in users) == ['rest@example.com', 'web@example.com']
+    assert not any(user.is_staff or user.is_superuser for user in users)
+
+
 def test_login_page_wrong_password(client, user):
     response = client.post('/login', {'username': user.email, 'password': 'nope'})
     assert response.status_code == 200

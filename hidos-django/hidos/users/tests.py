@@ -13,7 +13,7 @@ from django.core import mail
 from django.core.cache import cache
 from django.test import Client
 
-from conftest import KELVIN, LOOKALIKE, PASSWORD, VICTIM, image_file, make_user
+from conftest import KELVIN, LOOKALIKE, PASSWORD, VICTIM, image_file, jwt_client, make_user
 
 pytestmark = pytest.mark.django_db
 User = get_user_model()
@@ -226,6 +226,14 @@ def test_google_login_is_not_merged_into_facebook_account_with_the_same_email(ap
     assert set(SocialAccount.objects.filter(user=attacker).values_list('provider', flat=True)) == {'facebook'}
 
 
+def test_facebook_login_is_not_merged_into_confirmed_account(api_client, user, facebook_app):
+    response = facebook_login(api_client, user.email, uid='fb-attacker')
+    assert response.status_code == 400
+    assert 'access' not in response.json()
+    assert not SocialAccount.objects.exists()
+    assert list(User.objects.all()) == [user]
+
+
 def test_google_login_is_not_merged_into_account_with_the_email_as_unconfirmed_second_address(
         client, api_client, google_app):
     attacker = make_user('mallory@example.com')
@@ -276,14 +284,16 @@ def register_and_confirm(api_client, email):
     return User.objects.get(email=email)
 
 
-def test_postgresql_iexact_takes_the_lookalike_for_the_address():
-    """The premise of these tests: with iexact matching, they fail on PostgreSQL."""
+@pytest.mark.parametrize('lookalike, address', [
+    (LOOKALIKE, VICTIM), ('sam@' + chr(0x017F) + 'ample.com', 'sam@sample.com')])  # long s: S
+def test_postgresql_iexact_takes_the_lookalike_for_the_address(lookalike, address):
+    """The premise of these tests and test_email_properties.py: with iexact matching, they fail on PostgreSQL."""
     from django.db import connection
     if connection.vendor != 'postgresql':
         pytest.skip('only PostgreSQL folds non-ASCII letters to ASCII ones')
-    make_user(LOOKALIKE)
-    assert EmailAddress.objects.filter(email__iexact=VICTIM).exists()
-    assert User.objects.filter(email__iexact=VICTIM).exists()
+    make_user(lookalike)
+    assert EmailAddress.objects.filter(email__iexact=address).exists()
+    assert User.objects.filter(email__iexact=address).exists()
 
 
 def test_google_login_is_not_merged_into_account_with_lookalike_address(api_client, google_app):
@@ -473,6 +483,33 @@ def test_account_confirms_the_address_it_added(api_client, user, google_app):
     assert EmailAddress.objects.get(email='alice@home.example').verified
     # and then both are merged with the account's Google logins
     assert jwt_user_id(google_login(api_client, 'alice@home.example', uid='google-alice')) == user.pk
+
+
+@pytest.mark.parametrize('via', ['link', 'allauth', 'api'])
+def test_address_added_to_an_account_is_not_confirmed_by_another_account(user, via):
+    """Opening the link logged in as some other account doesn't confirm it either."""
+    add_address(user, 'alice@work.example')
+    intruder = make_user('mallory@example.com')
+    if via == 'api':
+        browser = jwt_client(intruder)  # the API doesn't take sessions
+    else:
+        browser = Client()
+        browser.force_login(intruder)
+    confirm(confirmation_key('alice@work.example'), via, browser)
+    assert list(EmailAddress.objects.filter(email='alice@work.example').values_list('user', 'verified')) == [
+        (user.pk, False)]
+
+
+@pytest.mark.parametrize('via', ['link', 'allauth', 'api'])
+def test_signup_address_is_confirmed_by_the_link_alone(api_client, via):
+    """The address an account signed up with, on every route, opened logged out."""
+    response = api_client.post(REGISTER, {'email': 'new@example.com', 'password1': PASSWORD, 'password2': PASSWORD},
+                               format='json')
+    assert response.status_code == 201, response.content
+    assert confirm(confirmation_key('new@example.com'), via).status_code in (200, 302)
+    assert EmailAddress.objects.get(email='new@example.com').verified
+    login = {'email': 'new@example.com', 'password': PASSWORD}
+    assert api_client.post(LOGIN, login, format='json').status_code == 200
 
 
 # --- sites (#78) -------------------------------------------------------------------

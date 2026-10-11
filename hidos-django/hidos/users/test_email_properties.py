@@ -1,14 +1,27 @@
 """
 Email addresses at every entry point that takes one (#67).
 
+Two addresses are the same person only if they are equal after lower-casing
+ASCII A-Z (users.emails), or after what every form does before looking them
+up and mailing them: strip surrounding whitespace (str.strip(), which also
+strips Unicode spaces) and str.lower() (which turns the Kelvin sign into a
+k). Any other pair is two people, also where some layer takes one for the
+other: PostgreSQL's UPPER(), behind iexact, folds ı to I and ſ to S (SQLite
+folds ASCII only, so these tests matter on PostgreSQL, as in CI), and IDNA
+maps fullwidth letters and ſ in a domain to ASCII. For such pairs nothing
+done with one address logs into, confirms, merges into, resets or mails a
+token for the account of the other.
+
 No address is a server error, and an address is stored and mailed as typed
 or refused (users.adapter.AccountAdapter.clean_email).
 """
 import re
 
+import jwt
 import pytest
-from allauth.account.models import EmailConfirmationHMAC
+from allauth.account.models import EmailAddress, EmailConfirmationHMAC
 from allauth.account.utils import url_str_to_user_pk
+from allauth.socialaccount.models import SocialAccount
 from django.contrib.auth import get_user_model
 from django.core import mail
 from django.core.exceptions import ValidationError
@@ -16,8 +29,9 @@ from django.core.validators import validate_email
 from django.test import Client
 from rest_framework.test import APIClient
 
-from conftest import PASSWORD, make_user
+from conftest import KELVIN, LOOKALIKE, PASSWORD, VICTIM, make_user
 from users.emails import has_ascii_local_part
+from users.tests import google_app, google_login  # noqa: F401 (a fixture)
 
 pytestmark = pytest.mark.django_db
 User = get_user_model()
@@ -26,9 +40,36 @@ LOGIN = '/api/v1/auth/login/'
 REGISTER = '/api/v1/auth/registration/'
 RESEND = '/api/v1/auth/registration/resend-email/'
 RESETS = ['/api/v1/auth/password/reset/', '/accounts/password/reset/']
+LOGINS = ['rest', 'login', 'allauth']
 
 # by code point, so that no editor normalizes them away
-DOTLESS_I, DOTTED_CAPITAL_I, FULLWIDTH_AT = chr(0x0131), chr(0x0130), chr(0xFF20)
+DOTLESS_I, LONG_S, DOTTED_CAPITAL_I = chr(0x0131), chr(0x017F), chr(0x0130)
+NBSP, IDEOGRAPHIC_SPACE, FULLWIDTH_AT = chr(0x00A0), chr(0x3000), chr(0xFF20)
+
+
+def fullwidth(text):
+    return ''.join(chr(ord(c) - 0x21 + 0xFF01) for c in text)
+
+
+# (registered, typed): the same person
+SAME = [
+    pytest.param('alice@example.com', 'ALICE@EXAMPLE.COM', id='ascii-upper'),
+    pytest.param('alice@example.com', 'Alice@Example.Com', id='ascii-mixed'),
+    pytest.param('alice@example.com', ' alice@example.com\t', id='ascii-whitespace'),
+    pytest.param('alice@example.com', NBSP + 'alice@example.com' + IDEOGRAPHIC_SPACE, id='unicode-whitespace'),
+    pytest.param('kate@example.com', KELVIN, id='kelvin-sign'),
+]
+
+_LOOKALIKES = [
+    ('dotless-i-domain', VICTIM, LOOKALIKE),  # UPPER(): I; mailed to xn--gmal-nza.com
+    ('long-s-domain', 'sam@sample.com', 'sam@' + LONG_S + 'ample.com'),  # UPPER(): S; IDNA: sample.com
+    ('dotless-i-local', VICTIM, 'v' + DOTLESS_I + 'ctim@gmail.com'),  # UPPER(): I; can't be mailed
+    ('dotted-capital-i', 'ivan@example.com', DOTTED_CAPITAL_I + 'van@example.com'),  # .lower(): i + U+0307
+    ('fullwidth-domain', VICTIM, 'victim@' + fullwidth('gmail') + '.com'),  # IDNA: gmail.com
+]
+# (registered, typed): two people
+DIFFERENT = ([pytest.param(a, b, id=name) for name, a, b in _LOOKALIKES]
+             + [pytest.param(b, a, id=name + '-reversed') for name, a, b in _LOOKALIKES])
 
 
 def stored(email):
@@ -82,6 +123,159 @@ def signup(via, email):
     if via == 'rest':
         return ok(api().post(REGISTER, data, format='json'))
     return ok(web().post('/accounts/signup/', data))
+
+
+def logged_in_as(via, email, password=PASSWORD):
+    """Id of the account that a login with these credentials gets, or None."""
+    if via == 'rest':
+        response = ok(api().post(LOGIN, {'email': email, 'password': password}, format='json'))
+        if response.status_code != 200:
+            return None
+        return int(jwt.decode(response.json()['access'], options={'verify_signature': False})['user_id'])
+    browser = web()
+    if via == 'login':
+        ok(browser.post('/login', {'username': email, 'password': password}))
+    else:
+        ok(browser.post('/accounts/login/', {'login': email, 'password': password}))
+    user_id = browser.session.get('_auth_user_id')
+    return int(user_id) if user_id else None
+
+
+def google_user(email, uid='google-uid'):
+    """Id of the account that a Google login with this (verified) address gets, or None."""
+    response = ok(google_login(api(), email, uid=uid))
+    if response.status_code != 200:
+        return None
+    return User.objects.get(email=response.json()['user']['email']).pk
+
+
+# --- look-alikes are different people ----------------------------------------------------------
+
+@pytest.mark.parametrize('via', ['rest', 'allauth'])
+@pytest.mark.parametrize('registered, typed', DIFFERENT)
+def test_signup_with_a_lookalike_never_touches_the_account(via, registered, typed):
+    """A separate account, or none if the look-alike can't be mailed."""
+    owner = account(registered)
+    mail.outbox.clear()
+    signup(via, typed)
+    others = User.objects.exclude(pk=owner.pk)
+    assert [user.email for user in others] == ([stored(typed)] if has_ascii_local_part(stored(typed)) else [])
+    assert {user_id for to, user_id, kind in tokens()} == {user.pk for user in others}
+    owner.refresh_from_db()
+    assert owner.email == stored(registered) and EmailAddress.objects.get(user=owner).verified
+
+
+@pytest.mark.parametrize('via', LOGINS)
+@pytest.mark.parametrize('registered, typed', DIFFERENT)
+def test_login_with_a_lookalike_never_gets_the_account(via, registered, typed):
+    """Not even with the account's own password."""
+    owner = account(registered)
+    assert logged_in_as(via, typed) != owner.pk
+
+
+@pytest.mark.parametrize('url', RESETS)
+@pytest.mark.parametrize('registered, typed', DIFFERENT)
+def test_password_reset_with_a_lookalike_mails_no_link_for_the_account(url, registered, typed):
+    owner = account(registered)
+    mail.outbox.clear()
+    ok(web().post(url, {'email': typed}))
+    assert tokens_for(owner) == []
+
+
+@pytest.mark.parametrize('registered, typed', DIFFERENT)
+def test_resending_the_confirmation_for_a_lookalike_mails_nothing_for_the_account(registered, typed):
+    owner = account(registered, verified=False)
+    mail.outbox.clear()
+    ok(api().post(RESEND, {'email': typed}, format='json'))
+    assert tokens_for(owner) == []
+
+
+@pytest.mark.usefixtures('google_app')
+@pytest.mark.parametrize('registered, typed', DIFFERENT)
+def test_a_confirmed_lookalike_doesnt_confirm_the_account(registered, typed):
+    """e.g. a pending signup next to an account that confirmed the look-alike"""
+    owner = account(registered, verified=False)
+    other = account(typed)
+    for via in LOGINS:
+        assert logged_in_as(via, registered) is None, via
+    assert google_user(registered, uid='google-owner') not in (owner.pk, other.pk)
+
+
+@pytest.mark.usefixtures('google_app')
+@pytest.mark.parametrize('registered, typed', DIFFERENT)
+def test_lookalike_account_cant_confirm_the_address_by_the_link_alone(registered, typed):
+    """The look-alike's account adds the address before anyone has it; its owner opens the link."""
+    attacker = account(typed)
+    browser = web()
+    browser.force_login(attacker)
+    ok(browser.post('/accounts/email/', {'action_add': '', 'email': registered}))
+    added = EmailAddress.objects.filter(user=attacker).exclude(email=attacker.email)
+    assert len(added) == has_ascii_local_part(stored(registered))  # or refused, as it can't be mailed
+    for address in added:
+        ok(web().post('/confirm-email/%s/' % EmailConfirmationHMAC(address).key))
+        address.refresh_from_db()
+        assert not address.verified
+    assert google_user(registered, uid='google-owner') != attacker.pk
+    assert not SocialAccount.objects.filter(user=attacker).exists()
+
+
+@pytest.mark.usefixtures('google_app')
+@pytest.mark.parametrize('registered, typed', DIFFERENT)
+def test_google_login_with_a_lookalike_is_not_merged_into_the_account(registered, typed):
+    owner = account(registered)
+    assert google_user(typed) != owner.pk
+    assert not SocialAccount.objects.filter(user=owner).exists()
+    owner.refresh_from_db()
+    assert owner.email == stored(registered) and owner.has_usable_password()
+
+
+@pytest.mark.usefixtures('google_app')
+@pytest.mark.parametrize('registered, typed', DIFFERENT)
+def test_google_login_goes_to_the_account_that_confirmed_exactly_that_address(registered, typed):
+    """On PostgreSQL iexact finds both accounts."""
+    owner, other = account(registered), account(typed)
+    for user, uid in ((owner, 'google-owner'), (other, 'google-other')):
+        user_id = google_user(user.email, uid=uid)
+        if has_ascii_local_part(user.email):
+            assert user_id == user.pk
+        else:  # allauth drops an address that clean_email refuses
+            assert user_id not in (owner.pk, other.pk)
+
+
+# --- variants are the same person ---------------------------------------------------------------
+
+@pytest.mark.parametrize('via', ['rest', 'allauth'])
+@pytest.mark.parametrize('registered, typed', SAME)
+def test_signup_with_a_variant_doesnt_create_a_second_account(via, registered, typed):
+    owner = account(registered)
+    mail.outbox.clear()
+    signup(via, typed)
+    assert list(User.objects.values_list('pk', flat=True)) == [owner.pk]
+    assert tokens_for(owner) == []
+
+
+@pytest.mark.parametrize('via', LOGINS)
+@pytest.mark.parametrize('registered, typed', SAME)
+def test_login_with_a_variant_is_the_same_account(via, registered, typed):
+    owner = account(registered)
+    assert logged_in_as(via, typed) == owner.pk
+
+
+@pytest.mark.parametrize('url', RESETS)
+@pytest.mark.parametrize('registered, typed', SAME)
+def test_password_reset_with_a_variant_mails_the_link_to_the_stored_address(url, registered, typed):
+    owner = account(registered)
+    mail.outbox.clear()
+    ok(web().post(url, {'email': typed}))
+    assert tokens() == [((owner.email,), owner.pk, 'reset')]
+
+
+@pytest.mark.usefixtures('google_app')
+@pytest.mark.parametrize('registered, typed', [p for p in SAME if 'whitespace' not in p.id])
+def test_google_login_with_a_variant_is_merged_into_the_account(registered, typed):
+    owner = account(registered)
+    assert google_user(typed) == owner.pk
+    assert User.objects.count() == 1
 
 
 # --- addresses that can't be stored or mailed as typed ----------------------------------------------
