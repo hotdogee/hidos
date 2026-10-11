@@ -2,11 +2,18 @@
 Tests for the web pages served by Django itself (login, result viewer,
 admin, health check).
 """
+import json
+import os
+import re
+import subprocess
+import sys
+
 import pytest
 from django.contrib import admin
 from django.urls import reverse
 
 from conftest import PASSWORD
+from hidos.settings.base import PROJECT_ROOT, REPO_ROOT
 from fs.tests import create_folder, create_task, fake_run
 
 pytestmark = pytest.mark.django_db
@@ -169,3 +176,53 @@ def test_throttling_uses_the_proxy_address(settings, rf):
         assert idents == {'10.0.0.9'}
     finally:
         api_settings.reload()
+
+
+# --- deployed defaults (#96, #26) ----------------------------------------------------------
+# The test settings set API_SESSION_AUTH and NUM_PROXIES themselves; these
+# check what a deployment gets.
+
+DEPLOYED_SETTINGS = """
+import json
+import environ
+environ.Env.read_env = classmethod(lambda cls, *args, **kwargs: None)  # the code defaults, not a local .env
+from django.conf import settings
+print(json.dumps(list(settings.REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'])))
+"""
+
+
+def deployed_settings(module, secret_key='k' * 20 + 'abcdefghijklmnopqrstuvwxyz0123456789'):
+    env = {k: v for k, v in os.environ.items() if k not in ('API_SESSION_AUTH', 'NUM_PROXIES')}
+    env.update(DJANGO_SETTINGS_MODULE=module, DJANGO_SECRET_KEY=secret_key)
+    return subprocess.run([sys.executable, '-c', DEPLOYED_SETTINGS], cwd=PROJECT_ROOT, env=env,
+                          capture_output=True, text=True)
+
+
+@pytest.mark.parametrize('module', ['hidos.settings.production', 'hidos.settings.staging'])
+def test_deployed_api_does_not_accept_sessions(module):
+    result = deployed_settings(module)
+    assert result.returncode == 0, result.stderr
+    classes = json.loads(result.stdout)
+    assert 'rest_framework_simplejwt.authentication.JWTAuthentication' in classes
+    assert not any('Session' in c for c in classes)
+
+
+@pytest.mark.parametrize('key', ['change-me', 'x' * 60, 'django-insecure-' + 'abcdefghij' * 5])
+def test_production_refuses_placeholder_secret_keys(key):
+    result = deployed_settings('hidos.settings.production', secret_key=key)
+    assert result.returncode != 0 and 'DJANGO_SECRET_KEY' in result.stderr
+
+
+def test_env_example_leaves_the_secret_key_empty():
+    """Copying .env.example must not give a working key, so compose's ${DJANGO_SECRET_KEY:?} check fires."""
+    with open(os.path.join(REPO_ROOT, '.env.example'), encoding='utf-8') as fh:
+        assert re.search(r'^DJANGO_SECRET_KEY=$', fh.read(), re.M)
+
+
+def test_compose_sets_num_proxies_for_nginx():
+    """Without NUM_PROXIES the rate limits trust the client's X-Forwarded-For."""
+    with open(os.path.join(REPO_ROOT, 'docker-compose.yml'), encoding='utf-8') as fh:
+        compose = fh.read()
+    assert re.search(r'^    NUM_PROXIES: \$\{NUM_PROXIES:-1\}$', compose, re.M)
+    with open(os.path.join(REPO_ROOT, 'docker', 'nginx.conf'), encoding='utf-8') as fh:
+        assert 'X-Forwarded-For $proxy_add_x_forwarded_for' in fh.read()

@@ -16,7 +16,8 @@ COPY requirements/ requirements/
 RUN pip install -r requirements/production.txt
 
 COPY . .
-RUN DJANGO_SETTINGS_MODULE=hidos.settings.production DJANGO_SECRET_KEY=collectstatic-only \
+RUN DJANGO_SETTINGS_MODULE=hidos.settings.production \
+    DJANGO_SECRET_KEY=collectstatic-only-the-real-key-comes-from-the-environment \
     python manage.py collectstatic --noinput \
     && useradd --system --uid 1000 --home-dir /app hidos \
     && mkdir -p /data/media /data/chunked_uploads \

@@ -10,7 +10,8 @@ from .base import (
 DEBUG = env.bool('DJANGO_DEBUG', default=True)
 
 # Development only; production requires DJANGO_SECRET_KEY.
-SECRET_KEY = env('DJANGO_SECRET_KEY', default='django-insecure-local-development-key-do-not-use-in-production')
+# (.env.example leaves it empty)
+SECRET_KEY = env('DJANGO_SECRET_KEY', default='') or 'django-insecure-local-development-key-do-not-use-in-production'
 
 ALLOWED_HOSTS = ALLOWED_HOSTS + [
     '127.0.0.1',

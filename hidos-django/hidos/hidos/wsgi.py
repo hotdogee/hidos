@@ -15,7 +15,9 @@ framework.
 """
 import os
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "hidos.settings.local")
+# WSGI servers run the production settings unless told otherwise; runserver
+# (manage.py) defaults to hidos.settings.local before it gets here.
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "hidos.settings.production")
 
 # This application object is used by any WSGI server configured to use this
 # file. This includes Django's development server, if the WSGI_APPLICATION

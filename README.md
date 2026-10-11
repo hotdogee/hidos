@@ -108,8 +108,8 @@ All deployment settings come from environment variables (or a `.env` file).
 
 | Variable | Default | |
 | --- | --- | --- |
-| `DJANGO_SECRET_KEY` | none | **Required in production.** |
-| `DJANGO_SETTINGS_MODULE` | `hidos.settings.local` | `hidos.settings.production` in the Docker image |
+| `DJANGO_SECRET_KEY` | none | **Required in production**: at least 50 random characters (it signs the JWTs) |
+| `DJANGO_SETTINGS_MODULE` | `hidos.settings.local` (`manage.py`, Celery); `hidos.settings.production` (`hidos.wsgi`, e.g. gunicorn) | `hidos.settings.production` in the Docker image |
 | `DJANGO_ALLOWED_HOSTS` | `.hidos.io` | Comma separated |
 | `CSRF_TRUSTED_ORIGINS` | `https://*.hidos.io` | Origins that may POST forms (admin, login) |
 | `DATABASE_URL` | `postgres://django@localhost:5432/django` | |
