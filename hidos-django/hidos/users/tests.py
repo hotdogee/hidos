@@ -1,5 +1,6 @@
 import re
 from unittest import mock
+from urllib.parse import parse_qs, urlsplit
 
 import jwt
 import pytest
@@ -9,6 +10,8 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
 from django.core import mail
+from django.core.cache import cache
+from django.test import Client
 
 from conftest import KELVIN, LOOKALIKE, PASSWORD, VICTIM, image_file, make_user
 
@@ -344,6 +347,101 @@ def test_password_reset_link_is_mailed_to_the_stored_address_only(client, url):
         mail.outbox.clear()
         assert client.post(url, {'email': typed}).status_code in (200, 302)
         assert reset_links() == expected, typed
+
+
+# --- addresses added under /accounts/email/ (#67) ---------------------------------------
+
+def add_address(user, email):
+    """Add a second address under /accounts/email/, logged in as the user; returns that browser."""
+    browser = Client()
+    browser.force_login(user)
+    response = browser.post('/accounts/email/', {'action_add': '', 'email': email})
+    assert response.status_code == 302, response.content
+    assert EmailAddress.objects.filter(user=user, email=email, verified=False).exists()
+    return browser
+
+
+def confirmation_key(email):
+    """The key in the last confirmation link mailed to the address."""
+    message = [message for message in mail.outbox if message.to == [email]][-1]
+    return re.search(r'/confirm-email/(\S+)/', message.body).group(1)
+
+
+def confirm(key, via, browser=None):
+    """Confirm an address with its key: by the mailed link, on allauth's own route or through the API."""
+    browser = browser or Client()
+    if via == 'api':
+        return browser.post('/api/v1/auth/registration/verify-email/', {'key': key})
+    return browser.post({'link': '/confirm-email/%s/', 'allauth': '/accounts/confirm-email/%s/'}[via] % key)
+
+
+def jwt_user_id(response):
+    assert response.status_code == 200, response.content
+    return int(jwt.decode(response.json()['access'], options={'verify_signature': False})['user_id'])
+
+
+@pytest.mark.parametrize('via', ['link', 'allauth', 'api'])
+def test_address_added_by_another_account_is_not_confirmed_by_the_link_alone(api_client, google_app, via):
+    """
+    The look-alike account adds victim@gmail.com. The mail to it says that user victim@gmaıl.com
+    gave the address, which reads like the victim's own account. Opening it must not confirm the
+    address for the look-alike, which would then get the victim's Google logins.
+    """
+    attacker = register_and_confirm(api_client, LOOKALIKE)
+    mail.outbox.clear()
+    add_address(attacker, VICTIM)
+    assert LOOKALIKE in mail.outbox[0].body
+    response = confirm(confirmation_key(VICTIM), via)  # by the victim, who isn't logged in as the attacker
+    assert response.status_code in (200, 302)
+    assert not EmailAddress.objects.get(user=attacker, email=VICTIM).verified
+    victim_id = jwt_user_id(google_login(api_client, VICTIM, uid='google-victim'))
+    assert victim_id != attacker.pk
+    assert User.objects.get(pk=victim_id).email == VICTIM
+    assert not SocialAccount.objects.filter(user=attacker).exists()
+
+
+def test_address_added_by_another_account_doesnt_take_a_pending_signup(api_client, google_app):
+    """The victim signed up but hasn't confirmed yet: the look-alike's request arrives next to their own."""
+    attacker = register_and_confirm(api_client, LOOKALIKE)
+    mail.outbox.clear()
+    response = api_client.post(REGISTER, {'email': VICTIM, 'password1': PASSWORD, 'password2': PASSWORD},
+                               format='json')
+    assert response.status_code == 201, response.content
+    victim = User.objects.get(email=VICTIM)
+    own_key = confirmation_key(VICTIM)
+    cache.clear()  # a few minutes later: allauth mails an address at most every 3 minutes
+    add_address(attacker, VICTIM)
+    attacker_key = confirmation_key(VICTIM)
+    assert attacker_key != own_key
+    confirm(attacker_key, 'link')  # the victim opens the wrong one first
+    assert not EmailAddress.objects.get(user=attacker, email=VICTIM).verified
+    confirm(own_key, 'link')
+    assert EmailAddress.objects.get(user=victim, email=VICTIM).verified
+    login = {'email': VICTIM, 'password': PASSWORD}
+    assert jwt_user_id(api_client.post(LOGIN, login, format='json')) == victim.pk
+    assert jwt_user_id(google_login(api_client, VICTIM, uid='google-victim')) == victim.pk
+
+
+def test_account_confirms_the_address_it_added(api_client, user, google_app):
+    """In the session that added it, or on another device after logging in there."""
+    browser = add_address(user, 'alice@work.example')
+    confirm(confirmation_key('alice@work.example'), 'link', browser)
+    assert EmailAddress.objects.get(email='alice@work.example').verified
+
+    add_address(user, 'alice@home.example')
+    link = '/confirm-email/%s/' % confirmation_key('alice@home.example')
+    other_device = Client()
+    response = other_device.post(link)
+    assert response.status_code == 302
+    login_url = urlsplit(response['Location'])
+    assert login_url.path == '/login' and parse_qs(login_url.query) == {'next': [link]}
+    assert not EmailAddress.objects.get(email='alice@home.example').verified
+    response = other_device.post('/login', {'username': user.email, 'password': PASSWORD, 'next': link})
+    assert response.status_code == 302 and response['Location'] == link
+    other_device.post(link)
+    assert EmailAddress.objects.get(email='alice@home.example').verified
+    # and then both are merged with the account's Google logins
+    assert jwt_user_id(google_login(api_client, 'alice@home.example', uid='google-alice')) == user.pk
 
 
 # --- sites (#78) -------------------------------------------------------------------

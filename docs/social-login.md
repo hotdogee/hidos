@@ -66,6 +66,13 @@ failing or creating a second user. Both sides must have verified the address:
   signing in with Google would end up in their account. Such a Google login
   fails like before #67 if the unconfirmed address is the account's main
   email, and otherwise creates a separate account.
+* An address that an account added under `/accounts/email/` is only
+  confirmed by opening the link while logged in as that account
+  (`users/adapter.py`). The address an account signed up with is still
+  confirmed by the link alone. The mail and the page behind the link name
+  the account that asked by its address, so a request from
+  `victim@gmaıl.com` reads like one from the victim's own account, and one
+  click handed the victim's Google logins to the look-alike account.
 * The two addresses must be the same apart from the case of ASCII letters
   (`users/emails.py`). Unicode case mapping isn't used: PostgreSQL's
   `UPPER()`, behind Django's `iexact`, turns the dotless ı of

@@ -439,6 +439,8 @@ ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_EMAIL_VERIFICATION = env('ACCOUNT_EMAIL_VERIFICATION', default='mandatory')
+# Addresses added to an account are only confirmed while logged in as it (#67)
+ACCOUNT_ADAPTER = 'users.adapter.AccountAdapter'
 SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
 # Social and local accounts are merged by email address (#67). Only emails the
 # provider reports as verified are matched, and only with local accounts that
