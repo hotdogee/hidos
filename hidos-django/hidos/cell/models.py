@@ -60,14 +60,17 @@ class UnreadableImage(ValueError):
     """The upload passed validation but cannot be decoded."""
 
 
-def task_id_for(version, owner, data):
+def task_id_for(app_name, version, owner, data):
     """
-    Task ids are derived from the app version, the owner and the image, so
-    uploading the same image twice returns the existing task. The digest is
-    keyed with SECRET_KEY because the id is also part of the media URLs, and
-    uses the owner's id, which (unlike the email) never changes.
+    Task ids are derived from the app, its version, the owner and the image,
+    so uploading the same image twice returns the existing task. All apps
+    share the fs File ids, and some have the same version string (Cell A1 and
+    C1 are both 0.30), hence the app name. The digest is keyed with
+    SECRET_KEY because the id is also part of the media URLs, and uses the
+    owner's id, which (unlike the email) never changes.
     """
     m = hmac.new(settings.SECRET_KEY.encode('utf-8'), digestmod='md5')
+    m.update(app_name.encode('utf-8') + b'\0')
     m.update(version.encode('utf-8'))
     m.update(str(owner.pk).encode('utf-8'))
     m.update(data)
@@ -112,7 +115,7 @@ class SingleImageUploadManager(models.Manager):
         uploaded_file_data = file.read()
 
         # Generate task id
-        task_id = task_id_for(app.version, owner, uploaded_file_data)
+        task_id = task_id_for(app_name, app.version, owner, uploaded_file_data)
 
         existing = self._existing(task_id, owner)
         if existing is not None:

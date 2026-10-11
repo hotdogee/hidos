@@ -146,10 +146,24 @@ def test_same_image_from_two_users_gives_two_tasks(auth_client, other_client, fa
 
 def test_task_ids_depend_on_secret_key(settings, user):
     from cell.models import task_id_for
-    a = task_id_for('0.8', user, b'image')
+    a = task_id_for('cellc2', '0.8', user, b'image')
     settings.SECRET_KEY = 'another-secret-key-for-this-test-only-123456'
-    assert task_id_for('0.8', user, b'image') != a
+    assert task_id_for('cellc2', '0.8', user, b'image') != a
     assert len(a) == 32
+
+
+def test_same_image_in_two_apps_with_the_same_version_gives_two_tasks(auth_client, monkeypatch):
+    """Cell A1 and Cell C1 are both version 0.30; their task ids used to collide (HTTP 500)."""
+    import cella1
+    import cellc1
+    assert cella1.version == cellc1.version
+    monkeypatch.setattr(cella1, 'run', fake_run({'#Mesh': 1}))
+    monkeypatch.setattr(cellc1, 'run', fake_run({'count': 1}))
+    a1 = auth_client.post('/api/v1/cell/a1/tasks', {'file': image_file()}, format='multipart')
+    c1 = auth_client.post('/api/v1/cell/c1/tasks', {'file': image_file()}, format='multipart')
+    assert a1.status_code == 201 and c1.status_code == 201, (a1.content, c1.content)
+    assert a1.json()['id'] != c1.json()['id']
+    assert File.objects.count() == 2
 
 
 def test_invalid_upload_is_rejected(auth_client):
