@@ -5,7 +5,7 @@ class TaskAdmin(admin.ModelAdmin):
     fields = ('id', 'status', 'progress', 'owner', 'folder', 'version',
             'result',
             'name', 'uploaded_filetype', 'error',
-            'uploaded_image', 'result_image', 'uploaded_display', 'result_display',
+            'uploaded_image', 'result_image', 'uploaded_display', 'result_display', 'thumbnail',
             'dequeued', 'finished',
             'created', 'modified')
     readonly_fields = ('id', 'created', 'modified')

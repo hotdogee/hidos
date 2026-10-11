@@ -43,6 +43,17 @@ def display_jpeg(data):
         return out.getvalue()
 
 
+def thumbnail_jpeg(display_data, size=None):
+    """Small JPEG preview (#38)"""
+    size = size or settings.THUMBNAIL_SIZE
+    with Image.open(io.BytesIO(display_data)) as img:
+        img = img.convert('RGB')
+        img.thumbnail((size, size))
+        out = io.BytesIO()
+        img.save(out, 'JPEG', quality=85)
+        return out.getvalue()
+
+
 def task_id_for(version, owner, data):
     """
     Task ids are derived from the app version, the owner and the image, so
@@ -113,6 +124,7 @@ class SingleImageUploadManager(models.Manager):
         # jpg image for viewer
         uploaded_display_path = path_prefix + '_uploaded_display.jpg'
         result_display_path = path_prefix + '_result_display.jpg'
+        thumbnail_path = path_prefix + '_thumbnail.jpg'
 
         # build data dictionary
         data = {
@@ -128,6 +140,7 @@ class SingleImageUploadManager(models.Manager):
             'result_image': result_image_path,
             'uploaded_display': uploaded_display_path,
             'result_display': result_display_path,
+            'thumbnail': thumbnail_path,
         }
         if not owner.is_anonymous:
             data['owner'] = owner
@@ -142,7 +155,8 @@ class SingleImageUploadManager(models.Manager):
         display_data = display_jpeg(uploaded_file_data)
         obj.uploaded_display.save(uploaded_display_path, ContentFile(display_data), save=False)
 
-        # TODO: Make thumbnail
+        # thumbnail for previews (#38)
+        obj.thumbnail.save(thumbnail_path, ContentFile(thumbnail_jpeg(display_data)), save=False)
 
         # save to database
         obj.save()
@@ -178,6 +192,7 @@ class CellTask(Task):
     result_image = models.ImageField(max_length=255, blank=True)
     uploaded_display = models.ImageField(max_length=255, blank=True)
     result_display = models.ImageField(max_length=255, blank=True)
+    thumbnail = models.ImageField(max_length=255, blank=True)
     result = models.JSONField(default=dict, blank=True)
     error = models.TextField(blank=True)
 

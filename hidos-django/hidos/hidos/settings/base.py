@@ -357,6 +357,9 @@ TASK_UPLOAD_MAX_BYTES = env.int('TASK_UPLOAD_MAX_BYTES', default=200 * 1024 * 10
 # Largest accepted profile image (#74)
 PROFILE_IMAGE_MAX_BYTES = env.int('PROFILE_IMAGE_MAX_BYTES', default=2 * 1024 * 1024)
 
+# Thumbnails generated for every uploaded image (#38), longest side in pixels
+THUMBNAIL_SIZE = env.int('THUMBNAIL_SIZE', default=256)
+
 # REST framework
 # The fs and cell APIs are protected by tokens (#96): JWT from the login API,
 # or DRF tokens created in the admin. Session authentication is only enabled

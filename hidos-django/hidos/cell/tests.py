@@ -2,6 +2,7 @@ import os
 
 import numpy as np
 import pytest
+from PIL import Image
 
 from conftest import image_file
 from fs.models import File
@@ -45,6 +46,27 @@ def test_create_task_in_folder(auth_client, fake_cellc2):
     assert data['folder'] == folder['id']
     listed = auth_client.get('/api/v1/fs/' + folder['id']).json()['files']
     assert [f['id'] for f in listed] == [data['id']]
+
+
+def test_task_representation_through_fs_api(auth_client, fake_cellc2):
+    data = create_task(auth_client)
+    item = auth_client.get('/api/v1/fs/' + data['id']).json()
+    content = item['content']
+    assert content['status'] == 'success'
+    assert content['result'] == {'confluence': 12.5, 'count': 3}
+    for key in ('uploaded_image', 'uploaded_display', 'result_image', 'result_display', 'thumbnail'):
+        assert content[key].startswith('/media/cellc2/task/'), key
+
+
+def test_thumbnail_is_created(auth_client, settings, fake_cellc2):
+    """Every upload gets a small JPEG preview (#38)."""
+    settings.THUMBNAIL_SIZE = 32
+    task = get_task(create_task(auth_client, image=image_file(size=(200, 100)))['id'])
+    with Image.open(task.thumbnail.path) as thumb:
+        assert thumb.format == 'JPEG'
+        assert thumb.size == (32, 16)
+    with Image.open(task.uploaded_display.path) as display:
+        assert display.format == 'JPEG' and display.size == (200, 100)
 
 
 def test_uploaded_file_name_is_not_used_on_disk(auth_client, fake_cellc2):
