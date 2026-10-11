@@ -6,7 +6,9 @@
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>HiDOS Cell Cloud</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.5/css/materialize.min.css">
+  <!--GOOGLE_ANALYTICS-->
   <style type="text/css">
     .parallax-container {
       min-height: 240px;
@@ -22,8 +24,12 @@
     <nav class="grey darken-4">
       <div class="nav-wrapper container">
         <a href="#!" class="brand-logo">HiDOS</a>
+        <a href="#" data-activates="mobile-nav" class="button-collapse"><i class="material-icons">menu</i></a>
         <ul class="right hide-on-med-and-down">
-          <li><a href="#">Login</a></li>
+          <li><a href="{{LOGIN_URL}}">Login</a></li>
+        </ul>
+        <ul class="side-nav" id="mobile-nav">
+          <li><a href="{{LOGIN_URL}}">Login</a></li>
         </ul>
       </div>
     </nav>
@@ -132,22 +138,6 @@
           </div>
         </div>
         
-        <div class="col s12 m6 l4">
-          <div class="card">
-            <div class="card-image waves-effect waves-block waves-light">
-              <a href="http://cells.hotdogee.com/">
-                <img src="static/images/cells-card.png" class="responsive-img wp-post-image">
-              </a>
-            </div>
-            <div class="card-content">
-              <p class="area"><a href="http://cells.hotdogee.com/">Selection</a></p>
-              <a href="http://cells.hotdogee.com/"><span class="card-title activator brown-text text-darken-4">Cell S</span></a>
-            </div>
-            <div class="card-action">
-              <a href="#">View Example</a>
-            </div>
-          </div>
-        </div>
       </div>
 
     </div>
@@ -155,10 +145,6 @@
   
   <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.5/js/materialize.min.js"></script>
-  <script>
-    $(document).ready(function(){
-      $('.parallax').parallax();
-    });
-  </script>
+  <script src="static/js/landing.js"></script>
 </body>
 </html>
