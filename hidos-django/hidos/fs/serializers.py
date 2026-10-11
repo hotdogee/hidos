@@ -46,6 +46,9 @@ class ContentRelatedField(serializers.RelatedField):
                 v = getattr(value, k)
                 if isinstance(v, FieldFile):
                     content[k] = v.url if v else None
+                elif k == 'error' and v:
+                    # the full traceback (server paths) is for the admin only
+                    content[k] = v.strip().splitlines()[-1]
                 else:
                     content[k] = v
         return content

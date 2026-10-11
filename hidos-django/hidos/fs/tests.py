@@ -275,3 +275,18 @@ def test_cleanup_uploads_command(auth_client, settings):
     call_command('cleanup_uploads')
     assert list(ChunkedUpload.objects.values_list('filename', flat=True)) == ['new.png']
     assert not os.path.exists(old_path)
+
+
+def test_open_uploads_are_limited(auth_client, settings):
+    settings.CHUNKED_UPLOAD_MAX_OPEN = 2
+    for i in range(2):
+        assert auth_client.post(FS + 'uploads', {'filename': '%d.png' % i, 'size': 10}, format='json').status_code == 201
+    assert auth_client.post(FS + 'uploads', {'filename': 'x.png', 'size': 10}, format='json').status_code == 400
+
+
+def test_upload_with_missing_data_is_rejected(auth_client):
+    import os
+    upload = auth_client.post(FS + 'uploads', {'filename': 'x.png', 'size': 10}, format='json').json()
+    auth_client.put(FS + 'uploads/' + upload['id'], b'0123456789', content_type='application/octet-stream')
+    os.remove(ChunkedUpload.objects.get(pk=upload['id']).path)
+    assert auth_client.post('/api/v1/cell/c2/tasks', {'upload': upload['id']}, format='json').status_code == 400

@@ -306,3 +306,13 @@ def test_task_deleted_during_analysis_stays_deleted(auth_client, monkeypatch):
     response = auth_client.post(TASKS, {'file': image_file()}, format='multipart')
     assert response.status_code == 201
     assert not File.objects.exists()
+
+
+def test_api_shows_only_the_last_line_of_errors(auth_client, monkeypatch):
+    import cellc2
+    monkeypatch.setattr(cellc2, 'run', lambda record: 1 / 0)
+    data = create_task(auth_client)
+    content = auth_client.get('/api/v1/fs/' + data['id']).json()['content']
+    assert content['status'] == 'failed'
+    assert content['error'] == 'ZeroDivisionError: division by zero'
+    assert 'Traceback' in get_task(data['id']).error

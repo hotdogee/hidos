@@ -372,6 +372,7 @@ THUMBNAIL_SIZE = env.int('THUMBNAIL_SIZE', default=256)
 # Chunked resumable uploads (#56); partial files are kept outside MEDIA_ROOT
 CHUNKED_UPLOAD_ROOT = env('CHUNKED_UPLOAD_ROOT', default=path.join(PROJECT_ROOT, 'chunked_uploads'))
 CHUNKED_UPLOAD_MAX_BYTES = env.int('CHUNKED_UPLOAD_MAX_BYTES', default=200 * 1024 * 1024)
+CHUNKED_UPLOAD_MAX_OPEN = env.int('CHUNKED_UPLOAD_MAX_OPEN', default=20)  # unfinished uploads per user
 CHUNKED_UPLOAD_EXPIRATION = timedelta(hours=env.int('CHUNKED_UPLOAD_EXPIRATION_HOURS', default=24))
 
 # REST framework

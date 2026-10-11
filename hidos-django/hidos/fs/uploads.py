@@ -49,6 +49,12 @@ class ChunkedUploadSerializer(serializers.ModelSerializer):
     def validate_filename(self, filename):
         return os.path.basename(filename.replace('\\', '/')) or 'upload'
 
+    def validate(self, attrs):
+        user = self.context['request'].user
+        if ChunkedUpload.objects.filter(owner=user, completed__isnull=True).count() >= settings.CHUNKED_UPLOAD_MAX_OPEN:
+            raise ValidationError(_('Too many unfinished uploads; finish or delete some first.'))
+        return attrs
+
     def validate_size(self, size):
         if size > settings.CHUNKED_UPLOAD_MAX_BYTES:
             raise ValidationError(_('Files must be smaller than %d MB.') % (settings.CHUNKED_UPLOAD_MAX_BYTES // 2 ** 20))
@@ -113,4 +119,6 @@ def take_completed_upload(user, upload_id):
         raise ValidationError({'upload': _('Upload not found.')})
     if not upload.completed:
         raise ValidationError({'upload': _('Upload is not complete (%d of %d bytes).') % (upload.offset, upload.size)})
+    if not os.path.isfile(upload.path):
+        raise ValidationError({'upload': _('The uploaded data is gone, upload the file again.')})
     return upload
