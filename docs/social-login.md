@@ -3,7 +3,7 @@
 Cell Cloud uses [django-allauth](https://docs.allauth.org/) for social login,
 and [dj-rest-auth](https://dj-rest-auth.readthedocs.io/) to expose it to the
 single page app (`POST /api/v1/auth/google/` and `/api/v1/auth/facebook/`
-with the provider's `access_token`, or `code` for Google). These notes are
+with the provider's `access_token`). These notes are
 based on Weian Wang's 2016 setup notes (`django allauth settings.md` on the
 `cellbase-dev` branch, #19).
 

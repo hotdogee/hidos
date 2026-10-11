@@ -1,6 +1,6 @@
 rem Start Jupyter Notebook server
 cd hidos
-virtualenv env
+if not exist env py -3 -m venv env
 call .\env\Scripts\activate
 jupyter nbextension enable --py --sys-prefix widgetsnbextension
 start /w /b jupyter notebook
