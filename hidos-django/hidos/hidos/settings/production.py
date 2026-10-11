@@ -21,5 +21,7 @@ X_FRAME_OPTIONS = 'DENY'
 
 STORAGES = {
     'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
-    'staticfiles': {'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage'},
+    # no manifest: the vendored 2016 static files (UTF-16 IntelliSense files,
+    # CSS referencing missing fonts) can't be post-processed
+    'staticfiles': {'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage'},
 }
