@@ -71,6 +71,15 @@ class File(TimeStampedModel):
     def __str__(self):
         return '{0} ({1})'.format(self.name, self.id.hex[:6])
 
+    def ancestor_ids(self):
+        """ids of the parent folder, grandparent folder, ... up to Home"""
+        ids = []
+        folder = self.folder
+        while folder is not None and folder.id not in ids:
+            ids.append(folder.id)
+            folder = folder.folder
+        return ids
+
     class Meta(TimeStampedModel.Meta):
         ordering = ('-modified', '-created',)
 

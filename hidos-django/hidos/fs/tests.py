@@ -52,12 +52,31 @@ def test_nested_folder_path_and_breadcrumbs(auth_client):
     assert data['breadcrumbs'] == [['Home', 'Home'], [parent['id'], 'A']]
 
 
+def test_patch_rename_without_folder_attribute(auth_client):
+    """PATCH with only `name` used to fail with a KeyError on `folder` (#97)."""
+    parent = create_folder(auth_client, 'A')
+    child = create_folder(auth_client, 'B', parent['id'])
+    response = auth_client.patch(FS + child['id'], {'name': 'Renamed'}, format='json')
+    assert response.status_code == 200, response.content
+    assert response.json()['name'] == 'Renamed'
+    assert response.json()['folder'] == parent['id']
+
+
 def test_patch_move_to_home_with_null_folder(auth_client):
     parent = create_folder(auth_client, 'A')
     child = create_folder(auth_client, 'B', parent['id'])
     response = auth_client.patch(FS + child['id'], {'folder': None}, format='json')
     assert response.status_code == 200
     assert Folder.objects.get(pk=child['id']).folder is None
+
+
+def test_cannot_move_folder_into_itself_or_a_subfolder(auth_client):
+    a = create_folder(auth_client, 'A')
+    b = create_folder(auth_client, 'B', a['id'])
+    c = create_folder(auth_client, 'C', b['id'])
+    assert auth_client.patch(FS + a['id'], {'folder': a['id']}, format='json').status_code == 400
+    assert auth_client.patch(FS + a['id'], {'folder': c['id']}, format='json').status_code == 400
+    assert Folder.objects.get(pk=a['id']).folder is None
 
 
 def test_folder_name_validation(auth_client):

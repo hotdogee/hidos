@@ -63,6 +63,10 @@ class FolderRelatedField(serializers.PrimaryKeyRelatedField):
 
 
 class NotSelfContainedFolderValidator(object):
+    """
+    Don't let a folder be moved into itself (#89) or into one of its own
+    subfolders. `folder` is optional, so a PATCH that only renames works (#97).
+    """
 
     message = _('Can not move a folder inside itself.')
     requires_context = True
@@ -73,8 +77,10 @@ class NotSelfContainedFolderValidator(object):
     def __call__(self, attrs, serializer):
         # Determine the existing instance, if this is an update operation.
         instance = getattr(serializer, 'instance', None)
-        folder = attrs['folder']
-        if instance and folder and (folder.id == instance.id):
+        folder = attrs.get('folder')
+        if instance is None or folder is None:
+            return
+        if folder.id == instance.id or instance.id in folder.ancestor_ids():
             raise ValidationError(self.message)
 
 
