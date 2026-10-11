@@ -3,7 +3,9 @@ import re
 import jwt
 import pytest
 from allauth.account.models import EmailAddress
+from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.sites.models import Site
 from django.core import mail
 
 from conftest import PASSWORD
@@ -50,6 +52,11 @@ def test_register_validates_passwords(api_client):
                                       'password2': '123'}, format='json').status_code == 400
 
 
+def test_confirmation_email_uses_site_domain(api_client):
+    api_client.post(REGISTER, {'email': 'n@example.com', 'password1': PASSWORD, 'password2': PASSWORD}, format='json')
+    assert settings.SITE_DOMAIN in mail.outbox[0].body
+
+
 # --- login / JWT ------------------------------------------------------------
 
 def test_login_returns_jwt(api_client, user):
@@ -79,6 +86,14 @@ def test_inactive_user_cannot_login(api_client, user):
     user.is_active = False
     user.save()
     assert api_client.post(LOGIN, {'email': user.email, 'password': PASSWORD}, format='json').status_code == 400
+
+
+# --- sites (#78) -------------------------------------------------------------------
+
+def test_site_domain_migration():
+    site = Site.objects.get(pk=settings.SITE_ID)
+    assert site.domain == settings.SITE_DOMAIN == 'hidos.io'
+    assert site.name == settings.SITE_NAME
 
 
 # --- admin --------------------------------------------------------------------------

@@ -131,6 +131,9 @@ STATICFILES_FINDERS = (
 # Application definition
 
 SITE_ID = 1
+# Written to the django_site row by app/migrations/0001_site_domain.py
+SITE_DOMAIN = env('SITE_DOMAIN', default='hidos.io')
+SITE_NAME = env('SITE_NAME', default='HiDOS')
 
 INSTALLED_APPS = [
     'django.contrib.auth',
