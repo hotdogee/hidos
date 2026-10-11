@@ -65,8 +65,7 @@ class TaskViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def perform_create(self, serializer): # CreateModelMixin
-        # If anonymous upload, user will be django.contrib.auth.models.AnonymousUser
-        # and username will be an empty string.
+        # Anonymous users are rejected by the IsAuthenticated permission
         task = serializer.save(owner=self.request.user) # returns create model instance
         # put task in queue
         task.enqueue()

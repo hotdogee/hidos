@@ -2,7 +2,10 @@
 local settings
 """
 from .base import *  # noqa: F401,F403
-from .base import ALLOWED_HOSTS, CORS_ALLOWED_ORIGINS, LOG_LEVEL, REPO_ROOT, REST_FRAMEWORK, build_logging, env, path
+from .base import (
+    ALLOWED_HOSTS, CORS_ALLOWED_ORIGINS, LOG_LEVEL, REPO_ROOT, REST_FRAMEWORK, build_logging, env, path,
+    rest_authentication_classes,
+)
 
 DEBUG = env.bool('DJANGO_DEBUG', default=True)
 
@@ -20,6 +23,10 @@ CORS_ALLOWED_ORIGINS = CORS_ALLOWED_ORIGINS + [
 ]
 
 CSRF_TRUSTED_ORIGINS = ['http://localhost:8000', 'http://127.0.0.1:8000']
+
+# Browsable API with session login for development
+API_SESSION_AUTH = env.bool('API_SESSION_AUTH', default=True)
+REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] = rest_authentication_classes(API_SESSION_AUTH)
 
 # REST framework
 REST_FRAMEWORK['DEFAULT_THROTTLE_RATES'] = {

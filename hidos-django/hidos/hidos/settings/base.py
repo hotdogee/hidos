@@ -343,12 +343,27 @@ SLACK_WEBHOOK_URL = env('SLACK_WEBHOOK_URL', default='')
 SLACK_CHANNEL = env('SLACK_CHANNEL', default='#image-bug')
 
 # REST framework
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
+# The fs and cell APIs are protected by tokens (#96): JWT from the login API,
+# or DRF tokens created in the admin. Session authentication is only enabled
+# when API_SESSION_AUTH is true (default in local settings) so the browsable
+# API keeps working for developers.
+API_SESSION_AUTH = env.bool('API_SESSION_AUTH', default=False)
+
+
+def rest_authentication_classes(session_auth):
+    classes = [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.TokenAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
+    ]
+    if session_auth:
+        classes.append('rest_framework.authentication.SessionAuthentication')
+    return tuple(classes)
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': rest_authentication_classes(API_SESSION_AUTH),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
     ),
     'DEFAULT_THROTTLE_CLASSES': (
         'rest_framework.throttling.AnonRateThrottle',

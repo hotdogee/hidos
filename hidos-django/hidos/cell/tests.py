@@ -54,6 +54,10 @@ def test_invalid_upload_is_rejected(auth_client):
     assert not File.objects.exists()
 
 
+def test_anonymous_cannot_submit(api_client):
+    assert api_client.post(TASKS, {'file': image_file()}, format='multipart').status_code == 401
+
+
 def test_json_safe():
     from cell.tasks import json_safe
     value = {'a': np.int64(3), 'b': np.float32(0.5), 'c': np.array([1, 2]), 'd': float('nan'), 'e': (np.bool_(True),)}

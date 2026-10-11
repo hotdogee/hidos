@@ -41,8 +41,7 @@ class FileViewSet(viewsets.ModelViewSet):
             return File.objects.none()
 
     def perform_create(self, serializer): # CreateModelMixin
-        # If anonymous upload, user will be django.contrib.auth.models.AnonymousUser
-        # and username will be an empty string.
+        # Anonymous users are rejected by the IsAuthenticated permission
         obj = serializer.save(owner=self.request.user) # returns create model instance
 
     def perform_update(self, serializer): # UpdateModelMixin
@@ -116,7 +115,7 @@ class FolderViewSet(viewsets.ModelViewSet):
             return Folder.objects.none()
 
     def perform_create(self, serializer): # CreateModelMixin
-        # If anonymous upload, user will be django.contrib.auth.models.AnonymousUser
+        # Anonymous users are rejected by the IsAuthenticated permission
         obj = serializer.save(owner=self.request.user) # returns create model instance
 
     # @detail_route()

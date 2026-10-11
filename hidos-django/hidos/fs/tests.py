@@ -1,8 +1,9 @@
 import shutil
 
 import pytest
+from rest_framework.authtoken.models import Token
 
-from conftest import image_file
+from conftest import PASSWORD, image_file
 from fs.models import File, Folder
 
 pytestmark = pytest.mark.django_db
@@ -41,6 +42,41 @@ def create_task(client, folder=None, image=None):
     response = client.post('/api/v1/cell/c2/tasks', data, format='multipart')
     assert response.status_code == 201, response.content
     return response.json()
+
+
+# --- authentication (#96) -----------------------------------------------------
+
+def test_anonymous_is_rejected(api_client):
+    assert api_client.get(FS).status_code == 401
+    assert api_client.post(FS, {'name': 'x'}, format='json').status_code == 401
+    assert not File.objects.exists()
+
+
+def test_session_is_not_enough_for_the_api(client, user):
+    """The fs API is protected by tokens, a logged in session does not work (#96)."""
+    client.force_login(user)
+    assert client.get(FS).status_code == 401
+
+
+def test_jwt_from_login_api_authorizes_fs(api_client, user):
+    response = api_client.post('/api/v1/auth/login/', {'email': user.email, 'password': PASSWORD}, format='json')
+    assert response.status_code == 200, response.content
+    token = response.json()['token']
+    api_client.credentials(HTTP_AUTHORIZATION='JWT ' + token)
+    assert api_client.get(FS).status_code == 200
+    api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
+    assert api_client.get(FS).status_code == 200
+
+
+def test_drf_token_authorizes_fs(api_client, user):
+    token = Token.objects.create(user=user)
+    api_client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+    assert api_client.get(FS + 'home').status_code == 200
+
+
+def test_invalid_jwt_is_rejected(api_client, user):
+    api_client.credentials(HTTP_AUTHORIZATION='JWT not-a-token')
+    assert api_client.get(FS).status_code == 401
 
 
 # --- folders --------------------------------------------------------------------

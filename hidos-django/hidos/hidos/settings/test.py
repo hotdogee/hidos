@@ -6,7 +6,7 @@ Uses SQLite unless DATABASE_URL is set (CI runs the suite against PostgreSQL).
 import tempfile
 
 from .base import *  # noqa: F401,F403
-from .base import PROJECT_ROOT, REST_FRAMEWORK, env, path
+from .base import PROJECT_ROOT, REST_FRAMEWORK, env, path, rest_authentication_classes
 
 DEBUG = False
 
@@ -31,6 +31,8 @@ CELERY_BROKER_URL = 'memory://'
 
 SLACK_WEBHOOK_URL = ''
 
+API_SESSION_AUTH = False
+REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] = rest_authentication_classes(API_SESSION_AUTH)
 REST_FRAMEWORK['DEFAULT_THROTTLE_RATES'] = {
     **REST_FRAMEWORK['DEFAULT_THROTTLE_RATES'],
     'anon': '10000/h',
