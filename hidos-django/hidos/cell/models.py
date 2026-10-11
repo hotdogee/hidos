@@ -98,8 +98,10 @@ class SingleImageUploadManager(models.Manager):
 
         existing_queryset = self.filter(id=task_id)
         if existing_queryset.exists():
-            # TODO: log existing
-            return existing_queryset[0]
+            logger.info('%s: task %s already exists', app_name, task_id)
+            existing = existing_queryset[0]
+            existing.is_existing = True
+            return existing
 
         # get image format
         image_type = image_type_of(uploaded_file_data)

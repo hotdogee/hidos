@@ -76,6 +76,13 @@ class TaskViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer): # CreateModelMixin
         # Anonymous users are rejected by the IsAuthenticated permission
         task = serializer.save(owner=self.request.user) # returns create model instance
+        if getattr(task, 'is_existing', False) and task.status in ('queued', 'running', 'success'):
+            # the same image was submitted before, return that task
+            return
+        if getattr(task, 'is_existing', False):
+            # resubmitting an image whose analysis failed runs it again
+            task.status, task.progress, task.error = 'queued', 0, ''
+            task.save(update_fields=['status', 'progress', 'error', 'modified'])
         # put task in queue
         logger.info('%s: queued task %s for user %s', task.type, task.id.hex, task.owner_id)
         task.enqueue()

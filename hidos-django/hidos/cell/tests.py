@@ -95,6 +95,27 @@ def test_missing_result_image_status(auth_client, monkeypatch):
     assert get_task(create_task(auth_client)['id']).status == 'NO_OUT_JPG'
 
 
+def test_duplicate_upload_returns_existing_task(auth_client, monkeypatch, fake_cellc2):
+    import cellc2
+    first = create_task(auth_client)
+    runs = []
+    monkeypatch.setattr(cellc2, 'run', lambda record: runs.append(1) or {})
+    second = create_task(auth_client)
+    assert second['id'] == first['id']
+    assert runs == []  # already analyzed, not queued again
+    assert File.objects.count() == 1
+
+
+def test_resubmitting_a_failed_image_runs_it_again(auth_client, monkeypatch):
+    import cellc2
+    monkeypatch.setattr(cellc2, 'run', lambda record: 1 / 0)
+    first = create_task(auth_client)
+    assert get_task(first['id']).status == 'failed'
+    monkeypatch.setattr(cellc2, 'run', fake_run())
+    create_task(auth_client)
+    assert get_task(first['id']).status == 'success'
+
+
 def test_same_image_from_two_users_gives_two_tasks(auth_client, other_client, fake_cellc2):
     a = create_task(auth_client)
     b = create_task(other_client)
