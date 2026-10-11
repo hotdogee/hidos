@@ -1,16 +1,20 @@
-from __future__ import absolute_import, unicode_literals
+import logging
 
-from rest_framework import filters
-from rest_framework import generics
-from rest_framework import serializers
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
-from rest_framework import exceptions, status
+from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.decorators import list_route
+from rest_framework.throttling import UserRateThrottle
+from rest_framework.views import APIView
+
+logger = logging.getLogger(__name__)
 
 
-from .models import Task
-from .serializers import TaskSerializer
+class TaskSubmitRateThrottle(UserRateThrottle):
+    """Rate limit for new analysis tasks per user (#26)"""
+    scope = 'task_submit'
+
 
 class TaskViewSet(viewsets.ModelViewSet):
     """
@@ -26,8 +30,8 @@ class TaskViewSet(viewsets.ModelViewSet):
      * move(destination)
     """
     lookup_field = 'id'
-    filter_backends = (filters.DjangoFilterBackend,)
-    filter_fields = ('id', )
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('id', )
     pagination_class = None
 
     def get_queryset(self):
@@ -58,7 +62,13 @@ class TaskViewSet(viewsets.ModelViewSet):
     #     serializer = self.get_serializer(queryset, many=True)
     #     return Response(serializer.data)
 
-    @list_route()
+    def get_throttles(self):
+        throttles = super().get_throttles()
+        if self.action == 'create':
+            throttles.append(TaskSubmitRateThrottle())
+        return throttles
+
+    @action(detail=False)
     def running(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         running_tasks = queryset.filter(owner=request.user, status__in=['queued', 'running'])
@@ -66,10 +76,17 @@ class TaskViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def perform_create(self, serializer): # CreateModelMixin
-        # If anonymous upload, user will be django.contrib.auth.models.AnonymousUser
-        # and username will be an empty string.
+        # Anonymous users are rejected by the IsAuthenticated permission
         task = serializer.save(owner=self.request.user) # returns create model instance
+        if getattr(task, 'is_existing', False) and task.status in ('queued', 'running', 'success'):
+            # the same image was submitted before, return that task
+            return
+        if getattr(task, 'is_existing', False):
+            # resubmitting an image whose analysis failed runs it again
+            task.status, task.progress, task.error = 'queued', 0, ''
+            task.save(update_fields=['status', 'progress', 'error', 'modified'])
         # put task in queue
+        logger.info('%s: queued task %s for user %s', task.type, task.id.hex, task.owner_id)
         task.enqueue()
 
     # built-in
@@ -99,3 +116,17 @@ class TaskViewSet(viewsets.ModelViewSet):
     #         'format': self.format_kwarg,
     #         'view': self
     #     }
+
+
+class ExampleListView(APIView):
+    """
+    Example input image, result image and numbers of every analysis app
+    (#43). Public: the examples are shown before signing in.
+    """
+    permission_classes = (AllowAny,)
+    authentication_classes = ()
+    throttle_classes = ()
+
+    def get(self, request, *args, **kwargs):
+        from .examples import analysis_apps, example_info
+        return Response([info for info in (example_info(c) for c in analysis_apps()) if info])

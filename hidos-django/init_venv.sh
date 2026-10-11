@@ -1,9 +1,9 @@
 #!/bin/bash -ve
+# Python 3.12+ virtualenv in hidos/env (numpy, scipy and OpenCV come as wheels)
 cd hidos
-virtualenv env
-./env/bin/activate
+python3 -m venv env
+. ./env/bin/activate
+python -m pip install -U pip
 pip install -r requirements/local.txt
-# install opencv
-ln -s /usr/local/lib/python2.7/site-packages/cv2.so ./env/lib/python2.7/site-packages/cv2.so
 deactivate
 cd ..

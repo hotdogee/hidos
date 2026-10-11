@@ -1,22 +1,64 @@
-from __future__ import absolute_import, unicode_literals
-
+from django.conf import settings
+from django.core.files import File as DjangoFile
+from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
-from rest_framework import filters
 
 from fs.serializers import FileSerializer
+from fs.uploads import take_completed_upload
 
-from .models import Task
+from .models import UnreadableImage
 
 
 class TaskSerializer(FileSerializer):
-    file = serializers.ImageField(write_only=True, max_length=None, allow_empty_file=False, use_url=False)
+    """
+    Create a task by uploading `file` (multipart), or with `upload`, the id of
+    a finished chunked upload (#56). Leave `folder` out (or null) to put the
+    task in the Home folder (#98).
+    """
+    file = serializers.ImageField(write_only=True, required=False, max_length=None, allow_empty_file=False, use_url=False)
+    upload = serializers.UUIDField(write_only=True, required=False)
     # url = serializers.URLField(source='get_absolute_url', read_only=True)
     type = serializers.CharField(max_length=32, read_only=True)
     name = serializers.CharField(max_length=255, read_only=True)
 
     class Meta:
         read_only_fields = ['id', 'name', 'type', 'created', 'modified', 'owner', 'content']
-        fields = read_only_fields + ['file', 'folder']
+        fields = read_only_fields + ['file', 'upload', 'folder']
+
+    def validate_file(self, file):
+        if file.size > settings.TASK_UPLOAD_MAX_BYTES:
+            raise serializers.ValidationError(
+                _('Images must be smaller than %d MB.') % (settings.TASK_UPLOAD_MAX_BYTES // 2 ** 20))
+        return file
+
+    def validate(self, attrs):
+        if ('file' in attrs) == ('upload' in attrs):
+            raise serializers.ValidationError(_('Send either "file" or "upload".'))
+        if 'upload' in attrs:
+            upload = take_completed_upload(self.context['request'].user, attrs.pop('upload'))
+            fh = open(upload.path, 'rb')
+            try:
+                # validate the assembled file exactly like a direct upload
+                image = serializers.ImageField().run_validation(DjangoFile(fh, name=upload.filename))
+                attrs['file'] = self.validate_file(image)
+            except Exception:
+                fh.close()
+                raise
+            self.chunked_upload = upload
+        attrs.setdefault('folder', None)
+        return attrs
+
+    def create(self, validated_data):
+        try:
+            return self.Meta.model.objects.create(**validated_data)
+        except UnreadableImage:
+            raise serializers.ValidationError({'file': [_('The image could not be read; it may be damaged.')]})
+        finally:
+            upload = getattr(self, 'chunked_upload', None)
+            if upload is not None:
+                validated_data['file'].close()
+                upload.delete_file()
+                upload.delete()
 
     # def create(self, validated_data):
     #    return CellC2Task.objects.create(**validated_data)

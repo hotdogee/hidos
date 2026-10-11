@@ -1,16 +1,20 @@
 {
   "name": "hidos-express",
-  "version": "1.0.0",
-  "description": "",
+  "version": "1.1.0",
+  "description": "HiDOS Cell Cloud landing page",
   "main": "app.js",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node app.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
   },
   "author": "Han Lin",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.13.4",
-    "helmet": "^1.3.0",
-    "materialize-css": "^0.97.5"
+    "express": "^5.3.0",
+    "helmet": "^8.3.0"
   }
 }

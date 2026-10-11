@@ -1,0 +1,52 @@
+# Monthly, grouped updates: one pull request per ecosystem per month.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      github-actions:
+        patterns: ["*"]
+
+  - package-ecosystem: pip
+    directory: /hidos-django/hidos
+    schedule:
+      interval: monthly
+    groups:
+      python:
+        patterns: ["*"]
+
+  - package-ecosystem: npm
+    directory: /hidos-express
+    schedule:
+      interval: monthly
+    groups:
+      npm:
+        patterns: ["*"]
+
+  - package-ecosystem: docker
+    directories:
+      - /hidos-django/hidos
+      - /hidos-express
+    schedule:
+      interval: monthly
+    groups:
+      docker:
+        patterns: ["*"]
+
+  - package-ecosystem: docker-compose
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      docker-compose:
+        patterns: ["*"]
+    # Major versions of the database and the broker need a data migration
+    # (PostgreSQL: dump and restore with docker/backup.sh, and 18+ images
+    # mount the volume differently), so they are upgraded by hand.
+    ignore:
+      - dependency-name: postgres
+        update-types: ["version-update:semver-major"]
+      - dependency-name: rabbitmq
+        update-types: ["version-update:semver-major"]

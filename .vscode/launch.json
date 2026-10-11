@@ -2,68 +2,45 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python",
-            "type": "python",
+            "name": "Python: current file",
+            "type": "debugpy",
             "request": "launch",
-            "stopOnEntry": true,
             "program": "${file}",
-            "debugOptions": [
-                "WaitOnAbnormalExit",
-                "WaitOnNormalExit",
-                "RedirectOutput"
-            ]
-        },
-        {
-            "name": "Python Console App",
-            "type": "python",
-            "request": "launch",
-            "stopOnEntry": true,
-            "program": "${file}",
-            "externalConsole": true,
-            "debugOptions": [
-                "WaitOnAbnormalExit",
-                "WaitOnNormalExit"
-            ]
+            "console": "integratedTerminal"
         },
         {
             "name": "Django",
-            "type": "python",
-            "pythonPath": "${workspaceRoot}/hidos-django/hidos/env/Scripts/python",
+            "type": "debugpy",
             "request": "launch",
-            "stopOnEntry": false,
-            "externalConsole": false,
-            "program": "${workspaceRoot}/hidos-django/hidos/manage.py",
-            "cwd": "${workspaceRoot}/hidos-django/hidos/",
+            "program": "${workspaceFolder}/hidos-django/hidos/manage.py",
+            "cwd": "${workspaceFolder}/hidos-django/hidos/",
             "args": [
                 "runserver",
                 "--noreload"
             ],
-            "debugOptions": [
-                "WaitOnAbnormalExit",
-                "WaitOnNormalExit",
-                "RedirectOutput",
-                "DjangoDebugging"
-            ],
+            "django": true,
             "env": {
                 "DJANGO_SETTINGS_MODULE": "hidos.settings.local"
             }
         },
         {
-            "name": "Watson",
-            "type": "python",
+            "name": "Celery worker",
+            "type": "debugpy",
             "request": "launch",
-            "stopOnEntry": true,
-            "program": "${workspaceRoot}/console.py",
-            "args": [
-                "dev",
-                "runserver",
-                "--noreload=True"
-            ],
-            "debugOptions": [
-                "WaitOnAbnormalExit",
-                "WaitOnNormalExit",
-                "RedirectOutput"
-            ]
+            "module": "celery",
+            "cwd": "${workspaceFolder}/hidos-django/hidos/",
+            "args": ["-A", "hidos", "worker", "--loglevel=info", "--pool=solo", "-Q", "cell"],
+            "env": {
+                "DJANGO_SETTINGS_MODULE": "hidos.settings.local"
+            }
+        },
+        {
+            "name": "Tests",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "cwd": "${workspaceFolder}/hidos-django/hidos/",
+            "args": ["-m", "not analysis"]
         }
     ]
 }

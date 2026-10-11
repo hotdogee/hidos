@@ -1,16 +1,22 @@
-from __future__ import absolute_import, unicode_literals
-
-from rest_framework import filters
-from rest_framework import generics
-from rest_framework import serializers
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
-from rest_framework import exceptions, status
+from rest_framework.decorators import action
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
-from rest_framework.decorators import list_route
 
 
 from .models import Folder, File
 from .serializers import FolderSerializer, FileSerializer, FolderFilesSerializer
+from .download import zip_response
+
+
+class OptionalLimitOffsetPagination(LimitOffsetPagination):
+    """
+    Lists are only paginated when the client asks for it with ?limit=N
+    (&offset=M), e.g. for infinite scrolling (#40); without it the response
+    is the plain list it has always been.
+    """
+    max_limit = 1000
 
 
 class FileViewSet(viewsets.ModelViewSet):
@@ -24,9 +30,9 @@ class FileViewSet(viewsets.ModelViewSet):
     """
     queryset = File.objects.all()
     serializer_class = FileSerializer
-    filter_backends = (filters.DjangoFilterBackend,)
-    filter_fields = ('type', 'folder')
-    pagination_class = None
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('type', 'folder')
+    pagination_class = OptionalLimitOffsetPagination
 
     def get_queryset(self): # GenericAPIView
         """
@@ -41,26 +47,30 @@ class FileViewSet(viewsets.ModelViewSet):
         (Eg. return a list of items that is specific to the user)
         """
         if not self.request.user.is_anonymous:
-            return File.objects.filter(owner=self.request.user)
+            return File.objects.filter(owner=self.request.user).select_related('content_type').prefetch_related('content')
         else:
             return File.objects.none()
 
     def perform_create(self, serializer): # CreateModelMixin
-        # If anonymous upload, user will be django.contrib.auth.models.AnonymousUser
-        # and username will be an empty string.
+        # Anonymous users are rejected by the IsAuthenticated permission
         obj = serializer.save(owner=self.request.user) # returns create model instance
 
+    def perform_update(self, serializer): # UpdateModelMixin
+        instance = serializer.save()
+        # re-read so the response doesn't show the prefetched (stale) content
+        serializer.instance = self.get_queryset().get(pk=instance.pk)
 
-    @list_route()
-    def root(self, request, *args, **kwargs):
+
+    @action(detail=False)
+    def home(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset()).filter(folder__isnull=True)
 
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = FolderFilesSerializer(page, many=True)
+            serializer = FolderFilesSerializer(page, many=True, context=self.get_serializer_context())
             return self.get_paginated_response(serializer.data)
 
-        serializer = FolderFilesSerializer(queryset, many=True)
+        serializer = FolderFilesSerializer(queryset, many=True, context=self.get_serializer_context())
 
         data = {
             'id': None,
@@ -69,14 +79,28 @@ class FileViewSet(viewsets.ModelViewSet):
             'modified': None,
             'owner': self.request.user.pk,
             'content': {},
-            'name': '/',
+            'name': Folder.home_name,
             'folder': None,
             'breadcrumbs': [],
-            'path': '/',
+            'path': Folder.home_name,
             'files': serializer.data
         }
 
         return Response(data)
+
+    @action(detail=False, methods=['get', 'post'])
+    def download(self, request, *args, **kwargs):
+        """
+        Batch download (#35): a zip of the result images (and a results.csv)
+        of the selected tasks. Folders are included recursively.
+        GET ?ids=<id>,<id>  or  POST {"ids": [<id>, ...]}
+        """
+        if request.method == 'POST':
+            ids = request.data.get('ids', [])
+        else:
+            ids = [i for i in request.query_params.get('ids', '').split(',') if i]
+        include_uploaded = str(request.query_params.get('uploaded', request.data.get('uploaded', ''))).lower() in ('1', 'true', 'yes')
+        return zip_response(self.get_queryset(), ids, include_uploaded=include_uploaded)
 
 
 class FolderViewSet(viewsets.ModelViewSet):
@@ -94,8 +118,8 @@ class FolderViewSet(viewsets.ModelViewSet):
     """
     queryset = Folder.objects.all()
     serializer_class = FolderSerializer
-    filter_backends = (filters.DjangoFilterBackend,)
-    filter_fields = ('folder',)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('folder',)
     pagination_class = None
 
     def get_queryset(self): # GenericAPIView
@@ -116,7 +140,7 @@ class FolderViewSet(viewsets.ModelViewSet):
             return Folder.objects.none()
 
     def perform_create(self, serializer): # CreateModelMixin
-        # If anonymous upload, user will be django.contrib.auth.models.AnonymousUser
+        # Anonymous users are rejected by the IsAuthenticated permission
         obj = serializer.save(owner=self.request.user) # returns create model instance
 
     # @detail_route()

@@ -1,28 +1,80 @@
-from __future__ import absolute_import, unicode_literals
-import re
+import hmac
+import io
+import logging
 import sys
 import uuid
-import hashlib
-import imghdr
-import stat as Perm
 import posixpath as path
-from os import makedirs, chmod
+import shutil
 
 import cv2
 import numpy as np
+from PIL import Image
 
-from django.db import models
+from django.db import IntegrityError, models, transaction
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
-from django.core.validators import RegexValidator
-from django.contrib.postgres.fields import JSONField
-
-from django_extensions.db.models import TimeStampedModel
+from django.urls import reverse
 
 from fs.models import File
 
-from . import app_name, verbose_name, version
+logger = logging.getLogger(__name__)
+
+# Pillow format name -> file extension used for the stored upload
+# (the same names imghdr returned before Python 3.13 removed it)
+IMAGE_TYPES = {'mpo': 'jpeg'}
+
+
+def image_type_of(data):
+    """'jpeg', 'png', 'tiff', ... for the image bytes `data`"""
+    with Image.open(io.BytesIO(data)) as img:
+        fmt = (img.format or 'bin').lower()
+    return IMAGE_TYPES.get(fmt, fmt)
+
+
+def display_jpeg(data):
+    """8-bit JPEG version of an uploaded image for web display"""
+    decoded = cv2.imdecode(np.frombuffer(data, dtype=np.uint8), cv2.IMREAD_COLOR)
+    if decoded is not None:
+        flag, encoded = cv2.imencode('.jpg', decoded)
+        if flag:
+            return encoded.tobytes()
+    # formats OpenCV can't read (e.g. GIF); Pillow validated the upload already
+    with Image.open(io.BytesIO(data)) as img:
+        out = io.BytesIO()
+        img.convert('RGB').save(out, 'JPEG', quality=90)
+        return out.getvalue()
+
+
+def thumbnail_jpeg(display_data, size=None):
+    """Small JPEG preview (#38)"""
+    size = size or settings.THUMBNAIL_SIZE
+    with Image.open(io.BytesIO(display_data)) as img:
+        img = img.convert('RGB')
+        img.thumbnail((size, size))
+        out = io.BytesIO()
+        img.save(out, 'JPEG', quality=85)
+        return out.getvalue()
+
+
+class UnreadableImage(ValueError):
+    """The upload passed validation but cannot be decoded."""
+
+
+def task_id_for(app_name, version, owner, data):
+    """
+    Task ids are derived from the app, its version, the owner and the image,
+    so uploading the same image twice returns the existing task. All apps
+    share the fs File ids, and some have the same version string (Cell A1 and
+    C1 are both 0.30), hence the app name. The digest is keyed with
+    SECRET_KEY because the id is also part of the media URLs, and uses the
+    owner's id, which (unlike the email) never changes.
+    """
+    m = hmac.new(settings.SECRET_KEY.encode('utf-8'), digestmod='md5')
+    m.update(app_name.encode('utf-8') + b'\0')
+    m.update(version.encode('utf-8'))
+    m.update(str(owner.pk).encode('utf-8'))
+    m.update(data)
+    return m.hexdigest()
 
 # Abstract model for a user submitted task
 class Task(File):
@@ -37,42 +89,47 @@ class Task(File):
 
     class Meta(File.Meta):
         abstract = True
+        # File.Meta resolves to TimeStampedModel.Meta here, so repeat the ordering
+        ordering = ('-modified', '-created',)
 
 
 class ViewableQuerySet(models.query.QuerySet):
 
     def viewable_by(self, user):
-        return self.filter(user=user)
+        return self.filter(owner=user)
 
 
 class SingleImageUploadManager(models.Manager):
 
-    def create(self, file, owner, folder, **kwargs): # QuerySet, file=file, owner=user
+    def create(self, file, owner, folder=None, **kwargs): # QuerySet, file=file, owner=user
         """
-        Create a CellTaskModel from a validated UploadedFile object
+        Create a CellTaskModel from a validated UploadedFile object.
+        folder=None is the user's Home folder (#98).
         """
         # app
         app_name = self.model.__module__.split('.')[0]
         app = sys.modules[app_name]
-        print app_name, app
 
         # read to memory
+        file.seek(0)
         uploaded_file_data = file.read()
 
         # Generate task id
-        m = hashlib.md5()
-        m.update(app.version)
-        m.update(owner.email) # if anonymous, username is ''
-        m.update(uploaded_file_data)
-        task_id = m.hexdigest()
+        task_id = task_id_for(app_name, app.version, owner, uploaded_file_data)
 
-        existing_queryset = self.filter(id=task_id)
-        if existing_queryset.exists():
-            # TODO: log existing
-            return existing_queryset[0]
+        existing = self._existing(task_id, owner)
+        if existing is not None:
+            logger.info('%s: task %s already exists', app_name, task_id)
+            return existing
 
-        # get image format
-        image_type = imghdr.what('', uploaded_file_data)
+        # decode before anything is stored: an image Pillow can verify but
+        # not decode must not leave a task behind
+        try:
+            image_type = image_type_of(uploaded_file_data)
+            display_data = display_jpeg(uploaded_file_data)
+            thumbnail_data = thumbnail_jpeg(display_data)
+        except Exception as e:
+            raise UnreadableImage(str(e)) from e
         # path_prefix relative to MEDIA_ROOT
         path_prefix = path.join(app_name, 'task', task_id, task_id)
         # avoid exploits, don't any part of the user filename
@@ -81,6 +138,7 @@ class SingleImageUploadManager(models.Manager):
         # jpg image for viewer
         uploaded_display_path = path_prefix + '_uploaded_display.jpg'
         result_display_path = path_prefix + '_result_display.jpg'
+        thumbnail_path = path_prefix + '_thumbnail.jpg'
 
         # build data dictionary
         data = {
@@ -96,29 +154,47 @@ class SingleImageUploadManager(models.Manager):
             'result_image': result_image_path,
             'uploaded_display': uploaded_display_path,
             'result_display': result_display_path,
+            'thumbnail': thumbnail_path,
         }
         if not owner.is_anonymous:
             data['owner'] = owner
-        obj = super(SingleImageUploadManager, self).create(**data)
-        obj.content = obj
+        try:
+            with transaction.atomic():
+                obj = super(SingleImageUploadManager, self).create(**data)
+                obj.content = obj
 
-        # save uploaded image data to file
-        obj.uploaded_image.save(uploaded_image_path, file, save=False)
+                # save uploaded image data to file
+                # (FILE_UPLOAD_DIRECTORY_PERMISSIONS lets the worker write results)
+                obj.uploaded_image.save(uploaded_image_path, ContentFile(uploaded_file_data), save=False)
 
-        # convert to jpeg for web display
-        uploaded_image_array = np.asarray(bytearray(uploaded_file_data), dtype=np.uint8)
-        flag, uploaded_display_array = cv2.imencode('.jpg', cv2.imdecode(uploaded_image_array, cv2.IMREAD_COLOR))
-        obj.uploaded_display.save(uploaded_display_path, ContentFile(bytearray(uploaded_display_array)), save=False)
+                # jpeg for web display
+                obj.uploaded_display.save(uploaded_display_path, ContentFile(display_data), save=False)
 
-        # TODO: Make thumbnail
+                # thumbnail for previews (#38)
+                obj.thumbnail.save(thumbnail_path, ContentFile(thumbnail_data), save=False)
 
-        # save to database
-        obj.save()
+                # save to database
+                obj.save()
+        except IntegrityError:
+            # the same image was submitted twice at the same time
+            existing = self._existing(task_id, owner)
+            if existing is None:
+                raise
+            return existing
+        except Exception:
+            shutil.rmtree(path.dirname(path.join(settings.MEDIA_ROOT, uploaded_image_path)), ignore_errors=True)
+            raise
         return obj
+
+    def _existing(self, task_id, owner):
+        existing = self.filter(id=task_id, owner=owner if not owner.is_anonymous else None).first()
+        if existing is not None:
+            existing.is_existing = True
+        return existing
 
     # built-in
     # run create(file=UploadedFile object)
-    # def create(self, **kwargs): # QuerySet, file=file
+    # def create(self, **kwargs): # QuerySet, file=file;
     #     """
     #     Creates a new object with the given kwargs, saving it to the database
     #     and returning the created object.
@@ -146,10 +222,14 @@ class CellTask(Task):
     result_image = models.ImageField(max_length=255, blank=True)
     uploaded_display = models.ImageField(max_length=255, blank=True)
     result_display = models.ImageField(max_length=255, blank=True)
-    result = JSONField(default=dict, blank=True) # requires postgres
+    thumbnail = models.ImageField(max_length=255, blank=True)
+    result = models.JSONField(default=dict, blank=True)
     error = models.TextField(blank=True)
 
     objects = SingleImageUploadManager.from_queryset(ViewableQuerySet)()
+
+    def get_absolute_url(self):
+        return reverse('task-result', args=[self.id.hex])
 
     class Meta(Task.Meta):
         abstract = True

@@ -1,3 +1,21 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import ChunkedUpload, File
+
+class FileAdmin(admin.ModelAdmin):
+    date_hierarchy = 'modified'
+    fields = ('id', 'owner', 'folder', 'name', 'type', 'content_type', 'content_id',
+            'created', 'modified')
+    readonly_fields = ('id', 'created', 'modified')
+    search_fields = ['id', 'owner__email', 'type', 'name']
+    list_filter = ('owner', 'content_type')
+    list_display = ('__str__', 'type', 'folder', 'owner', 'modified')
+
+admin.site.register(File, FileAdmin)
+
+
+@admin.register(ChunkedUpload)
+class ChunkedUploadAdmin(admin.ModelAdmin):
+    list_display = ('filename', 'owner', 'offset', 'size', 'created', 'completed')
+    readonly_fields = ('id', 'created')
+    search_fields = ['id', 'filename', 'owner__email']

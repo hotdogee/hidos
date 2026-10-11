@@ -1,17 +1,21 @@
-from django.contrib.auth import get_user_model, authenticate
+import requests
 from django.conf import settings
-from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
-from django.contrib.auth.tokens import default_token_generator
-from django.utils.http import urlsafe_base64_decode as uid_decoder
-from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import force_text
+from django.contrib.auth import get_user_model, authenticate
+from django.utils.translation import gettext_lazy as _
 
 from rest_framework import serializers, exceptions
-from rest_framework.exceptions import ValidationError
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from allauth.utils import email_address_exists
+from allauth.account import app_settings as allauth_account_settings
 from allauth.account.adapter import get_adapter
+from allauth.account.models import EmailAddress
 from allauth.account.utils import setup_user_email
+from dj_rest_auth.registration.serializers import SocialLoginSerializer
+from dj_rest_auth.serializers import JWTSerializer as BaseJWTSerializer
+from dj_rest_auth.serializers import PasswordResetSerializer as BasePasswordResetSerializer
+
+from .emails import has_confirmed_email, same_email
+from .forms import PasswordResetForm
 
 # Get the UserModel
 UserModel = get_user_model()
@@ -25,7 +29,7 @@ class LoginSerializer(serializers.Serializer):
         user = None
 
         if email and password:
-            user = authenticate(email=email, password=password)
+            user = authenticate(self.context.get('request'), email=email, password=password)
         else:
             msg = _('Must include "email" and "password".')
             raise exceptions.ValidationError(msg)
@@ -48,34 +52,69 @@ class LoginSerializer(serializers.Serializer):
             raise exceptions.ValidationError(msg)
 
         # If required, is the email verified?
-        if 'rest_auth.registration' in settings.INSTALLED_APPS:
-            from allauth.account import app_settings
-            if app_settings.EMAIL_VERIFICATION == app_settings.EmailVerificationMethod.MANDATORY:
-                email_address = user.emailaddress_set.get(email=user.email)
-                if not email_address.verified:
+        if 'dj_rest_auth.registration' in settings.INSTALLED_APPS:
+            if allauth_account_settings.EMAIL_VERIFICATION == allauth_account_settings.EmailVerificationMethod.MANDATORY:
+                if not has_confirmed_email(user):
                     raise serializers.ValidationError(_('E-mail is not verified.'))
 
         attrs['user'] = user
         return attrs
 
 
+class TokenClaimsSerializer(TokenObtainPairSerializer):
+    """
+    JWT claims. The token identifies the user by id; email and full_name are
+    included for clients (the username is not, see #95).
+    """
+
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        token['email'] = user.email
+        token['full_name'] = user.get_full_name()
+        return token
+
+
+class JWTSerializer(BaseJWTSerializer):
+    """
+    Serializer for JWT authentication.
+    `token` is the access token, kept for clients written against the
+    djangorestframework-jwt API; `access`, `refresh` and `user` are new.
+    """
+    token = serializers.CharField(source='access', read_only=True)
+
+
 class UserDetailsSerializer(serializers.ModelSerializer):
     """
-    User model w/o password
+    User model w/o password, including the profile fields (#75)
     """
+    image = serializers.ImageField(required=False, allow_null=True, use_url=True)
+
     class Meta:
         model = UserModel
         read_only_fields = ('email', 'is_staff', 'is_active', 'date_joined', 'last_login', 'get_full_name', 'get_short_name')
-        fields = ('first_name', 'last_name') + read_only_fields
+        fields = ('first_name', 'last_name', 'organization', 'language', 'image') + read_only_fields
+
+    def validate_language(self, language):
+        if language and language not in dict(settings.LANGUAGES):
+            raise serializers.ValidationError(
+                _('Unsupported language. Choose one of: %s') % ', '.join(dict(settings.LANGUAGES)))
+        return language
+
+    def validate_image(self, image):
+        if image and image.size > settings.PROFILE_IMAGE_MAX_BYTES:
+            raise serializers.ValidationError(
+                _('Profile images must be smaller than %d KB.') % (settings.PROFILE_IMAGE_MAX_BYTES // 1024))
+        return image
 
 
 class RegisterSerializer(serializers.Serializer):
     first_name = serializers.CharField(
-        required=False, max_length=30,
+        required=False, max_length=150,
         style={'placeholder': '(Optional)'}
     )
     last_name = serializers.CharField(
-        required=False, max_length=30,
+        required=False, max_length=150,
         style={'placeholder': '(Optional)'}
     )
     email = serializers.EmailField(
@@ -92,7 +131,11 @@ class RegisterSerializer(serializers.Serializer):
 
     def validate_email(self, email):
         email = get_adapter().clean_email(email)
-        if email and email_address_exists(email):
+        # compared as allauth will store it: lower-cased, and str.lower() turns e.g. a Kelvin sign into a k
+        stored = email.lower()
+        if email and any(same_email(existing, stored)
+                         for model in (UserModel, EmailAddress)
+                         for existing in model.objects.filter(email__iexact=stored).values_list('email', flat=True)):
             raise serializers.ValidationError(
                 _("A user is already registered with this e-mail address."))
         return email
@@ -124,3 +167,38 @@ class RegisterSerializer(serializers.Serializer):
         self.custom_signup(request, user)
         setup_user_email(request, user, [])
         return user
+
+
+class PasswordResetSerializer(BasePasswordResetSerializer):
+    """Mails reset links only for the accounts that own the address (users.forms, #67)."""
+    password_reset_form_class = PasswordResetForm
+
+
+GOOGLE_TOKENINFO_URL = 'https://oauth2.googleapis.com/tokeninfo'
+
+
+class GoogleLoginSerializer(SocialLoginSerializer):
+    """
+    Social login with a Google access token (POST /api/v1/auth/google/).
+
+    An access token does not say which application it was issued to, so a
+    token obtained by another site's "Sign in with Google" could be replayed
+    here to log in as that Google user, and through email authentication
+    (#67) into a local account with the same email. The token must have
+    been issued to our Google client id. (ID tokens and the authorization
+    code flow are checked by allauth.)
+    """
+
+    def validate(self, attrs):
+        access_token = attrs.get('access_token')
+        if access_token and not attrs.get('id_token'):
+            view = self.context.get('view')
+            app = view.adapter_class(self._get_request()).get_provider().app
+            try:
+                response = requests.get(GOOGLE_TOKENINFO_URL, params={'access_token': access_token}, timeout=10)
+                info = response.json() if response.status_code == 200 else {}
+            except (requests.RequestException, ValueError):
+                info = {}
+            if not app.client_id or app.client_id not in (info.get('aud'), info.get('azp')):
+                raise serializers.ValidationError(_('This Google token was not issued to this application.'))
+        return super().validate(attrs)

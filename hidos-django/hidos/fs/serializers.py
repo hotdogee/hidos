@@ -1,17 +1,15 @@
-from __future__ import absolute_import, unicode_literals
 import re
-import sys
-import json
 from collections import OrderedDict
+from importlib import import_module
 
-from django.db import models
+from django.utils.translation import gettext_lazy as _
 from django.db.models.fields.files import FieldFile
 from django.core.validators import RegexValidator
 
 from rest_framework import serializers
-from rest_framework import filters
 from rest_framework import fields
 from rest_framework import relations
+from rest_framework.exceptions import ValidationError
 
 from .models import Folder, File
 
@@ -43,14 +41,50 @@ class ContentRelatedField(serializers.RelatedField):
         Serialize tagged objects to a simple textual representation.
         """
         content = {}
-        for k in value.__dict__:
-            if k not in self.ignore_keys and k[-6:] != '_cache':
+        for k in list(value.__dict__):
+            if k not in self.ignore_keys and not k.startswith('_') and k[-6:] != '_cache':
                 v = getattr(value, k)
                 if isinstance(v, FieldFile):
-                    content[k] = v.url
+                    content[k] = v.url if v else None
+                elif k == 'error' and v:
+                    # the full traceback (server paths) is for the admin only
+                    content[k] = v.strip().splitlines()[-1]
                 else:
                     content[k] = v
         return content
+
+
+class FolderRelatedField(serializers.PrimaryKeyRelatedField):
+    """
+    Limit the queryset to owned folders only
+    """
+    def get_queryset(self):
+        if not self.context['request'].user.is_anonymous:
+            return Folder.objects.filter(owner=self.context['request'].user)
+        else:
+            return Folder.objects.none()
+
+
+class NotSelfContainedFolderValidator(object):
+    """
+    Don't let a folder be moved into itself (#89) or into one of its own
+    subfolders. `folder` is optional, so a PATCH that only renames works (#97).
+    """
+
+    message = _('Can not move a folder inside itself.')
+    requires_context = True
+
+    def __init__(self, message=None):
+        self.message = message or self.message
+
+    def __call__(self, attrs, serializer):
+        # Determine the existing instance, if this is an update operation.
+        instance = getattr(serializer, 'instance', None)
+        folder = attrs.get('folder')
+        if instance is None or folder is None:
+            return
+        if folder.id == instance.id or instance.id in folder.ancestor_ids():
+            raise ValidationError(self.message)
 
 
 class FileSerializer(serializers.ModelSerializer):
@@ -60,11 +94,14 @@ class FileSerializer(serializers.ModelSerializer):
     type = serializers.CharField(max_length=32, read_only=True, # look up in FileType model
         validators=[RegexValidator(file_re, r'File type must not contain  \ / : * ? " < > |')])
     content = ContentRelatedField(read_only=True)
+    folder = FolderRelatedField(allow_null=True, required=False, 
+        pk_field=serializers.UUIDField(format='hex'))
 
     class Meta:
         model = File
         read_only_fields = ['id', 'type', 'created', 'modified', 'owner', 'content']
         fields = read_only_fields + ['name', 'folder']
+        validators = [NotSelfContainedFolderValidator()]
 
     def to_representation(self, instance):
         """
@@ -72,14 +109,14 @@ class FileSerializer(serializers.ModelSerializer):
         """
         # recursive check
         if type(instance).__name__ != type(instance.content).__name__:
-            # get the module, will raise KeyError if module cannot be found
+            # get the module, will raise ImportError if module cannot be found
             # get the class, will raise AttributeError if class cannot be found
             try:
                 app_label = instance.content_type.app_label
                 model_class_name = type(instance.content).__name__
-                serializer = getattr(sys.modules[app_label + '.serializers'], model_class_name + 'Serializer')()
+                serializer = getattr(import_module(app_label + '.serializers'), model_class_name + 'Serializer')(context=self.context)
                 return serializer.to_representation(instance.content)
-            except (KeyError, AttributeError):
+            except (ImportError, AttributeError):
                 pass
         ret = OrderedDict()
 
@@ -102,18 +139,10 @@ class FileSerializer(serializers.ModelSerializer):
 
         return ret
 
-class FolderFilesSerializer(serializers.ModelSerializer):
-    id = serializers.UUIDField(format='hex', read_only=True)
-    name = serializers.CharField(max_length=255,  # display name
-        validators=[RegexValidator(file_re, r'File names must not contain  \ / : * ? " < > |')])
-    type = serializers.CharField(max_length=32, read_only=True, # look up in FileType model
-        validators=[RegexValidator(file_re, r'File type must not contain  \ / : * ? " < > |')])
-    content = ContentRelatedField(read_only=True)
+class FolderFilesSerializer(FileSerializer):
 
-    class Meta:
-        model = File
-        read_only_fields = ['id', 'type', 'created', 'modified', 'owner', 'content']
-        fields = read_only_fields + ['name', 'folder']
+    class Meta(FileSerializer.Meta):
+        pass
 
     def to_representation(self, instance):
         """
@@ -121,14 +150,14 @@ class FolderFilesSerializer(serializers.ModelSerializer):
         """
         # recursive check
         if type(instance).__name__ != type(instance.content).__name__ and type(instance.content).__name__ != 'Folder':
-            # get the module, will raise KeyError if module cannot be found
+            # get the module, will raise ImportError if module cannot be found
             # get the class, will raise AttributeError if class cannot be found
             try:
                 app_label = instance.content_type.app_label
                 model_class_name = type(instance.content).__name__
-                serializer = getattr(sys.modules[app_label + '.serializers'], model_class_name + 'Serializer')()
+                serializer = getattr(import_module(app_label + '.serializers'), model_class_name + 'Serializer')(context=self.context)
                 return serializer.to_representation(instance.content)
-            except (KeyError, AttributeError):
+            except (ImportError, AttributeError):
                 pass
         ret = OrderedDict()
 
@@ -162,6 +191,7 @@ class FolderSerializer(FileSerializer):
         model = Folder
         read_only_fields = ['id', 'type', 'created', 'modified', 'files', 'owner', 'path', 'breadcrumbs']
         fields = read_only_fields + ['name', 'folder']
+        validators = [NotSelfContainedFolderValidator()]
         # Model fields which have editable=False set, and AutoField fields will be set to read-only by default,
         # and do not need to be added to the read_only_fields option.
 

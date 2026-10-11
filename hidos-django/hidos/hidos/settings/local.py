@@ -1,33 +1,41 @@
-﻿"""
+"""
 local settings
 """
-from __future__ import absolute_import, unicode_literals
+from .base import *  # noqa: F401,F403
+from .base import (
+    ALLOWED_HOSTS, CORS_ALLOWED_ORIGINS, LOG_LEVEL, REPO_ROOT, REST_FRAMEWORK, build_logging, env, path,
+    rest_authentication_classes,
+)
 
-from .base import *
+DEBUG = env.bool('DJANGO_DEBUG', default=True)
 
-DEBUG = True
+# Development only; production requires DJANGO_SECRET_KEY.
+# (.env.example leaves it empty)
+SECRET_KEY = env('DJANGO_SECRET_KEY', default='') or 'django-insecure-local-development-key-do-not-use-in-production'
 
 ALLOWED_HOSTS = ALLOWED_HOSTS + [
     '127.0.0.1',
-    'localhost'
+    'localhost',
 ]
 
-CORS_ORIGIN_ALLOW_ALL = False
-
-CORS_ORIGIN_WHITELIST = (
-    'localhost:8080',
-    '.hotdogee.com',
-    '.hidos.io',
-)
-
-INSTALLED_APPS = INSTALLED_APPS + [
-    'corsheaders',
+CORS_ALLOWED_ORIGINS = CORS_ALLOWED_ORIGINS + [
+    'http://localhost:8080',
+    'http://localhost:8082',
 ]
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+CSRF_TRUSTED_ORIGINS = ['http://localhost:8000', 'http://127.0.0.1:8000']
+
+# Browsable API with session login for development
+API_SESSION_AUTH = env.bool('API_SESSION_AUTH', default=True)
+REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] = rest_authentication_classes(API_SESSION_AUTH)
 
 # REST framework
 REST_FRAMEWORK['DEFAULT_THROTTLE_RATES'] = {
+    **REST_FRAMEWORK['DEFAULT_THROTTLE_RATES'],
     'anon': '100/h',
-    'register_view':'20/h', # rest_auth.register.views.RegisterView
+    'register_view': '20/h',  # users.views.RegisterView
 }
+
+# Keep the old ../../log/*.log files during development
+LOG_DIR = env('LOG_DIR', default=path.join(REPO_ROOT, 'log'))
+LOGGING = build_logging(LOG_LEVEL, LOG_DIR)

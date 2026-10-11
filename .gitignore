@@ -67,3 +67,10 @@ browse.VC.db
 
 # cellx/bin/results/
 **/bin/results/
+
+# local configuration and data
+.env
+backups/
+node_modules/
+.pytest_cache/
+.ruff_cache/

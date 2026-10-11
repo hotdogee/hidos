@@ -32,3 +32,11 @@ jspm_packages
 
 # Optional REPL history
 .node_repl_history
+
+# media
+media/ 
+
+# collectstatic output, unfinished chunked uploads, local virtualenvs
+/static/
+/chunked_uploads/
+.venv/

@@ -1,0 +1,96 @@
+{% extends "app/layout.html" %}
+
+{% block analytics_title %}Result{% endblock %}
+
+{% block head-styles %}
+{% if not finished %}<meta http-equiv="refresh" content="5">{% endif %}
+<style type="text/css">
+  .viewer {
+    position: relative;
+    overflow: auto;
+    max-height: 75vh;
+    background: #212121;
+    cursor: zoom-in;
+    text-align: center;
+  }
+  /* default magnification: the whole image fits in the frame (#66) */
+  .viewer.fit img {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    max-height: 75vh;
+    object-fit: contain;
+  }
+  .viewer.actual {
+    cursor: zoom-out;
+  }
+  .viewer.actual img {
+    max-width: none;
+    max-height: none;
+  }
+  .result-table td:first-child {
+    font-weight: 500;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="section">
+  <h5>{{ task.name }}</h5>
+  <p class="grey-text">{{ app_name }} {{ task.version }} &middot; {{ task.status }}{% if task.finished %} &middot; {{ task.finished }}{% endif %}</p>
+</div>
+
+{% if not finished %}
+<div class="progress"><div class="indeterminate"></div></div>
+<p>The image is being analyzed. This page refreshes automatically.</p>
+{% endif %}
+
+<div class="row">
+  <div class="col s12 m6">
+    <h6>Uploaded image</h6>
+    <div class="viewer fit z-depth-1" data-zoom="fit">
+      {% if task.uploaded_display %}<img src="{{ task.uploaded_display.url }}" alt="Uploaded image">{% endif %}
+    </div>
+    {% if task.uploaded_image %}<a href="{{ task.uploaded_image.url }}" download class="btn-flat" data-track="download_uploaded">Download</a>{% endif %}
+  </div>
+  <div class="col s12 m6">
+    <h6>Result</h6>
+    <div class="viewer fit z-depth-1" data-zoom="fit">
+      {% if finished and task.result_display %}<img src="{{ task.result_display.url }}" alt="Result image">{% endif %}
+    </div>
+    {% if finished and task.result_image %}<a href="{{ task.result_image.url }}" download class="btn-flat" data-track="download_result">Download</a>{% endif %}
+  </div>
+</div>
+
+{% if finished %}
+<table class="result-table striped">
+  <tbody>
+  {% for key, value in result_items %}
+    <tr><td>{{ key }}</td><td>{{ value }}</td></tr>
+  {% empty %}
+    <tr><td colspan="2">{% if task.status == 'success' %}No numbers{% else %}The analysis did not succeed ({{ task.status }}).{% endif %}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // click an image to switch between "fit" (default, #66) and 100%
+  document.querySelectorAll('.viewer').forEach(function (viewer) {
+    viewer.addEventListener('click', function () {
+      var actual = viewer.classList.toggle('actual');
+      viewer.classList.toggle('fit', !actual);
+      viewer.setAttribute('data-zoom', actual ? 'actual' : 'fit');
+      if (window.gtag) { gtag('event', actual ? 'zoom_actual' : 'zoom_fit'); }
+    });
+  });
+  // detailed action tracking (#14) when Google Analytics is configured
+  document.querySelectorAll('[data-track]').forEach(function (el) {
+    el.addEventListener('click', function () {
+      if (window.gtag) { gtag('event', el.getAttribute('data-track'), {app: '{{ task.type|escapejs }}'}); }
+    });
+  });
+</script>
+{% endblock %}

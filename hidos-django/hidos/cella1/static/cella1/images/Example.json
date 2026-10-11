@@ -1,0 +1,21 @@
+{
+  "#Branch": 27,
+  "#Extremity": 27,
+  "#Junction": 110,
+  "#Mesh": 79,
+  "#Segment": 138,
+  "Connectivity": 303,
+  "Mean branch length": 58.867,
+  "Mean mesh area": 8888.478,
+  "Mean mesh perimeter": 339.316,
+  "Mean segment length": 67.133,
+  "Std. branch Length": 27.033,
+  "Std. mesh area": 10115.852,
+  "Std. mesh perimeter": 193.215,
+  "Std. segment length": 59.061,
+  "Tot. branch length": 1589,
+  "Tot. mesh area": 702189,
+  "Tot. mesh perimeter": 26805,
+  "Tot. network length": 10853,
+  "Tot. segment length": 9264
+}

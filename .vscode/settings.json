@@ -2,7 +2,7 @@
 {
     // When opening a file, `editor.tabSize` and `editor.insertSpaces` will be detected based on the file contents.
     "editor.detectIndentation": true,
-    
+
     // Configure glob patterns for excluding files and folders.
     "files.exclude": {
         "**/*.pyc": true,
@@ -16,12 +16,9 @@
 
 // Python Configuration
 
-    // Path to Python, you can use a custom version of Python by modifying this setting to include the full path.
-    "python.pythonPath": "${workspaceRoot}/hidos-django/hidos/env/Scripts/python",
+    // The virtualenv created by hidos-django/init_venv.cmd (use env/bin/python on Linux and macOS)
+    "python.defaultInterpreterPath": "${workspaceFolder}/hidos-django/hidos/env/Scripts/python",
 
-    // Arguments passed in. Each argument is a separate item in the array.
-    "python.formatting.autopep8Args": ["--max-line-length", "180"],
-
-    // Arguments passed in. Each argument is a separate item in the array.
-    "python.linting.pylintArgs": ["--load-plugins", "pylint_django"]
+    "python.testing.pytestEnabled": true,
+    "python.testing.cwd": "${workspaceFolder}/hidos-django/hidos"
 }

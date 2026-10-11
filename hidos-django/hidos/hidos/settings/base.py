@@ -1,57 +1,64 @@
-﻿"""
-base settings
 """
-from __future__ import absolute_import, unicode_literals
-from os import path
+base settings
+
+Every deployment-specific value is read from the environment (or from an
+optional ``.env`` file next to ``manage.py``); see ``.env.example`` and the
+README for the full list.
+"""
+from datetime import timedelta
+from os import makedirs, path
+from sys import platform
+
+import environ
+from kombu import Exchange, Queue
+
 PROJECT_ROOT = path.dirname(path.dirname(path.dirname(path.abspath(__file__))))
+REPO_ROOT = path.dirname(path.dirname(PROJECT_ROOT))
 
-DEBUG = False
+env = environ.Env()
+if path.isfile(path.join(PROJECT_ROOT, '.env')):
+    environ.Env.read_env(path.join(PROJECT_ROOT, '.env'))
 
-ALLOWED_HOSTS = [
-    '.hidos.io',
-]
+DEBUG = env.bool('DJANGO_DEBUG', default=False)
 
-ADMINS = (
-    # ('Your Name', 'your_email@example.com'),
-)
+ALLOWED_HOSTS = env.list('DJANGO_ALLOWED_HOSTS', default=['.hidos.io'])
+
+ADMINS = [tuple(a.split(':', 1)) for a in env.list('DJANGO_ADMINS', default=[])]  # "Name:email,..."
 
 MANAGERS = ADMINS
 
 APPEND_SLASH = False
 
 LOGIN_URL = '/login'
+LOGIN_REDIRECT_URL = env('LOGIN_REDIRECT_URL', default='/')
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = 'n(bd1f1c%e8=_xad02x53tfn%wgwpi492e$8_erx+d)!tpeoim'
+# Required in production; local and test settings provide an insecure fallback.
+SECRET_KEY = env('DJANGO_SECRET_KEY', default='')
 
 # Database
-# https://docs.djangoproject.com/en/1.9/ref/settings/#databases
+# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+# e.g. DATABASE_URL=postgres://django:password@localhost:5432/django
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'django',
-        'USER': 'django',
-        'PASSWORD': '',
-        'HOST': 'localhost',
-        'PORT': '',
-    }
+    'default': env.db('DATABASE_URL', default='postgres://django@localhost:5432/django'),
 }
 
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
 # Password hashers
+# bcrypt_sha256 stays the default so existing password hashes keep working.
 
 PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
     'django.contrib.auth.hashers.BCryptPasswordHasher',
     'django.contrib.auth.hashers.PBKDF2PasswordHasher',
     'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
-    'django.contrib.auth.hashers.SHA1PasswordHasher',
-    'django.contrib.auth.hashers.MD5PasswordHasher',
-    'django.contrib.auth.hashers.CryptPasswordHasher',
+    'django.contrib.auth.hashers.ScryptPasswordHasher',
 ]
 
 # Password validation
-# https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
+# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -71,59 +78,51 @@ AUTH_PASSWORD_VALIDATORS = [
 AUTH_USER_MODEL = 'users.User'
 
 # Internationalization
-# https://docs.djangoproject.com/en/1.9/topics/i18n/
+# https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-# Language code for this installation. All choices can be found here:
-# http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'en-us'
+
+# Languages a user can pick in their profile (users.User.language)
+LANGUAGES = [
+    ('en', 'English'),
+    ('zh-hant', 'Traditional Chinese'),
+]
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
-# although not all choices may be available on all operating systems.
-# On Unix systems, a value of None will cause Django to use the same
-# timezone as the operating system.
-# If running in a Windows environment this must be set to the same as your
-# system time zone.
-TIME_ZONE = 'Asia/Taipei'
+TIME_ZONE = env('TIME_ZONE', default='Asia/Taipei')
 
-# If you set this to False, Django will make some optimizations so as not
-# to load the internationalization machinery.
 USE_I18N = True
 
-# If you set this to False, Django will not format dates, numbers and
-# calendars according to the current locale.
-USE_L10N = True
-
-# If you set this to False, Django will not use timezone-aware datetimes.
 USE_TZ = True
 
 # File Permissions
-FILE_UPLOAD_PERMISSION = 0o666
-FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o666
+# Shared by the web and worker processes, which may run as different users
+# in the same group.
+FILE_UPLOAD_PERMISSIONS = 0o664
+FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o775
+
+# Largest single request body (uploads larger than this should use the
+# chunked upload API, see fs.uploads)
+DATA_UPLOAD_MAX_MEMORY_SIZE = env.int('DATA_UPLOAD_MAX_MEMORY_SIZE', default=10 * 1024 * 1024)
 
 # Media files
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
-# Example: "/home/media/media.lawrence.com/media/"
-MEDIA_ROOT = path.join(PROJECT_ROOT, 'media').replace('\\','/')
+MEDIA_ROOT = env('MEDIA_ROOT', default=path.join(PROJECT_ROOT, 'media')).replace('\\', '/')
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
-# Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
-MEDIA_URL = '/media/'
+MEDIA_URL = env('MEDIA_URL', default='/media/')
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.9/howto/static-files/
+# https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 # Absolute path to the directory static files should be collected to.
-# Don't put anything in this directory yourself; store your static files
-# in apps' "static/" subdirectories and in STATICFILES_DIRS.
-# Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = path.join(PROJECT_ROOT, 'static').replace('\\', '/')
+STATIC_ROOT = env('STATIC_ROOT', default=path.join(PROJECT_ROOT, 'static')).replace('\\', '/')
 
 # URL prefix for static files.
-# Example: "http://media.lawrence.com/static/"
-STATIC_URL = '/static/'
+STATIC_URL = env('STATIC_URL', default='/static/')
 
 # Additional locations of static files
 STATICFILES_DIRS = (
@@ -137,16 +136,17 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 # Application definition
 
 SITE_ID = 1
+# Written to the django_site row by app/migrations/0001_site_domain.py, i.e. by
+# the first migrate only; change the site in the admin afterwards.
+SITE_DOMAIN = env('SITE_DOMAIN', default='hidos.io')
+SITE_NAME = env('SITE_NAME', default='HiDOS')
 
 INSTALLED_APPS = [
-    'material',
-    'material.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -154,14 +154,16 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_extensions',
+    'corsheaders',
+    'django_filters',
     'users.apps.Config',
-    'crispy_forms',
     'rest_framework',
     'rest_framework.authtoken',
-    'rest_auth',
+    'rest_framework_simplejwt',
+    'dj_rest_auth',
     'allauth',
     'allauth.account',
-    'rest_auth.registration',
+    'dj_rest_auth.registration',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.facebook',
     'allauth.socialaccount.providers.google',
@@ -174,22 +176,22 @@ INSTALLED_APPS = [
     'cellm1.apps.Config',
     'cellm3.apps.Config',
     'celln1.apps.Config',
-    # Uncomment the next line to enable the admin:
     'django.contrib.admin',
-    # Uncomment the next line to enable admin documentation:
     'django.contrib.admindocs',
 ]
 
-MIDDLEWARE_CLASSES = [
+MIDDLEWARE = [
+    'app.middleware.HealthCheckMiddleware',  # before host validation and HTTPS redirects
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'hidos.urls'
@@ -198,13 +200,11 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            path.join(PROJECT_ROOT, 'templates').replace('\\','/')
+            path.join(PROJECT_ROOT, 'templates').replace('\\', '/')
         ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
-                # Insert your TEMPLATE_CONTEXT_PROCESSORS here or use this
-                # list if you haven't customized them:
                 'django.contrib.auth.context_processors.auth',
                 'django.template.context_processors.debug',
                 'django.template.context_processors.i18n',
@@ -214,6 +214,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 # `allauth` needs this from django
                 'django.template.context_processors.request',
+                'app.context_processors.site_settings',
             ],
         },
     },
@@ -224,83 +225,93 @@ WSGI_APPLICATION = 'hidos.wsgi.application'
 
 
 AUTHENTICATION_BACKENDS = (
-    # Needed to login by username in Django admin, regardless of `allauth`
+    # Needed to login by email in Django admin, regardless of `allauth`
     'django.contrib.auth.backends.ModelBackend',
     # `allauth` specific authentication methods, such as login by e-mail
     'allauth.account.auth_backends.AuthenticationBackend',
 )
 
-# A sample logging configuration. The only tangible logging
-# performed by this configuration is to send an email to
-# the site admins on every HTTP 500 error when DEBUG=False.
-# See http://docs.djangoproject.com/en/dev/topics/logging for
-# more details on how to customize your logging configuration.
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'file': {
-            'format': '%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s',
+# CORS (the Cell Cloud single page app is served from a different origin)
+CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=[])
+CORS_ALLOWED_ORIGIN_REGEXES = env.list('CORS_ALLOWED_ORIGIN_REGEXES', default=[
+    r'^https://([\w-]+\.)*hidos\.io$',
+])
+CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=['https://*.hidos.io'])
+
+# Logging (#12)
+# Everything goes to the console so `docker compose logs` and systemd see it.
+# Set LOG_DIR to also keep rotating log files (django.log, celery.log).
+LOG_LEVEL = env('LOG_LEVEL', default='INFO')
+LOG_DIR = env('LOG_DIR', default='')
+
+
+def build_logging(log_level, log_dir=''):
+    logging = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'formatters': {
+            'file': {
+                'format': '%(asctime)s	%(name)s	%(levelname)s	%(message)s',
+            },
+            'console': {
+                'format': '%(asctime)s %(levelname)s %(name)s: %(message)s',
+            },
         },
-    },
-    'filters': {
-        'require_debug_false': {
-            '()': 'django.utils.log.RequireDebugFalse'
+        'filters': {
+            'require_debug_false': {
+                '()': 'django.utils.log.RequireDebugFalse'
+            },
         },
-        'require_debug_true': {
-            '()': 'django.utils.log.RequireDebugTrue',
+        'handlers': {
+            'console': {
+                'level': 'DEBUG',
+                'class': 'logging.StreamHandler',
+                'formatter': 'console',
+            },
+            'mail_admins': {
+                'level': 'ERROR',
+                'filters': ['require_debug_false'],
+                'class': 'django.utils.log.AdminEmailHandler'
+            },
         },
-    },
-    'handlers': {
-        'console': {
-            'level': 'INFO',
-            'filters': ['require_debug_true'],
-            'class': 'logging.StreamHandler',
-        },
-        'mail_admins': {
-            'level': 'ERROR',
-            'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler'
-        },
-        'django_log': {
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': '../../log/django.log',
-            'maxBytes': 1024 * 1024 * 100,  # 100 mb
-            'formatter': 'file',
-        },
-        'celery_log': {
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': '../../log/celery.log',
-            'maxBytes': 1024 * 1024 * 100,  # 100 mb
-            'formatter': 'file',
-        }
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['console', 'django_log', 'mail_admins'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        'py.warnings': {
+        'root': {
             'handlers': ['console'],
+            'level': 'WARNING',
         },
-        'app': {
-            'handlers': ['django_log'],
-            'level': 'INFO',
-        },
-        'celery.task': {
-            'handlers': ['celery_log'],
-            'level': 'INFO',
-            'propagate': True,
+        'loggers': {
+            'django': {
+                'handlers': ['console', 'mail_admins'],
+                'level': log_level,
+                'propagate': False,
+            },
         },
     }
-}
+    web_loggers = ['hidos', 'app', 'fs', 'users']
+    worker_loggers = ['celery', 'cell', 'cella1', 'cellc1', 'cellc2', 'cellm1', 'cellm3', 'celln1']
+    for name in web_loggers + worker_loggers:
+        logging['loggers'][name] = {'handlers': ['console'], 'level': log_level, 'propagate': False}
+    if log_dir:
+        makedirs(log_dir, exist_ok=True)
+        for name, loggers in (('django', ['django'] + web_loggers), ('celery', worker_loggers)):
+            logging['handlers'][name + '_log'] = {
+                'class': 'logging.handlers.RotatingFileHandler',
+                'filename': path.join(log_dir, name + '.log'),
+                'maxBytes': 1024 * 1024 * 100,  # 100 mb
+                'backupCount': 5,
+                'formatter': 'file',
+            }
+            for logger in loggers:
+                logging['loggers'][logger]['handlers'].append(name + '_log')
+    return logging
+
+
+LOGGING = build_logging(LOG_LEVEL, LOG_DIR)
 
 # Specify the default test runner.
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
-# Rscript path
-from sys import platform
+# Rscript path (only used by the legacy R versions of the algorithms, kept in
+# cellc2/bin/*.R and cellm1/bin/*.R; the current pipeline is pure Python)
 R_SCRIPT = r"/usr/bin/Rscript"
 FONT = 'DejaVuSerif-Italic.ttf'
 
@@ -309,74 +320,146 @@ if platform == 'win32':
 if platform == 'darwin':
     R_SCRIPT = r'/usr/local/bin/Rscript'
     FONT = '/Library/Fonts/Times New Roman.ttf'
+R_SCRIPT = env('R_SCRIPT', default=R_SCRIPT)
+FONT = env('FONT', default=FONT)
 
 
 USE_CACHE = False
 
-# Celery Settings
-from kombu import Exchange, Queue
-CELERY_DEFAULT_QUEUE = 'cell'
-CELERY_DEFAULT_EXCHANGE = 'hidos'
-CELERY_DEFAULT_EXCHANGE_TYPE = 'direct'
-CELERY_DEFAULT_ROUTING_KEY = 'cell'
-CELERY_QUEUES = (
+# Celery Settings (all read with the CELERY_ prefix, see hidos/celery.py)
+CELERY_BROKER_URL = env('CELERY_BROKER_URL', default='amqp://guest:guest@localhost:5672//')
+# Task state is stored on the Task rows, so a result backend is optional.
+CELERY_RESULT_BACKEND = env('CELERY_RESULT_BACKEND', default=None)
+CELERY_TASK_IGNORE_RESULT = CELERY_RESULT_BACKEND is None
+CELERY_TASK_DEFAULT_QUEUE = 'cell'
+CELERY_TASK_DEFAULT_EXCHANGE = 'hidos'
+CELERY_TASK_DEFAULT_EXCHANGE_TYPE = 'direct'
+CELERY_TASK_DEFAULT_ROUTING_KEY = 'cell'
+CELERY_TASK_QUEUES = (
     Queue('cell', Exchange('hidos'), routing_key='cell'),
 )
-CELERY_ROUTES = {
-    'cellc2.tasks.process_image': {
+CELERY_TASK_ROUTES = {
+    '*.tasks.analysis': {
         'queue': 'cell',
         'routing_key': 'cell',
     },
 }
-BROKER_URL = 'amqp://'
-CELERY_RESULT_BACKEND = 'amqp://'
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
-CELERY_ACCEPT_CONTENT=['json']
+CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TIMEZONE = TIME_ZONE
-CELERY_DISABLE_RATE_LIMITS = True
-#CELERY_ENABLE_UTC = True
+CELERY_WORKER_DISABLE_RATE_LIMITS = True
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+# RabbitMQ 4 refuses transient non-exclusive queues, which Celery's remote
+# control (inspect/ping) and event queues are by default; the worker then
+# reconnects in a loop.
+CELERY_CONTROL_QUEUE_EXCLUSIVE = True
+CELERY_EVENT_QUEUE_EXCLUSIVE = True
+# Run tasks in-process (tests, or a quick demo without a broker)
+CELERY_TASK_ALWAYS_EAGER = env.bool('CELERY_TASK_ALWAYS_EAGER', default=False)
+CELERY_TASK_EAGER_PROPAGATES = False
+
+# Error reports from failed analysis tasks (#63); leave empty to disable.
+SLACK_WEBHOOK_URL = env('SLACK_WEBHOOK_URL', default='')
+SLACK_CHANNEL = env('SLACK_CHANNEL', default='#image-bug')
+
+# Google Analytics (#13); off unless a measurement ID is configured.
+GOOGLE_ANALYTICS_ID = env('GOOGLE_ANALYTICS_ID', default='')
+
+# Largest accepted image for an analysis task
+TASK_UPLOAD_MAX_BYTES = env.int('TASK_UPLOAD_MAX_BYTES', default=200 * 1024 * 1024)
+
+# Largest accepted profile image (#74)
+PROFILE_IMAGE_MAX_BYTES = env.int('PROFILE_IMAGE_MAX_BYTES', default=2 * 1024 * 1024)
+
+# Thumbnails generated for every uploaded image (#38), longest side in pixels
+THUMBNAIL_SIZE = env.int('THUMBNAIL_SIZE', default=256)
+
+# Chunked resumable uploads (#56); partial files are kept outside MEDIA_ROOT
+CHUNKED_UPLOAD_ROOT = env('CHUNKED_UPLOAD_ROOT', default=path.join(PROJECT_ROOT, 'chunked_uploads'))
+CHUNKED_UPLOAD_MAX_BYTES = env.int('CHUNKED_UPLOAD_MAX_BYTES', default=200 * 1024 * 1024)
+CHUNKED_UPLOAD_MAX_OPEN = env.int('CHUNKED_UPLOAD_MAX_OPEN', default=20)  # unfinished uploads per user
+CHUNKED_UPLOAD_EXPIRATION = timedelta(hours=env.int('CHUNKED_UPLOAD_EXPIRATION_HOURS', default=24))
 
 # REST framework
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+# The fs and cell APIs are protected by tokens (#96): JWT from the login API,
+# or DRF tokens created in the admin. Session authentication is only enabled
+# when API_SESSION_AUTH is true (default in local settings) so the browsable
+# API keeps working for developers.
+API_SESSION_AUTH = env.bool('API_SESSION_AUTH', default=False)
+
+
+def rest_authentication_classes(session_auth):
+    classes = [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.TokenAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
+    ]
+    if session_auth:
+        classes.append('rest_framework.authentication.SessionAuthentication')
+    return tuple(classes)
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': rest_authentication_classes(API_SESSION_AUTH),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
     ),
     'DEFAULT_THROTTLE_CLASSES': (
         'rest_framework.throttling.AnonRateThrottle',
         'rest_framework.throttling.ScopedRateThrottle',
     ),
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '10/h',
-        'register_view':'2/h', # rest_auth.register.views.RegisterView
+        'anon': env('THROTTLE_ANON', default='10/h'),
+        'register_view': env('THROTTLE_REGISTER', default='2/h'),  # users.views.RegisterView
+        'dj_rest_auth': env('THROTTLE_AUTH', default='60/h'),  # login, password reset, ...
+        'task_submit': env('THROTTLE_TASK_SUBMIT', default='600/h'),  # new analysis tasks (#26)
+        'upload_chunk': env('THROTTLE_UPLOAD_CHUNK', default='6000/h'),  # chunked uploads (#56)
     },
-    'DEFAULT_FILTER_BACKENDS': ('rest_framework.filters.DjangoFilterBackend',)
+    'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',),
+    'DEFAULT_PAGINATION_CLASS': None,
+    # Number of reverse proxies in front of Django (nginx in docker compose: 1).
+    # Throttling then uses the address the proxy saw instead of trusting a
+    # client supplied X-Forwarded-For header.
+    'NUM_PROXIES': env.int('NUM_PROXIES', default=None),
 }
 
-# Email
-EMAIL_HOST = "smtp.gmail.com"
-EMAIL_PORT = 587
-EMAIL_HOST_PASSWORD = 53394221
-EMAIL_HOST_USER = "hidos.image@gmail.com"
-EMAIL_USE_TLS = True
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# Cache, also where the rate limit counters are kept. The default per
+# process memory cache gives every gunicorn worker its own counters; docker
+# compose uses the database (CACHE_URL=dbcache://hidos_cache).
+CACHES = {'default': env.cache_url('CACHE_URL', default='locmemcache://')}
+
+# Email (EMAIL_URL, e.g. smtp+tls://user:password@smtp.example.com:587)
+vars().update(env.email_url('EMAIL_URL', default='consolemail://'))
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='HiDOS Cell Cloud <noreply@hidos.io>')
+SERVER_EMAIL = env('SERVER_EMAIL', default=DEFAULT_FROM_EMAIL)
 
 # allauth
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+ACCOUNT_LOGIN_METHODS = {'email'}
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_EMAIL_VERIFICATION = env('ACCOUNT_EMAIL_VERIFICATION', default='mandatory')
+# Addresses added to an account are only confirmed while logged in as it (#67)
+ACCOUNT_ADAPTER = 'users.adapter.AccountAdapter'
+# An address added to an account or used for a password reset belongs to the
+# account whose own or confirmed address it is (#67)
+ACCOUNT_FORMS = {
+    'add_email': 'users.forms.AddEmailForm',
+    'reset_password': 'users.forms.ResetPasswordForm',
+}
 SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
+# Social and local accounts are merged by email address (#67). Only emails the
+# provider reports as verified are matched, and only with local accounts that
+# confirmed the same address (users.adapter, compared with users.emails).
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
+SOCIALACCOUNT_ADAPTER = 'users.adapter.SocialAccountAdapter'
 
 SOCIALACCOUNT_PROVIDERS = {
     'facebook': {
         'METHOD': 'oauth2',
         'SCOPE': ['email', 'public_profile'],
-        'AUTH_PARAMS': { 'auth_type': 'reauthenticate' },
+        'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
         'FIELDS': [
             'id',
             'email',
@@ -390,23 +473,43 @@ SOCIALACCOUNT_PROVIDERS = {
             'gender',
             'updated_time'],
         'EXCHANGE_TOKEN': True,
+        # Facebook does not guarantee that the email is verified, so a
+        # Facebook login is never merged into an existing local account.
         'VERIFIED_EMAIL': False,
-        'VERSION': 'v2.4'
     },
     'google': {
         'SCOPE': ['profile', 'email'],
-        'AUTH_PARAMS': { 'access_type': 'online' }
+        'AUTH_PARAMS': {'access_type': 'online'}
     }
 }
+# OAuth client credentials can be configured in the admin (Social applications)
+# or with these environment variables.
+for _provider in ('facebook', 'google'):
+    _client_id = env('%s_CLIENT_ID' % _provider.upper(), default='')
+    if _client_id:
+        SOCIALACCOUNT_PROVIDERS[_provider]['APPS'] = [{
+            'client_id': _client_id,
+            'secret': env('%s_CLIENT_SECRET' % _provider.upper(), default=''),
+        }]
 
-# restauth
-REST_USE_JWT = True
-
-REST_AUTH_SERIALIZERS = {
+# dj-rest-auth
+REST_AUTH = {
+    'USE_JWT': True,
+    'JWT_AUTH_HTTPONLY': False,  # return the refresh token in the response body
+    'SESSION_LOGIN': False,
     'LOGIN_SERIALIZER': 'users.serializers.LoginSerializer',
     'USER_DETAILS_SERIALIZER': 'users.serializers.UserDetailsSerializer',
+    'JWT_SERIALIZER': 'users.serializers.JWTSerializer',
+    'JWT_TOKEN_CLAIMS_SERIALIZER': 'users.serializers.TokenClaimsSerializer',
+    'REGISTER_SERIALIZER': 'users.serializers.RegisterSerializer',
+    'PASSWORD_RESET_SERIALIZER': 'users.serializers.PasswordResetSerializer',
 }
 
-REST_AUTH_REGISTER_SERIALIZERS = {
-    'REGISTER_SERIALIZER': 'users.serializers.RegisterSerializer',
+# djangorestframework-simplejwt (replaces djangorestframework-jwt)
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=env.int('JWT_ACCESS_DAYS', default=7)),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=env.int('JWT_REFRESH_DAYS', default=365)),
+    # "JWT <token>" is what the djangorestframework-jwt era clients send
+    'AUTH_HEADER_TYPES': ('JWT', 'Bearer'),
+    'LEEWAY': 30,
 }

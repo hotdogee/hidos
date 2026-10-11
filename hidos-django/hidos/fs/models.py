@@ -1,18 +1,14 @@
-from __future__ import absolute_import, unicode_literals
-import re
+import os
 import sys
 import uuid
-from os import path
 
 from django.db import models
 from django.conf import settings
-from django.core.validators import RegexValidator
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 
 from django_extensions.db.models import TimeStampedModel
 
-from . import app_name, verbose_name, version
 
 # class TimeStampedModel(models.Model):
 #     """ TimeStampedModel
@@ -40,7 +36,7 @@ class FileType(models.Model):
 
 class FileManager(models.Manager):
 
-    def create(self, name, owner, folder, **kwargs): # QuerySet
+    def create(self, name, owner, folder=None, **kwargs): # QuerySet
         """
         Create a new folder given the name and parent folder
         and returns the file_model
@@ -73,16 +69,25 @@ class File(TimeStampedModel):
 
     objects = FileManager()
 
-    def __unicode__(self):
+    def __str__(self):
         return '{0} ({1})'.format(self.name, self.id.hex[:6])
 
+    def ancestor_ids(self):
+        """ids of the parent folder, grandparent folder, ... up to Home"""
+        ids = []
+        folder = self.folder
+        while folder is not None and folder.id not in ids:
+            ids.append(folder.id)
+            folder = folder.folder
+        return ids
+
     class Meta(TimeStampedModel.Meta):
-        pass
+        ordering = ('-modified', '-created',)
 
 
 class FolderManager(models.Manager):
 
-    def create(self, name, owner, folder, **kwargs): # QuerySet
+    def create(self, name, owner, folder=None, **kwargs): # QuerySet
         """
         Create a new folder given the name and parent folder
         """
@@ -109,10 +114,12 @@ class Folder(File):
 
     objects = FolderManager()
 
+    home_name = 'Home'
+
     @property
     def path(self): # will probably need some caching
         if not self.folder:
-            return self.name
+            return self.home_name + '/' + self.name
         else:
             return self.folder.path + '/' + self.name
 
@@ -123,13 +130,14 @@ class Folder(File):
         if not folder_list:
             folder_list = []
         if not self.folder:
-            return folder_list
+            return [[self.home_name, self.home_name]] + folder_list
         else:
             folder_list.append([self.folder.id.hex, self.folder.name])
             return self.folder.breadcrumbs(folder_list)
 
     class Meta(File.Meta):
-        pass
+        # File.Meta resolves to TimeStampedModel.Meta here, so repeat the ordering
+        ordering = ('-modified', '-created',)
 
     # built in
     # def to_python(self, value): # CharField
@@ -140,3 +148,42 @@ class Folder(File):
     #     if self.strip:
     #         value = value.strip()
     #     return value
+
+
+class ChunkedUpload(models.Model):
+    """
+    A file uploaded in chunks so large uploads can be resumed (#56).
+    The data is kept in CHUNKED_UPLOAD_ROOT (outside MEDIA_ROOT, which is
+    served publicly) until a task is created from the finished upload.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, models.CASCADE, related_name='chunked_uploads')
+    filename = models.CharField(max_length=255)
+    size = models.BigIntegerField()  # total number of bytes
+    offset = models.BigIntegerField(default=0)  # number of bytes received
+    created = models.DateTimeField(auto_now_add=True)
+    completed = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ('-created',)
+
+    def __str__(self):
+        return '{0} ({1}/{2})'.format(self.filename, self.offset, self.size)
+
+    @property
+    def path(self):
+        return os.path.join(settings.CHUNKED_UPLOAD_ROOT, self.id.hex + '.part')
+
+    @property
+    def status(self):
+        return 'complete' if self.completed else 'uploading'
+
+    @property
+    def expires(self):
+        return self.created + settings.CHUNKED_UPLOAD_EXPIRATION
+
+    def delete_file(self):
+        try:
+            os.remove(self.path)
+        except FileNotFoundError:
+            pass

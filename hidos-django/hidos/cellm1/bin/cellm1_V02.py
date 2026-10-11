@@ -3,7 +3,7 @@ from PIL import Image
 import numpy as np
 import mahotas as mh
 from skimage import io, morphology, data, color, img_as_ubyte
-from skimage.transform import resize
+from cell.skimage_compat import resize
 from skimage.util import img_as_ubyte
 from skimage.morphology import erosion, dilation, disk
 from PIL import ImageFont, ImageDraw
@@ -33,7 +33,7 @@ def cellm1(task_record):
 
     p1_norm2 = ((I / float(255)))
 
-    map_std = np.zeros((scale_x_size, scale_y_size), dtype=np.float)
+    map_std = np.zeros((scale_x_size, scale_y_size), dtype=float)
 
     for x_inx in range(0, scale_x_size):
         for y_inx in range(0, scale_y_size):
@@ -60,13 +60,18 @@ def cellm1(task_record):
     img_masked_rs = resize(img_masked, (ori_img_int8.shape[0], ori_img_int8.shape[
                            1]), preserve_range=True).astype(np.uint8)
 
-    img = Image.fromarray(img_as_ubyte(img_masked_rs)).convert('RGB')
-    font = ImageFont.truetype(settings.FONT, ori_img_int8.shape[0] / 20)
-    draw = ImageDraw.Draw(img)
-    draw.text((100, 80), ratio_str + '%', (255, 255, 0), font=font)
 
-    #img.save(output_image_path, "JPEG", quality=80)
-    cv2.imwrite(task_record.result_image.path, img)
-    cv2.imwrite(task_record.result_display.path, img)
+    ## remove draw on image (weian)
+    # img = Image.fromarray(img_as_ubyte(img_masked_rs)).convert('RGB')
+    # font = ImageFont.truetype(settings.FONT, ori_img_int8.shape[0] / 20)
+    # draw = ImageDraw.Draw(img)
+    # draw.text((100, 80), ratio_str + '%', (255, 255, 0), font=font)
+    #
+    # #img.save(output_image_path, "JPEG", quality=80)
+    # cv2.imwrite(task_record.result_image.path, img)
+    # cv2.imwrite(task_record.result_display.path, img)
+
+    cv2.imwrite(task_record.result_image.path, img_masked_rs)
+    cv2.imwrite(task_record.result_display.path, img_masked_rs)
 
     return {'ratio': ratio}

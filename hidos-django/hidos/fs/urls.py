@@ -1,9 +1,7 @@
-﻿from __future__ import absolute_import, unicode_literals
-
-from django.conf.urls import url
+﻿from django.urls import re_path as url
 
 from . import api
-from . import views
+from . import uploads
 from . import app_name # application namespace
 
 # url(r'^api/v1/fs/', include('fs.urls', namespace='fs')),
@@ -26,9 +24,22 @@ urlpatterns = [
         'get': 'list',
         'post': 'create'
     }), name='file-list'),
-    url(r'^root$', api.FileViewSet.as_view({
-        'get': 'root',
-    }), name='file-root'),
+    url(r'^home$', api.FileViewSet.as_view({
+        'get': 'home',
+    }), name='file-home'),
+    url(r'^download$', api.FileViewSet.as_view({
+        'get': 'download',
+        'post': 'download',
+    }), name='file-download'),
+    # chunked resumable uploads (#56)
+    url(r'^uploads$', uploads.ChunkedUploadViewSet.as_view({
+        'post': 'create',
+    }), name='upload-list'),
+    url(r'^uploads/(?P<pk>[0-9a-fA-F-]+)$', uploads.ChunkedUploadViewSet.as_view({
+        'get': 'retrieve',
+        'put': 'append',
+        'delete': 'destroy',
+    }), name='upload-detail'),
     # {% url "fs:files" file.id %}
     url(r'^(?P<pk>[0-9a-zA-Z]+)$', api.FileViewSet.as_view({
         'get': 'retrieve',
