@@ -30,8 +30,9 @@ FACEBOOK_CLIENT_SECRET=...
 
 or add them in the admin under *Social accounts → Social applications*. Pick
 the provider, fill in the client id and secret, and add the site. The site is
-`settings.SITE_ID` (1), whose domain is `SITE_DOMAIN` since the #78 data
-migration. Don't do both for the same provider.
+`settings.SITE_ID` (1). The #78 data migration sets its domain to
+`SITE_DOMAIN` when the database is first migrated; change it later in the
+admin under *Sites*. Don't do both for the same provider.
 
 ## 3. Use it
 
@@ -49,10 +50,22 @@ Provider settings (scopes, Facebook API version, ...) are in
 
 ## Accounts are merged by email (#67)
 
-If someone signs in with Google and an account with the same email already
-exists, the Google login is connected to that account instead of failing or
-creating a second user. This only happens when the provider says the email is
-verified. Google does; Facebook doesn't guarantee it (`VERIFIED_EMAIL: False`),
-so Facebook logins are never merged. If the existing local account's email was
-never confirmed, allauth also removes its password, so whoever registered it
-can't keep access to the account.
+If someone signs in with Google and an account that has confirmed the same
+email already exists, the Google login is connected to that account instead of
+failing or creating a second user. Both sides must have verified the address:
+
+* The provider must say the email is verified. Google does; Facebook doesn't
+  guarantee it (`VERIFIED_EMAIL: False`), so Facebook logins are never merged.
+  A Facebook login whose email already belongs to an account still fails with
+  "User is already registered with this e-mail address".
+* The local account must have confirmed the address (`users/adapter.py`).
+  allauth on its own also merges into accounts that only hold the address
+  unconfirmed, e.g. a signup or a Facebook login with someone else's email,
+  or a second address added under `/accounts/email/`. Whoever created such
+  an account would keep access through their other logins, and the person
+  signing in with Google would end up in their account. Such a Google login
+  fails like before #67 if the unconfirmed address is the account's main
+  email, and otherwise creates a separate account.
+
+The `/login` page, like the login API, refuses accounts whose email hasn't
+been confirmed.

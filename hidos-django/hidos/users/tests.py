@@ -183,13 +183,57 @@ def test_social_login_creates_account_for_new_email(api_client, google_app):
                                       'password2': PASSWORD}, format='json').status_code == 400
 
 
-def test_social_login_into_unverified_local_account_locks_out_the_password(api_client, google_app):
-    """Someone who signed up with another person's (unverified) email must not keep access."""
+@pytest.fixture
+def facebook_app():
+    app = SocialApp.objects.create(provider='facebook', name='Facebook', client_id='fb-id', secret='secret')
+    app.sites.add(Site.objects.get_current())
+    return app
+
+
+def facebook_login(api_client, email, uid='fb-uid-1'):
+    from allauth.socialaccount.providers.facebook.views import FacebookOAuth2Adapter
+
+    def complete_login(self, request, app, token, **kwargs):
+        return self.get_provider().sociallogin_from_response(request, {
+            'id': uid, 'email': email, 'name': 'Facebook User', 'first_name': 'Facebook', 'last_name': 'User'})
+
+    with mock.patch.object(FacebookOAuth2Adapter, 'complete_login', complete_login):
+        return api_client.post('/api/v1/auth/facebook/', {'access_token': 'fake-fb-token'}, format='json')
+
+
+def test_social_login_is_not_merged_into_unverified_local_account(api_client, google_app):
+    """Someone who signed up with another person's (unconfirmed) email must not get their Google login."""
     squatter = make_user('dave@example.com', verified=False)
+    # e.g. connected under /accounts/3rdparty/ before the owner of the address shows up
+    SocialAccount.objects.create(user=squatter, provider='facebook', uid='fb-squatter')
     response = google_login(api_client, 'dave@example.com', uid='google-uid-3')
+    assert response.status_code == 400
+    assert 'access' not in response.json()
+    assert not SocialAccount.objects.filter(provider='google').exists()
+
+
+def test_google_login_is_not_merged_into_facebook_account_with_the_same_email(api_client, google_app, facebook_app):
+    """Facebook emails are unverified: a Facebook signup can't capture the address's later Google logins."""
+    response = facebook_login(api_client, 'victim@example.com', uid='fb-attacker')
     assert response.status_code == 200, response.content
-    squatter.refresh_from_db()
-    assert not squatter.has_usable_password()
+    attacker = User.objects.get(email='victim@example.com')
+    response = google_login(api_client, 'victim@example.com', uid='google-victim')
+    assert response.status_code == 400
+    assert not SocialAccount.objects.filter(provider='google').exists()
+    assert set(SocialAccount.objects.filter(user=attacker).values_list('provider', flat=True)) == {'facebook'}
+
+
+def test_google_login_is_not_merged_into_account_with_the_email_as_unconfirmed_second_address(
+        client, api_client, google_app):
+    attacker = make_user('mallory@example.com')
+    client.force_login(attacker)
+    response = client.post('/accounts/email/', {'action_add': '', 'email': 'victim@example.com'})
+    assert response.status_code in (200, 302)
+    assert EmailAddress.objects.filter(user=attacker, email='victim@example.com', verified=False).exists()
+    response = google_login(api_client, 'victim@example.com', uid='google-victim')
+    assert response.status_code == 200, response.content
+    assert response.json()['user']['email'] == 'victim@example.com'  # a new account, not mallory's
+    assert not SocialAccount.objects.filter(user=attacker).exists()
 
 
 def test_google_token_issued_to_another_app_is_rejected(api_client, user, google_app):

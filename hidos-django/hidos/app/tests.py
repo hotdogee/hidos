@@ -34,6 +34,17 @@ def test_login_page_logs_in_and_redirects(client, user):
     assert '_auth_user_id' in client.session
 
 
+def test_login_page_refuses_unconfirmed_email(client, api_client):
+    """Like the login API: signing up with someone else's address must not give a session."""
+    from conftest import make_user
+    make_user('unv@example.com', verified=False)
+    response = client.post('/login', {'username': 'unv@example.com', 'password': PASSWORD, 'next': '/admin/'})
+    assert response.status_code == 200
+    assert '_auth_user_id' not in client.session
+    assert 'has not been confirmed yet' in response.content.decode()
+    assert client.get('/accounts/3rdparty/').status_code == 302  # to the login page
+
+
 def test_login_page_wrong_password(client, user):
     response = client.post('/login', {'username': user.email, 'password': 'nope'})
     assert response.status_code == 200

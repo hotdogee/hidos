@@ -63,7 +63,11 @@
         </div>
         {% endif %}
         {% if form.errors %}
+        {% if form.non_field_errors.as_data.0.code == 'unverified' %}
+        <p class="validation-summary-errors">{{ form.non_field_errors.0 }}</p>
+        {% else %}
         <p class="validation-summary-errors">Please enter a correct email and password.</p>
+        {% endif %}
         {% endif %}
       </form>
     </div>
