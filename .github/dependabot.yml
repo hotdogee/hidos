@@ -42,3 +42,11 @@ updates:
     groups:
       docker-compose:
         patterns: ["*"]
+    # Major versions of the database and the broker need a data migration
+    # (PostgreSQL: dump and restore with docker/backup.sh, and 18+ images
+    # mount the volume differently), so they are upgraded by hand.
+    ignore:
+      - dependency-name: postgres
+        update-types: ["version-update:semver-major"]
+      - dependency-name: rabbitmq
+        update-types: ["version-update:semver-major"]
