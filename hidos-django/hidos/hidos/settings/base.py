@@ -441,8 +441,10 @@ ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_EMAIL_VERIFICATION = env('ACCOUNT_EMAIL_VERIFICATION', default='mandatory')
 # Addresses added to an account are only confirmed while logged in as it (#67)
 ACCOUNT_ADAPTER = 'users.adapter.AccountAdapter'
-# Password reset links are only mailed for the account that owns the address (#67)
+# An address added to an account or used for a password reset belongs to the
+# account whose own or confirmed address it is (#67)
 ACCOUNT_FORMS = {
+    'add_email': 'users.forms.AddEmailForm',
     'reset_password': 'users.forms.ResetPasswordForm',
 }
 SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'

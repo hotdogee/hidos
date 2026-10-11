@@ -75,7 +75,9 @@ failing or creating a second user. Both sides must have verified the address:
   click handed the victim's Google logins to the look-alike account.
   Password reset links, too, are only mailed for the account whose own or
   confirmed address it is, not for one that merely added it
-  (`users/forms.py`).
+  (`users/forms.py`). Such an address of another account can't be added at
+  all: an account without a confirmed address (a Facebook login) can make
+  an added address its own, and that one is unique.
 * The two addresses must be the same apart from the case of ASCII letters
   (`users/emails.py`). Unicode case mapping isn't used: PostgreSQL's
   `UPPER()`, behind Django's `iexact`, turns the dotless ı of

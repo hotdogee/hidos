@@ -4,7 +4,7 @@ from urllib.parse import parse_qs, urlsplit
 
 import jwt
 import pytest
-from allauth.account.models import EmailAddress
+from allauth.account.models import EmailAddress, EmailConfirmationHMAC
 from allauth.socialaccount.models import SocialAccount, SocialApp
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -423,26 +423,34 @@ def test_address_added_by_another_account_is_not_confirmed_by_the_link_alone(api
     assert not SocialAccount.objects.filter(user=attacker).exists()
 
 
-def test_address_added_by_another_account_doesnt_take_a_pending_signup(api_client, google_app):
-    """The victim signed up but hasn't confirmed yet: the look-alike's request arrives next to their own."""
-    attacker = register_and_confirm(api_client, LOOKALIKE)
+@pytest.mark.parametrize('confirmed', [True, False])
+@pytest.mark.parametrize('owned, typed', [
+    (VICTIM, VICTIM), (VICTIM, 'Victim@GMAIL.com'), (VICTIM, ' victim@gmail.com '),
+    ('kate@example.com', KELVIN)])  # .lower() is kate@example.com
+def test_address_another_account_owns_cant_be_added(api_client, google_app, facebook_app, confirmed, owned, typed):
+    """
+    Another account's own address, whether that account confirmed it or is a pending signup. An account
+    without a confirmed address (a Facebook login) could make it its own address, which is unique: an
+    IntegrityError (HTTP 500).
+    """
+    owner = make_user(owned, verified=confirmed)
+    assert facebook_login(api_client, 'mallory@example.com', uid='fb-mallory').status_code == 200
+    attacker = User.objects.get(email='mallory@example.com')
+    browser = Client()
+    browser.force_login(attacker)  # what the Facebook login on the web pages gives
     mail.outbox.clear()
-    response = api_client.post(REGISTER, {'email': VICTIM, 'password1': PASSWORD, 'password2': PASSWORD},
-                               format='json')
-    assert response.status_code == 201, response.content
-    victim = User.objects.get(email=VICTIM)
-    own_key = confirmation_key(VICTIM)
-    cache.clear()  # a few minutes later: allauth mails an address at most every 3 minutes
-    add_address(attacker, VICTIM)
-    attacker_key = confirmation_key(VICTIM)
-    assert attacker_key != own_key
-    confirm(attacker_key, 'link')  # the victim opens the wrong one first
-    assert not EmailAddress.objects.get(user=attacker, email=VICTIM).verified
-    confirm(own_key, 'link')
-    assert EmailAddress.objects.get(user=victim, email=VICTIM).verified
-    login = {'email': VICTIM, 'password': PASSWORD}
-    assert jwt_user_id(api_client.post(LOGIN, login, format='json')) == victim.pk
-    assert jwt_user_id(google_login(api_client, VICTIM, uid='google-victim')) == victim.pk
+    response = browser.post('/accounts/email/', {'action_add': '', 'email': typed})
+    assert response.status_code == 200
+    assert 'A user is already registered with this email address.' in response.content.decode()
+    assert browser.post('/accounts/email/', {'action_primary': '', 'email': owned}).status_code == 302
+    assert list(EmailAddress.objects.filter(user=attacker).values_list('email', flat=True)) == [attacker.email]
+    assert mail.outbox == []
+    attacker.refresh_from_db()
+    assert attacker.email == 'mallory@example.com'
+    # the owner confirms it with the link mailed at signup, and gets its Google logins
+    if not confirmed:
+        confirm(EmailConfirmationHMAC(EmailAddress.objects.get(user=owner)).key, 'link')
+    assert jwt_user_id(google_login(api_client, owned, uid='google-owner')) == owner.pk
 
 
 def test_account_confirms_the_address_it_added(api_client, user, google_app):

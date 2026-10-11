@@ -18,8 +18,9 @@ class AccountAdapter(DefaultAccountAdapter):
     by that account (#67): the link has to be opened while logged in as it.
     The account's own address (user.email, the one it signed up with) is
     still confirmed by the link alone. (An account without a confirmed
-    address may make an added one its own address, but that gets it no more
-    than signing up with that address would.)
+    address may make an added one its own address. As users.forms refuses
+    an address that another account owns, that gets it no more than signing
+    up with that address would.)
 
     The mail and the page behind the link name the account that asked by its
     address, and nothing in them shows that victim@gmaıl.com isn't the
