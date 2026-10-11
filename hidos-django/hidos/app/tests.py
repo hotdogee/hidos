@@ -18,6 +18,23 @@ def fake_cellc2(monkeypatch):
     monkeypatch.setattr(cellc2, 'run', fake_run({'confluence': '42.00'}))
 
 
+def test_login_page_logs_in_and_redirects(client, user):
+    page = client.get('/login?next=/results/abc')
+    assert page.status_code == 200
+    html = page.content.decode()
+    assert 'action="/login"' in html
+    assert reverse('account_signup') in html and reverse('account_reset_password') in html
+    response = client.post('/login', {'username': user.email, 'password': PASSWORD, 'next': '/admin/'})
+    assert response.status_code == 302 and response['Location'] == '/admin/'
+    assert '_auth_user_id' in client.session
+
+
+def test_login_page_wrong_password(client, user):
+    response = client.post('/login', {'username': user.email, 'password': 'nope'})
+    assert response.status_code == 200
+    assert 'Please enter a correct email and password.' in response.content.decode()
+
+
 def test_logout_is_post_only(client, user):
     client.force_login(user)
     assert client.get('/logout').status_code == 405

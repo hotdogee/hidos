@@ -12,7 +12,7 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.urls import include, path, re_path
 
-from allauth.account.views import ConfirmEmailView
+from allauth.account.views import ConfirmEmailView, password_reset_from_key
 from allauth.socialaccount.providers.facebook.views import FacebookOAuth2Adapter
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
@@ -45,6 +45,9 @@ urlpatterns = [
     re_path(r'^logout$',
         auth_views.LogoutView.as_view(next_page='/'),
         name='logout'),
+    # the link in password reset emails sent by /api/v1/auth/password/reset/
+    re_path(r'^accounts/password/reset/key/(?P<uidb36>[0-9A-Za-z]+)-(?P<key>.+)/$', password_reset_from_key,
+        name='password_reset_confirm'),
     path('accounts/', include('allauth.urls')),
 
     path('admin/doc/', include('django.contrib.admindocs.urls')),

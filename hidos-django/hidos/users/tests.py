@@ -17,7 +17,7 @@ LOGIN = '/api/v1/auth/login/'
 REGISTER = '/api/v1/auth/registration/'
 
 
-# --- registration ----------------------------------------------------------------
+# --- local signup (#18) ---------------------------------------------------------
 
 def test_register_sends_confirmation_and_requires_it(api_client):
     response = api_client.post(REGISTER, {
@@ -86,6 +86,21 @@ def test_inactive_user_cannot_login(api_client, user):
     user.is_active = False
     user.save()
     assert api_client.post(LOGIN, {'email': user.email, 'password': PASSWORD}, format='json').status_code == 400
+
+
+def test_password_reset_round_trip(api_client, client, user):
+    """The reset email links to a working page (the URL name used to be missing: HTTP 500)."""
+    response = api_client.post('/api/v1/auth/password/reset/', {'email': user.email}, format='json')
+    assert response.status_code == 200, response.content
+    link = re.search(r'https?://[^/\s]+(/accounts/password/reset/key/\S+)', mail.outbox[0].body).group(1)
+    page = client.get(link, follow=True)
+    assert page.status_code == 200
+    new_password = 'another-long-passphrase-42'
+    done = client.post(page.redirect_chain[-1][0] if page.redirect_chain else link,
+                       {'password1': new_password, 'password2': new_password})
+    assert done.status_code == 302
+    login = api_client.post(LOGIN, {'email': user.email, 'password': new_password}, format='json')
+    assert login.status_code == 200
 
 
 # --- sites (#78) -------------------------------------------------------------------
