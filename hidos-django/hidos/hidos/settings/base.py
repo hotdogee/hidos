@@ -349,6 +349,11 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_WORKER_DISABLE_RATE_LIMITS = True
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+# RabbitMQ 4 refuses transient non-exclusive queues, which Celery's remote
+# control (inspect/ping) and event queues are by default; the worker then
+# reconnects in a loop.
+CELERY_CONTROL_QUEUE_EXCLUSIVE = True
+CELERY_EVENT_QUEUE_EXCLUSIVE = True
 # Run tasks in-process (tests, or a quick demo without a broker)
 CELERY_TASK_ALWAYS_EAGER = env.bool('CELERY_TASK_ALWAYS_EAGER', default=False)
 CELERY_TASK_EAGER_PROPAGATES = False
