@@ -12,7 +12,6 @@
             "name": "Django",
             "type": "debugpy",
             "request": "launch",
-            "python": "${workspaceFolder}/hidos-django/hidos/env/Scripts/python",
             "program": "${workspaceFolder}/hidos-django/hidos/manage.py",
             "cwd": "${workspaceFolder}/hidos-django/hidos/",
             "args": [
@@ -28,7 +27,6 @@
             "name": "Celery worker",
             "type": "debugpy",
             "request": "launch",
-            "python": "${workspaceFolder}/hidos-django/hidos/env/Scripts/python",
             "module": "celery",
             "cwd": "${workspaceFolder}/hidos-django/hidos/",
             "args": ["-A", "hidos", "worker", "--loglevel=info", "--pool=solo", "-Q", "cell"],
@@ -40,7 +38,6 @@
             "name": "Tests",
             "type": "debugpy",
             "request": "launch",
-            "python": "${workspaceFolder}/hidos-django/hidos/env/Scripts/python",
             "module": "pytest",
             "cwd": "${workspaceFolder}/hidos-django/hidos/",
             "args": ["-m", "not analysis"]

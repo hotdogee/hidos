@@ -115,7 +115,8 @@ virtualenv. The 2016 Windows / Python 2.7 guide is kept in
 [docs/legacy-windows-setup.md](docs/legacy-windows-setup.md).
 
 VS Code launch configurations for the server, the worker and the tests are
-in `.vscode/launch.json`.
+in `.vscode/launch.json`; they run with the Python interpreter selected in
+VS Code (pick the `env` virtualenv).
 
 ## Configuration
 
