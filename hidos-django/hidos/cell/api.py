@@ -3,8 +3,10 @@ import logging
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
+from rest_framework.views import APIView
 
 logger = logging.getLogger(__name__)
 
@@ -114,3 +116,17 @@ class TaskViewSet(viewsets.ModelViewSet):
     #         'format': self.format_kwarg,
     #         'view': self
     #     }
+
+
+class ExampleListView(APIView):
+    """
+    Example input image, result image and numbers of every analysis app
+    (#43). Public: the examples are shown before signing in.
+    """
+    permission_classes = (AllowAny,)
+    authentication_classes = ()
+    throttle_classes = ()
+
+    def get(self, request, *args, **kwargs):
+        from .examples import analysis_apps, example_info
+        return Response([info for info in (example_info(c) for c in analysis_apps()) if info])

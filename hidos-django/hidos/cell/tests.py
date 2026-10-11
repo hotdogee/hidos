@@ -196,6 +196,13 @@ def test_task_submission_is_rate_limited(auth_client, settings, fake_cellc2):
         SimpleRateThrottle.THROTTLE_RATES = api_settings.DEFAULT_THROTTLE_RATES
 
 
+def test_running_and_list_endpoints(auth_client, other_client, fake_cellc2):
+    create_task(auth_client)
+    assert len(auth_client.get(TASKS).json()) == 1
+    assert auth_client.get(TASKS + '/running').json() == []
+    assert other_client.get(TASKS).json() == []
+
+
 def test_deleting_a_task_removes_its_files(auth_client, fake_cellc2):
     """Deleted images must not stay reachable on disk/by URL (#23)."""
     data = create_task(auth_client)
@@ -218,6 +225,18 @@ def test_json_safe():
     from cell.tasks import json_safe
     value = {'a': np.int64(3), 'b': np.float32(0.5), 'c': np.array([1, 2]), 'd': float('nan'), 'e': (np.bool_(True),)}
     assert json_safe(value) == {'a': 3, 'b': 0.5, 'c': [1, 2], 'd': None, 'e': [True]}
+
+
+def test_examples_api_is_public(api_client):
+    """#43"""
+    response = api_client.get('/api/v1/cell/examples')
+    assert response.status_code == 200
+    examples = {e['app']: e for e in response.json()}
+    assert set(examples) == {'cella1', 'cellc1', 'cellc2', 'cellm1', 'cellm3', 'celln1'}
+    for e in examples.values():
+        assert e['uploaded_image'].startswith('/static/%s/images/Example.' % e['app'])
+        assert e['result_image'] == '/static/%s/images/Example_r.jpg' % e['app']
+        assert isinstance(e['result'], dict) and e['result']
 
 
 def test_every_app_has_task_endpoints(auth_client):

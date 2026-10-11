@@ -1,10 +1,11 @@
 ﻿from django.urls import include, re_path as url
 
-#from . import views
+from . import api
 
 
 urlpatterns = [
     #url(r'^$', views.IndexView.as_view(), name='index'),
+    url(r'^examples$', api.ExampleListView.as_view(), name='example-list'),
     url(r'^a1/', include('cella1.urls', namespace='cella1')),
     url(r'^c1/', include('cellc1.urls', namespace='cellc1')),
     url(r'^c2/', include('cellc2.urls', namespace='cellc2')),

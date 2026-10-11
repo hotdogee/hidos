@@ -1,0 +1,10 @@
+{
+  "cell_body": 30,
+  "dead_bodies": 4,
+  "mean_branch": 144.133,
+  "mean_length": 332.133,
+  "mean_outgrowth": 4.8,
+  "neurite_outgrowth": 144,
+  "number_of_branches": 4324,
+  "outgrowth_length": 9964
+}
